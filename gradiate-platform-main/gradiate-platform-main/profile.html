@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>My Profile | Gradiate</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        />
+        <link rel="stylesheet" href="css/index.css" />
+        <link rel="stylesheet" href="css/profile.css" />
+    </head>
+    <body>
+        <!-- Navigation Bar -->
+        <nav class="navbar">
+            <div class="container">
+                <a href="index.html" class="logo">Grad<span>iate</span></a>
+                <div class="nav-links">
+                    <a href="dashboard.html">Dashboard</a>
+                    <a href="bursaries.html">Bursaries</a>
+                    <a href="programs.html">Programs</a>
+                    <a href="blog.html">Blog</a>
+                    <a href="help.html">Help</a>
+                </div>
+                <div class="auth-buttons">
+                    <a href="profile.html" class="btn btn-primary"
+                        ><i class="fas fa-user"></i> Profile</a
+                    >
+                    <a href="index.html" class="btn btn-outline" id="logout-btn"
+                        >Log Out</a
+                    >
+                </div>
+            </div>
+        </nav>
+
+        <!-- Profile Main Content -->
+        <main class="profile-container">
+            <div class="container">
+                <h1 class="profile-title">
+                    <i class="fas fa-user-circle"></i> My Profile
+                </h1>
+
+                <!-- 1. Profile Overview Section -->
+                <section class="profile-section" id="profile-overview">
+                    <div class="section-header">
+                        <h2>
+                            <i class="fas fa-user-graduate"></i> Profile
+                            Overview
+                        </h2>
+                        <button
+                            class="btn btn-outline edit-btn"
+                            data-section="profile-overview"
+                        >
+                            Edit
+                        </button>
+                    </div>
+                    <div class="section-content">
+                        <div class="profile-picture-container">
+                            <div class="picture-wrapper">
+                                <img
+                                    src="images/default-avatar.jpg"
+                                    alt="Profile Picture"
+                                    class="profile-picture"
+                                    id="profile-pic"
+                                />
+                                <button
+                                    class="btn btn-outline change-picture-btn"
+                                >
+                                    <i class="fas fa-camera"></i> Change Picture
+                                </button>
+                            </div>
+                        </div>
+                        <div class="profile-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Full Name:</span>
+                                <span class="detail-value" id="full-name"
+                                    >John Doe</span
+                                >
+                                <input
+                                    type="text"
+                                    class="edit-input"
+                                    id="edit-full-name"
+                                    style="display: none"
+                                />
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Email:</span>
+                                <span class="detail-value" id="email"
+                                    >john.doe@example.com</span
+                                >
+                                <input
+                                    type="email"
+                                    class="edit-input"
+                                    id="edit-email"
+                                    style="display: none"
+                                />
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Phone:</span>
+                                <span class="detail-value" id="phone"
+                                    >+27 12 345 6789</span
+                                >
+                                <input
+                                    type="tel"
+                                    class="edit-input"
+                                    id="edit-phone"
+                                    style="display: none"
+                                />
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Location:</span>
+                                <span class="detail-value" id="location"
+                                    >Gauteng, South Africa</span
+                                >
+                                <select
+                                    class="edit-input"
+                                    id="edit-location"
+                                    style="display: none"
+                                >
+                                    <option value="Gauteng">Gauteng</option>
+                                    <option value="Western Cape">
+                                        Western Cape
+                                    </option>
+                                    <option value="KwaZulu-Natal">
+                                        KwaZulu-Natal
+                                    </option>
+                                    <option value="Eastern Cape">
+                                        Eastern Cape
+                                    </option>
+                                    <option value="Free State">
+                                        Free State
+                                    </option>
+                                    <option value="Limpopo">Limpopo</option>
+                                    <option value="Mpumalanga">
+                                        Mpumalanga
+                                    </option>
+                                    <option value="North West">
+                                        North West
+                                    </option>
+                                    <option value="Northern Cape">
+                                        Northern Cape
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Role:</span>
+                                <span class="detail-value" id="role"
+                                    >Student</span
+                                >
+                                <select
+                                    class="edit-input"
+                                    id="edit-role"
+                                    style="display: none"
+                                >
+                                    <option value="Student">Student</option>
+                                    <option value="Graduate">Graduate</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. Academic Information Section -->
+                <section class="profile-section" id="academic-info">
+                    <div class="section-header">
+                        <h2>
+                            <i class="fas fa-graduation-cap"></i> Academic
+                            Information
+                        </h2>
+                        <button
+                            class="btn btn-outline edit-btn"
+                            data-section="academic-info"
+                        >
+                            Edit
+                        </button>
+                    </div>
+                    <div class="section-content">
+                        <!-- Student Fields (shown when role is Student) -->
+                        <div class="student-fields">
+                            <div class="detail-item">
+                                <span class="detail-label">Grade:</span>
+                                <span class="detail-value" id="grade"
+                                    >Grade 12</span
+                                >
+                                <select
+                                    class="edit-input"
+                                    id="edit-grade"
+                                    style="display: none"
+                                >
+                                    <option value="Grade 11">Grade 11</option>
+                                    <option value="Grade 12">Grade 12</option>
+                                </select>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">School:</span>
+                                <span class="detail-value" id="school"
+                                    >Johannesburg High School</span
+                                >
+                                <input
+                                    type="text"
+                                    class="edit-input"
+                                    id="edit-school"
+                                    style="display: none"
+                                />
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label"
+                                    >Subjects & Marks:</span
+                                >
+                                <div class="detail-value">
+                                    <table class="marks-table" id="marks-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Subject</th>
+                                                <th>Final Mark</th>
+                                                <th class="edit-only">
+                                                    Actions
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Mathematics</td>
+                                                <td>85%</td>
+                                                <td class="edit-only">
+                                                    <button
+                                                        class="btn-icon remove-subject"
+                                                    >
+                                                        <i
+                                                            class="fas fa-times"
+                                                        ></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Physical Science</td>
+                                                <td>78%</td>
+                                                <td class="edit-only">
+                                                    <button
+                                                        class="btn-icon remove-subject"
+                                                    >
+                                                        <i
+                                                            class="fas fa-times"
+                                                        ></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Life Science</td>
+                                                <td>78%</td>
+                                                <td class="edit-only">
+                                                    <button
+                                                        class="btn-icon remove-subject"
+                                                    >
+                                                        <i
+                                                            class="fas fa-times"
+                                                        ></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Geography</td>
+                                                <td>68%</td>
+                                                <td class="edit-only">
+                                                    <button
+                                                        class="btn-icon remove-subject"
+                                                    >
+                                                        <i
+                                                            class="fas fa-times"
+                                                        ></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Life Orientation</td>
+                                                <td>70%</td>
+                                                <td class="edit-only">
+                                                    <button
+                                                        class="btn-icon remove-subject"
+                                                    >
+                                                        <i
+                                                            class="fas fa-times"
+                                                        ></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <thead>
+                                                <tr>
+                                                    <th>Final Average</th>
+                                                    <th>81%</th>
+                                                </tr>
+                                            </thead>
+                                        </tbody>
+                                    </table>
+                                    <div
+                                        class="add-subject-form edit-only"
+                                        style="display: none"
+                                    >
+                                        <input
+                                            type="text"
+                                            id="new-subject"
+                                            placeholder="Subject name"
+                                        />
+                                        <input
+                                            type="number"
+                                            id="new-mark"
+                                            placeholder="Mark %"
+                                            min="0"
+                                            max="100"
+                                        />
+                                        <button
+                                            class="btn btn-outline"
+                                            id="add-subject-btn"
+                                        >
+                                            Add
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Student Report Card Section -->
+                            <div class="detail-item">
+                                <span class="detail-label">Report Card:</span>
+                                <div class="detail-value">
+                                    <div class="file-upload-container">
+                                        <div
+                                            class="file-preview"
+                                            id="report-card-preview"
+                                        >
+                                            <a
+                                                href="#"
+                                                class="file-link"
+                                                id="report-card-link"
+                                                style="display: none"
+                                            >
+                                                report_card_2025.pdf
+                                            </a>
+                                            <span
+                                                class="no-file"
+                                                id="no-report-card"
+                                                >No file uploaded</span
+                                            >
+                                        </div>
+                                        <div
+                                            class="file-upload-controls edit-only"
+                                            style="display: none"
+                                        >
+                                            <input
+                                                type="file"
+                                                id="edit-report-card"
+                                                accept=".pdf,.jpg,.png"
+                                                class="file-input"
+                                            />
+                                            <button
+                                                class="btn btn-outline upload-btn"
+                                                id="upload-report-card"
+                                            >
+                                                <i class="fas fa-upload"></i>
+                                                Upload
+                                            </button>
+                                            <button
+                                                class="btn btn-outline remove-btn"
+                                                id="remove-report-card"
+                                            >
+                                                <i class="fas fa-trash"></i>
+                                                Remove
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Graduate Fields (hidden when role is Student) -->
+                        <div class="graduate-fields" style="display: none">
+                            <div class="detail-item">
+                                <span class="detail-label">Qualification:</span>
+                                <span class="detail-value" id="qualification"
+                                    >BSc Computer Science</span
+                                >
+                                <input
+                                    type="text"
+                                    class="edit-input"
+                                    id="edit-qualification"
+                                    style="display: none"
+                                />
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Institution:</span>
+                                <span class="detail-value" id="institution"
+                                    >University of Johannesburg</span
+                                >
+                                <input
+                                    type="text"
+                                    class="edit-input"
+                                    id="edit-institution"
+                                    style="display: none"
+                                />
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label"
+                                    >Year of Graduation:</span
+                                >
+                                <span class="detail-value" id="graduation-year"
+                                    >2024</span
+                                >
+                                <input
+                                    type="number"
+                                    class="edit-input"
+                                    id="edit-graduation-year"
+                                    min="1900"
+                                    max="2030"
+                                    style="display: none"
+                                />
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Transcript/CV:</span>
+                                <div class="detail-value">
+                                    <div class="file-upload-container">
+                                        <div
+                                            class="file-preview"
+                                            id="transcript-preview"
+                                        >
+                                            <a
+                                                href="#"
+                                                class="file-link"
+                                                id="transcript-link"
+                                                style="display: none"
+                                            >
+                                                transcript_2024.pdf
+                                            </a>
+                                            <span
+                                                class="no-file"
+                                                id="no-transcript"
+                                                >No file uploaded</span
+                                            >
+                                        </div>
+                                        <div
+                                            class="file-upload-controls edit-only"
+                                            style="display: none"
+                                        >
+                                            <input
+                                                type="file"
+                                                id="edit-transcript"
+                                                accept=".pdf,.jpg,.png"
+                                                class="file-input"
+                                            />
+                                            <button
+                                                class="btn btn-outline upload-btn"
+                                                id="upload-transcript"
+                                            >
+                                                <i class="fas fa-upload"></i>
+                                                Upload
+                                            </button>
+                                            <button
+                                                class="btn btn-outline remove-btn"
+                                                id="remove-transcript"
+                                            >
+                                                <i class="fas fa-trash"></i>
+                                                Remove
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. Preferences Section -->
+                <section class="profile-section" id="preferences">
+                    <div class="section-header">
+                        <h2><i class="fas fa-bullseye"></i> Preferences</h2>
+                        <button
+                            class="btn btn-outline edit-btn"
+                            data-section="preferences"
+                        >
+                            Edit
+                        </button>
+                    </div>
+                    <div class="section-content">
+                        <div class="detail-item">
+                            <span class="detail-label">Field of Study:</span>
+                            <span class="detail-value" id="field-of-study"
+                                >Computer Science</span
+                            >
+                            <input
+                                type="text"
+                                class="edit-input"
+                                id="edit-field-of-study"
+                                style="display: none"
+                            />
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Career Interests:</span>
+                            <span class="detail-value" id="career-interests"
+                                >Software Development, Data Science</span
+                            >
+                            <input
+                                type="text"
+                                class="edit-input"
+                                id="edit-career-interests"
+                                style="display: none"
+                            />
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Financial Need:</span>
+                            <span class="detail-value" id="financial-need"
+                                >Yes</span
+                            >
+                            <select
+                                class="edit-input"
+                                id="edit-financial-need"
+                                style="display: none"
+                            >
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                            </select>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Interested In:</span>
+                            <span class="detail-value" id="interested-in"
+                                >Bursaries, Graduate Programs</span
+                            >
+                            <div class="edit-input" style="display: none">
+                                <label class="checkbox-label">
+                                    <input
+                                        type="checkbox"
+                                        name="interest"
+                                        value="Bursaries"
+                                        checked
+                                    />
+                                    Bursaries
+                                </label>
+                                <label class="checkbox-label">
+                                    <input
+                                        type="checkbox"
+                                        name="interest"
+                                        value="Graduate Programs"
+                                        checked
+                                    />
+                                    Graduate Programs
+                                </label>
+                                <label class="checkbox-label">
+                                    <input
+                                        type="checkbox"
+                                        name="interest"
+                                        value="Internships"
+                                    />
+                                    Internships
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 4. Application Status Section -->
+                <section class="profile-section" id="application-status">
+                    <div class="section-header">
+                        <h2>
+                            <i class="fas fa-clipboard-list"></i> Application
+                            Status
+                        </h2>
+                    </div>
+                    <div class="section-content">
+                        <div class="applications-list">
+                            <h3>Bursaries Applied For</h3>
+                            <div class="application-item">
+                                <div class="app-info">
+                                    <h4>Computer Science Bursary</h4>
+                                    <p>University of Johannesburg</p>
+                                    <span class="app-date"
+                                        >Applied: 15 Aug 2025</span
+                                    >
+                                </div>
+                                <div class="app-status pending">
+                                    <i class="fas fa-clock"></i> Pending
+                                </div>
+                            </div>
+                            <div class="application-item">
+                                <div class="app-info">
+                                    <h4>Engineering Scholarship</h4>
+                                    <p>University of Pretoria</p>
+                                    <span class="app-date"
+                                        >Applied: 10 Aug 2025</span
+                                    >
+                                </div>
+                                <div class="app-status accepted">
+                                    <i class="fas fa-check-circle"></i> Accepted
+                                </div>
+                            </div>
+                        </div>
+                        <div class="saved-items">
+                            <h3>Saved Opportunities</h3>
+                            <div class="saved-item">
+                                <h4>Data Science Program</h4>
+                                <p>Cape Town University</p>
+                                <div class="saved-actions">
+                                    <button class="btn btn-outline">
+                                        Apply Now
+                                    </button>
+                                    <button class="btn btn-icon">
+                                        <i class="far fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-brand">
+                        <a href="index.html" class="logo"
+                            >Grad<span>iate</span></a
+                        >
+                        <p>Smart education matching for everyone.</p>
+                    </div>
+                    <div class="footer-links">
+                        <div class="link-group">
+                            <h4>Platform</h4>
+                            <a href="#">How It Works</a>
+                            <a href="#">Features</a>
+                        </div>
+                        <div class="link-group">
+                            <h4>Resources</h4>
+                            <a href="#">Help Center</a>
+                            <a href="#">Contact</a>
+                        </div>
+                        <div class="link-group">
+                            <h4>Legal</h4>
+                            <a href="#">Privacy Policy</a>
+                            <a href="#">Terms of Service</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                    <p class="copyright">
+                        &copy; 2025 Gradiate. All rights reserved.
+                    </p>
+                </div>
+            </div>
+        </footer>
+
+        <script src="js/profile.js"></script>
+    </body>
+</html>

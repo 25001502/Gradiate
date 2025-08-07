@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Settings | Gradiate</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        />
+        <link rel="stylesheet" href="css/index.css" />
+        <link rel="stylesheet" href="css/settings.css" />
+    </head>
+    <body>
+        <!-- Main Navigation Bar -->
+        <nav class="navbar">
+            <div class="container">
+                <a href="index.html" class="logo">Grad<span>iate</span></a>
+                <div class="nav-links">
+                    <a href="dashboard.html">Dashboard</a>
+                    <a href="bursaries.html">Bursaries</a>
+                    <a href="programs.html">Programs</a>
+                    <a href="blog.html">Blog</a>
+                    <a href="help.html">Help</a>
+                </div>
+                <div class="auth-buttons">
+                    <a href="profile.html" class="btn btn-primary"
+                        ><i class="fas fa-user"></i> Profile</a
+                    >
+                    <a href="index.html" class="btn btn-outline">Log Out</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Settings Page Content -->
+        <main class="settings-container">
+            <div class="container">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <h1><i class="fas fa-cog"></i> Account Settings</h1>
+                    <p>Manage your account preferences and privacy settings</p>
+                </div>
+
+                <div class="settings-content">
+                    <!-- Account Settings Section -->
+                    <section class="settings-section">
+                        <div class="section-header">
+                            <h2>
+                                <i class="fas fa-user-cog"></i> Account Settings
+                            </h2>
+                        </div>
+                        <div class="section-body">
+                            <!-- Email Setting -->
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h3>Email Address</h3>
+                                    <p>Current: student@example.com</p>
+                                </div>
+                                <button
+                                    class="btn btn-outline edit-btn"
+                                    data-target="email-modal"
+                                >
+                                    Change
+                                </button>
+                            </div>
+
+                            <!-- Password Setting -->
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h3>Password</h3>
+                                    <p>Last changed 3 months ago</p>
+                                </div>
+                                <button
+                                    class="btn btn-outline edit-btn"
+                                    data-target="password-modal"
+                                >
+                                    Change
+                                </button>
+                            </div>
+
+                            <!-- Phone Number Setting -->
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h3>Phone Number</h3>
+                                    <p>Current: +27 12 345 6789</p>
+                                </div>
+                                <button
+                                    class="btn btn-outline edit-btn"
+                                    data-target="phone-modal"
+                                >
+                                    Update
+                                </button>
+                            </div>
+
+                            <!-- Two-Factor Authentication Setting -->
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h3>Two-Factor Authentication</h3>
+                                    <p>
+                                        Add an extra layer of security to your
+                                        account
+                                    </p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input
+                                        type="checkbox"
+                                        id="two-factor-toggle"
+                                    />
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <!-- Delete Account Setting -->
+                            <div class="setting-item danger">
+                                <div class="setting-info">
+                                    <h3>Delete My Account</h3>
+                                    <p>
+                                        Permanently remove your account and all
+                                        data
+                                    </p>
+                                </div>
+                                <button
+                                    class="btn btn-danger"
+                                    id="delete-account-btn"
+                                >
+                                    Delete Account
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Notification Settings Section -->
+                    <section class="settings-section">
+                        <div class="section-header">
+                            <h2>
+                                <i class="fas fa-bell"></i> Notification
+                                Settings
+                            </h2>
+                        </div>
+                        <div class="section-body">
+                            <!-- Notification Toggles -->
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h3>Email Notifications</h3>
+                                    <p>Receive important updates via email</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input
+                                        type="checkbox"
+                                        id="email-notifications-toggle"
+                                        checked
+                                    />
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h3>SMS Notifications</h3>
+                                    <p>
+                                        Get text message alerts (standard rates
+                                        may apply)
+                                    </p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input
+                                        type="checkbox"
+                                        id="sms-notifications-toggle"
+                                    />
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <!-- Notification Preferences -->
+                            <div class="notification-preferences">
+                                <h3>Notification Preferences</h3>
+                                <p>
+                                    Choose what you want to be notified about:
+                                </p>
+
+                                <div class="preference-item">
+                                    <label class="checkbox-container">
+                                        <input type="checkbox" checked />
+                                        <span class="checkmark"></span>
+                                        New matched bursaries or programs
+                                    </label>
+                                </div>
+
+                                <div class="preference-item">
+                                    <label class="checkbox-container">
+                                        <input type="checkbox" checked />
+                                        <span class="checkmark"></span>
+                                        Application deadline reminders
+                                    </label>
+                                </div>
+
+                                <div class="preference-item">
+                                    <label class="checkbox-container">
+                                        <input type="checkbox" checked />
+                                        <span class="checkmark"></span>
+                                        Saved opportunity updates
+                                    </label>
+                                </div>
+
+                                <div class="preference-item">
+                                    <label class="checkbox-container">
+                                        <input type="checkbox" />
+                                        <span class="checkmark"></span>
+                                        New platform features
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Privacy Settings Section -->
+                    <section class="settings-section">
+                        <div class="section-header">
+                            <h2>
+                                <i class="fas fa-lock"></i> Privacy Settings
+                            </h2>
+                        </div>
+                        <div class="section-body">
+                            <!-- Privacy Options -->
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h3>Public Profile Visibility</h3>
+                                    <p>
+                                        Who can see your public profile
+                                        information
+                                    </p>
+                                </div>
+                                <select class="privacy-select">
+                                    <option value="public">Everyone</option>
+                                    <option value="institutions">
+                                        Institutions Only
+                                    </option>
+                                    <option value="private" selected>
+                                        Only Me
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h3>Recruiter Visibility</h3>
+                                    <p>
+                                        Allow institutions/recruiters to see
+                                        your profile
+                                    </p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input
+                                        type="checkbox"
+                                        id="recruiter-toggle"
+                                        checked
+                                    />
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h3>Data Sharing</h3>
+                                    <p>
+                                        Help improve Gradiate by sharing usage
+                                        data (anonymous)
+                                    </p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input
+                                        type="checkbox"
+                                        id="data-sharing-toggle"
+                                    />
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+
+        <!-- Email Change Modal -->
+        <div class="modal" id="email-modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h2><i class="fas fa-envelope"></i> Change Email Address</h2>
+                <form id="email-form">
+                    <div class="form-group">
+                        <label for="current-email">Current Email</label>
+                        <input
+                            type="email"
+                            id="current-email"
+                            value="student@example.com"
+                            readonly
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label for="new-email">New Email Address</label>
+                        <input type="email" id="new-email" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="email-password">Confirm Password</label>
+                        <input type="password" id="email-password" required />
+                    </div>
+                    <div class="form-actions">
+                        <button
+                            type="button"
+                            class="btn btn-outline cancel-btn"
+                        >
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            Update Email
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Password Change Modal -->
+        <div class="modal" id="password-modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h2><i class="fas fa-key"></i> Change Password</h2>
+                <form id="password-form">
+                    <div class="form-group">
+                        <label for="current-password">Current Password</label>
+                        <div class="password-input">
+                            <input
+                                type="password"
+                                id="current-password"
+                                required
+                            />
+                            <button type="button" class="toggle-password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-password">New Password</label>
+                        <div class="password-input">
+                            <input
+                                type="password"
+                                id="new-password"
+                                placeholder="Create a new password"
+                                required
+                            />
+                            <button type="button" class="toggle-password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="password-strength">
+                            <div class="strength-meter">
+                                <span class="strength-bar"></span>
+                                <span class="strength-bar"></span>
+                                <span class="strength-bar"></span>
+                                <span class="strength-bar"></span>
+                            </div>
+                            <span class="strength-text">Password Strength</span>
+                        </div>
+                        <div class="password-hints">
+                            <span class="hint"
+                                ><i class="fas fa-check"></i> At least 8
+                                characters</span
+                            >
+                            <span class="hint"
+                                ><i class="fas fa-check"></i> Uppercase
+                                letter</span
+                            >
+                            <span class="hint"
+                                ><i class="fas fa-check"></i> Number</span
+                            >
+                            <span class="hint"
+                                ><i class="fas fa-check"></i> Special
+                                character</span
+                            >
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-new-password"
+                            >Confirm New Password</label
+                        >
+                        <div class="password-input">
+                            <input
+                                type="password"
+                                id="confirm-new-password"
+                                placeholder="Confirm your new password"
+                                required
+                            />
+                            <button type="button" class="toggle-password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <p class="error-message" id="password-match-error"></p>
+                    </div>
+                    <div class="form-actions">
+                        <button
+                            type="button"
+                            class="btn btn-outline cancel-btn"
+                        >
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            Update Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Delete Account Modal -->
+        <div class="modal" id="delete-modal">
+            <div class="modal-content danger">
+                <span class="close-modal">&times;</span>
+                <h2>
+                    <i class="fas fa-exclamation-triangle"></i> Delete Your
+                    Account
+                </h2>
+                <div class="warning-message">
+                    <p>
+                        <strong>Warning:</strong> This action cannot be undone.
+                        All your data will be permanently deleted.
+                    </p>
+                    <p>You will lose access to:</p>
+                    <ul>
+                        <li>Your profile information</li>
+                        <li>Saved bursaries and programs</li>
+                        <li>Application history</li>
+                        <li>All other account data</li>
+                    </ul>
+                </div>
+                <div class="form-group">
+                    <label for="delete-password"
+                        >Enter your password to confirm</label
+                    >
+                    <div class="password-input">
+                        <input type="password" id="delete-password" required />
+                        <button type="button" class="toggle-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="confirm-delete" required />
+                        <span class="checkmark"></span>
+                        I understand this action is permanent and cannot be
+                        reversed
+                    </label>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline cancel-btn">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-danger">
+                        Permanently Delete Account
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-brand">
+                        <a href="index.html" class="logo"
+                            >Grad<span>iate</span></a
+                        >
+                        <p>Smart education matching for everyone.</p>
+                    </div>
+                    <div class="footer-links">
+                        <div class="link-group">
+                            <h4>Platform</h4>
+                            <a href="#">How It Works</a>
+                            <a href="#">Features</a>
+                        </div>
+                        <div class="link-group">
+                            <h4>Resources</h4>
+                            <a href="help.html">Help Center</a>
+                            <a href="blog.html">Blog</a>
+                        </div>
+                        <div class="link-group">
+                            <h4>Legal</h4>
+                            <a href="#">Privacy Policy</a>
+                            <a href="#">Terms of Service</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                    <p class="copyright">
+                        &copy; 2025 Gradiate. All rights reserved.
+                    </p>
+                </div>
+            </div>
+        </footer>
+
+        <script src="js/settings.js"></script>
+    </body>
+</html>

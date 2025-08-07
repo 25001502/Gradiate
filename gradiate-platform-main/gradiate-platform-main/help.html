@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Help Center | Gradiate</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        />
+        <link rel="stylesheet" href="css/index.css" />
+        <link rel="stylesheet" href="css/help.css" />
+    </head>
+    <body>
+        <!-- Navigation Bar -->
+        <nav class="navbar">
+            <div class="container">
+                <a href="index.html" class="logo">Grad<span>iate</span></a>
+                <div class="nav-links">
+                    <a href="dashboard.html">Dashboard</a>
+                    <a href="bursaries.html">Bursaries</a>
+                    <a href="programs.html">Programs</a>
+                    <a href="blog.html">Blog</a>
+                    <a href="help.html" class="active">Help</a>
+                </div>
+                <div class="auth-buttons">
+                    <a href="profile.html" class="btn btn-primary"
+                        ><i class="fas fa-user"></i> Profile</a
+                    >
+                    <a href="index.html" class="btn btn-outline" id="logout-btn"
+                        >Log Out</a
+                    >
+                </div>
+            </div>
+        </nav>
+
+        <!-- Help Center Main Content -->
+        <main class="help-container">
+            <div class="container">
+                <div class="page-header">
+                    <h1><i class="fas fa-question-circle"></i> Help Center</h1>
+                    <p>
+                        Find answers to common questions or contact our support
+                        team
+                    </p>
+                </div>
+
+                <div class="help-content">
+                    <!-- Search Help Section -->
+                    <section class="search-help">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input
+                                type="text"
+                                id="help-search"
+                                placeholder="Search help articles..."
+                            />
+                            <button class="btn btn-primary">Search</button>
+                        </div>
+                    </section>
+
+                    <!-- Popular Topics Section -->
+                    <section class="popular-topics">
+                        <h2><i class="fas fa-fire"></i> Popular Topics</h2>
+                        <div class="topics-grid">
+                            <a href="#account" class="topic-card">
+                                <div class="topic-icon">
+                                    <i class="fas fa-user-circle"></i>
+                                </div>
+                                <h3>Account Help</h3>
+                                <p>Managing your profile and settings</p>
+                            </a>
+                            <a href="#bursaries" class="topic-card">
+                                <div class="topic-icon">
+                                    <i class="fas fa-graduation-cap"></i>
+                                </div>
+                                <h3>Bursaries</h3>
+                                <p>Finding and applying for funding</p>
+                            </a>
+                            <a href="#programs" class="topic-card">
+                                <div class="topic-icon">
+                                    <i class="fas fa-book"></i>
+                                </div>
+                                <h3>Programs</h3>
+                                <p>Discovering educational programs</p>
+                            </a>
+                            <a href="#applications" class="topic-card">
+                                <div class="topic-icon">
+                                    <i class="fas fa-clipboard-list"></i>
+                                </div>
+                                <h3>Applications</h3>
+                                <p>Application process and status</p>
+                            </a>
+                        </div>
+                    </section>
+
+                    <!-- FAQ Section -->
+                    <section class="faq-section">
+                        <h2>
+                            <i class="fas fa-question"></i> Frequently Asked
+                            Questions
+                        </h2>
+
+                        <div class="faq-category">
+                            <h3 id="account">Account & Profile</h3>
+                            <div class="faq-accordion">
+                                <div class="faq-item">
+                                    <button class="faq-question">
+                                        How do I update my profile information?
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="faq-answer">
+                                        <p>
+                                            You can update your profile by
+                                            navigating to the Profile page and
+                                            clicking the "Edit" button next to
+                                            each section. Make your changes and
+                                            click "Save" to update your
+                                            information.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="faq-item">
+                                    <button class="faq-question">
+                                        Can I change my email address or
+                                        password?
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="faq-answer">
+                                        <p>
+                                            Yes! Navigate to "Dashboard" > "
+                                            Account Settings". You can update
+                                            your email, password, or enable
+                                            two-factor authentication for extra
+                                            security.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="faq-item">
+                                    <button class="faq-question">
+                                        What documents do I need to apply?How do
+                                        I delete my account?
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="faq-answer">
+                                        <p>
+                                            Go to "Dashboard" > " Account
+                                            Settings" and select "Delete My
+                                            Account". Note: This action is
+                                            permanent and removes all your data.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="faq-item">
+                                    <button class="faq-question">
+                                        Is my personal information secure?
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="faq-answer">
+                                        <p>
+                                            Absolutely. We use high encryption
+                                            and never share your data without
+                                            consent. Review our Privacy Policy
+                                            for details.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="faq-category">
+                            <h3 id="bursaries">Bursaries & Funding</h3>
+                            <div class="faq-accordion">
+                                <div class="faq-item">
+                                    <button class="faq-question">
+                                        How are bursary matches determined?
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="faq-answer">
+                                        <p>
+                                            Our system matches you with
+                                            bursaries based on your academic
+                                            profile, financial need, field of
+                                            study, and other preferences you've
+                                            set in your account. The percentage
+                                            match indicates how well a bursary
+                                            aligns with your profile.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="faq-item">
+                                    <button class="faq-question">
+                                        Can I apply for multiple bursaries?
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="faq-answer">
+                                        <p>
+                                            Yes, you can apply for as many
+                                            bursaries as you qualify for. We
+                                            recommend applying to several to
+                                            increase your chances of receiving
+                                            funding.
+                                        </p>
+                                    </div>
+                                    <div class="faq-item">
+                                        <button class="faq-question">
+                                            What if my bursary application is
+                                            rejected?
+                                            <i class="fas fa-chevron-down"></i>
+                                        </button>
+                                        <div class="faq-answer">
+                                            <p>
+                                                Do not worry! You can: Review
+                                                the providers feedback (if
+                                                available). Apply for other
+                                                bursaries. We will suggest
+                                                alternatives. Improve future
+                                                applications with our Bursary
+                                                Application article.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="faq-category">
+                            <h3 id="programs">Programs</h3>
+                            <div class="faq-accordion">
+                                <div class="faq-item">
+                                    <button class="faq-question">
+                                        How do I know if I qualify for a
+                                        program?
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="faq-answer">
+                                        <p>
+                                            Each program page lists the
+                                            admission requirements. Our matching
+                                            system also considers your academic
+                                            background to recommend programs
+                                            you're likely to qualify for.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="faq-item">
+                                    <button class="faq-question">
+                                        What documents do I need to apply?
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="faq-answer">
+                                        <p>
+                                            Typically you'll need your ID,
+                                            academic transcripts, and sometimes
+                                            recommendation letters. Specific
+                                            requirements are listed on each
+                                            program's application page.
+                                        </p>
+                                    </div>
+                                    <div class="faq-item">
+                                        <button class="faq-question">
+                                            Are international programs included
+                                            in the listings?
+                                            <i class="fas fa-chevron-down"></i>
+                                        </button>
+                                        <div class="faq-answer">
+                                            <p>
+                                                No, Gradiate currently focuses
+                                                on domestic programs only
+                                                (within [your country]). For
+                                                international options, we
+                                                recommend checking with
+                                                universities directly or using
+                                                dedicated study-abroad
+                                                platforms.
+                                            </p>
+                                        </div>
+                                        <div class="faq-item">
+                                            <button class="faq-question">
+                                                Can I save programs to review
+                                                later?
+                                                <i
+                                                    class="fas fa-chevron-down"
+                                                ></i>
+                                            </button>
+                                            <div class="faq-answer">
+                                                <p>
+                                                    Absolutely! Click the "Save"
+                                                    icon on any program to add
+                                                    it to your favorites list,
+                                                    accessible from your
+                                                    dashboard.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="faq-category">
+                            <h3 id="applications">Applications</h3>
+                            <div class="faq-accordion">
+                                <div class="faq-item">
+                                    <button class="faq-question">
+                                        Is there an application fee?
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="faq-answer">
+                                        <p>
+                                            This varies by institution. We
+                                            clearly indicate when a program has
+                                            fees (shown in the "Application
+                                            Info" section).
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="faq-item">
+                                    <button class="faq-question">
+                                        What if I miss a deadline?
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="faq-answer">
+                                        <p>
+                                            We highlight upcoming deadlines in
+                                            your dashboard. If you've missed
+                                            one, check the program page - some
+                                            institutions offer rolling
+                                            admissions or waitlist options. You
+                                            can also set deadline alerts for
+                                            future applications.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Contact Support Section -->
+                    <section class="contact-support">
+                        <h2><i class="fas fa-headset"></i> Still Need Help?</h2>
+                        <div class="contact-cards">
+                            <div class="contact-card">
+                                <div class="contact-icon">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <h3>Email Us</h3>
+                                <p>
+                                    Send us a message and we'll respond within
+                                    24 hours
+                                </p>
+                                <a
+                                    href="mailto:support@gradiate.com"
+                                    class="btn btn-outline"
+                                    >Send Email</a
+                                >
+                            </div>
+                            <div class="contact-card">
+                                <div class="contact-icon">
+                                    <i class="fas fa-phone-alt"></i>
+                                </div>
+                                <h3>Call Support</h3>
+                                <p>Speak directly with our support team</p>
+                                <a
+                                    href="tel:+27800123456"
+                                    class="btn btn-outline"
+                                    >0800 123 456</a
+                                >
+                            </div>
+                            <div class="contact-card">
+                                <div class="contact-icon">
+                                    <i class="fas fa-comments"></i>
+                                </div>
+                                <h3>Live Chat</h3>
+                                <p>Chat with a support agent in real-time</p>
+                                <button class="btn btn-primary">
+                                    Start Chat
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-brand">
+                        <a href="index.html" class="logo"
+                            >Grad<span>iate</span></a
+                        >
+                        <p>Smart education matching for everyone.</p>
+                    </div>
+                    <div class="footer-links">
+                        <div class="link-group">
+                            <h4>Platform</h4>
+                            <a href="#">How It Works</a>
+                            <a href="#">Features</a>
+                        </div>
+                        <div class="link-group">
+                            <h4>Resources</h4>
+                            <a href="help.html">Help Center</a>
+                            <a href="#">Contact</a>
+                        </div>
+                        <div class="link-group">
+                            <h4>Legal</h4>
+                            <a href="#">Privacy Policy</a>
+                            <a href="#">Terms of Service</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                    <p class="copyright">
+                        &copy; 2025 Gradiate. All rights reserved.
+                    </p>
+                </div>
+            </div>
+        </footer>
+
+        <script src="js/help.js"></script>
+    </body>
+</html>

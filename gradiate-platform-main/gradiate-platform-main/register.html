@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Sign Up | Gradiate</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        />
+        <link rel="stylesheet" href="css/register.css" />
+    </head>
+    <body>
+        <nav class="navbar">
+            <div class="container">
+                <a href="index.html" class="logo">Grad<span>iate</span></a>
+                <div class="auth-buttons">
+                    <span>Already have an account?</span>
+                    <a href="login.html" class="btn btn-outline">Log in</a>
+                </div>
+            </div>
+        </nav>
+
+        <main class="register-container">
+            <div class="register-card">
+                <div class="register-header">
+                    <h1>Create Your Account</h1>
+                    <p>
+                        Join Gradiate to discover personalized education
+                        opportunities
+                    </p>
+                </div>
+
+                <form class="register-form">
+                    <div class="form-group">
+                        <label for="fullname">Full Name</label>
+                        <input
+                            type="text"
+                            id="fullname"
+                            placeholder="Enter your full name"
+                            required
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input
+                            type="email"
+                            id="email"
+                            placeholder="Enter your email"
+                            required
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <div class="phone-input">
+                            <select id="country-code">
+                                <option value="+27">🇿🇦 +27</option>
+                            </select>
+                            <input
+                                type="tel"
+                                id="phone"
+                                placeholder="Enter phone number"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="password-input">
+                            <input
+                                type="password"
+                                id="password"
+                                placeholder="Create a password"
+                                required
+                            />
+                            <button type="button" class="toggle-password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="password-strength">
+                            <div class="strength-meter">
+                                <span class="strength-bar"></span>
+                                <span class="strength-bar"></span>
+                                <span class="strength-bar"></span>
+                                <span class="strength-bar"></span>
+                            </div>
+                            <span class="strength-text">Password Strength</span>
+                        </div>
+                        <div class="password-hints">
+                            <span class="hint"
+                                ><i class="fas fa-check"></i> At least 8
+                                characters</span
+                            >
+                            <span class="hint"
+                                ><i class="fas fa-check"></i> Uppercase
+                                letter</span
+                            >
+                            <span class="hint"
+                                ><i class="fas fa-check"></i> Number</span
+                            >
+                            <span class="hint"
+                                ><i class="fas fa-check"></i> Special
+                                character</span
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirm-password">Confirm Password</label>
+                        <div class="password-input">
+                            <input
+                                type="password"
+                                id="confirm-password"
+                                placeholder="Confirm your password"
+                                required
+                            />
+                            <button type="button" class="toggle-password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group consent-group">
+                        <input type="checkbox" id="consent" required />
+                        <label for="consent"
+                            >I agree to the
+                            <a href="terms.html">Terms of Service</a> and
+                            <a href="privacy.html">Privacy Policy</a></label
+                        >
+                    </div>
+
+                    <button type="submit" class="btn btn-register">
+                        Create Account
+                    </button>
+
+                    <p class="login-link">
+                        Already have an account? <a href="login.html">Log in</a>
+                    </p>
+                </form>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-brand">
+                        <a href="index.html" class="logo"
+                            >Grad<span>iate</span></a
+                        >
+                        <p>Smart education matching for everyone.</p>
+                    </div>
+                    <div class="footer-links">
+                        <div class="link-group">
+                            <h4>Platform</h4>
+                            <a href="#">How It Works</a>
+                            <a href="#">Features</a>
+                        </div>
+                        <div class="link-group">
+                            <h4>Resources</h4>
+                            <a href="#">Help Center</a>
+                            <a href="#">Contact</a>
+                        </div>
+                        <div class="link-group">
+                            <h4>Legal</h4>
+                            <a href="#">Privacy Policy</a>
+                            <a href="#">Terms of Service</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                    <p class="copyright">
+                        &copy; 2025 Gradiate. All rights reserved.
+                    </p>
+                </div>
+            </div>
+        </footer>
+
+        <script src="js/register.js"></script>
+    </body>
+</html>

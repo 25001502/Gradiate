@@ -1,0 +1,295 @@
+/* Guest View Styles */
+.guest-view {
+    display: none;
+    margin: 2rem 0;
+}
+
+.guest-message {
+    background-color: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 3rem 2rem;
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.guest-message i {
+    font-size: 3rem;
+    color: var(--primary-blue);
+    margin-bottom: 1.5rem;
+}
+
+.guest-message h2 {
+    font-size: 1.8rem;
+    color: var(--dark-text);
+    margin-bottom: 1rem;
+}
+
+.guest-message p {
+    color: var(--gray-text);
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+}
+
+/* Show guest view when not logged in */
+body.guest .guest-view {
+    display: block;
+}
+
+body.guest #logged-in-view {
+    display: none;
+}
+
+/* Show logged-in view when authenticated */
+body.logged-in .guest-view {
+    display: none;
+}
+
+body.logged-in #logged-in-view {
+    display: block;
+}
+
+/* Toast notification */
+.toast-notification {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--dark-text);
+    color: white;
+    padding: 12px 24px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1000;
+}
+
+.toast-notification.show {
+    opacity: 1;
+}
+
+/* Same old code from bursaries.css */
+/* Bursaries Page Styles */
+.bursaries-container {
+    padding: 2rem 0;
+    background-color: #f8fafc;
+    min-height: calc(100vh - 70px);
+}
+
+.page-header {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.page-header h1 {
+    font-size: 2.5rem;
+    color: var(--primary-blue);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.page-header h1 i {
+    font-size: 2rem;
+}
+
+.auth-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-direction: row-reverse; /* This swaps the order of the buttons */
+}
+
+.filter-controls {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+}
+
+.search-box {
+    flex: 1;
+    min-width: 250px;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-box i {
+    position: absolute;
+    left: 1rem;
+    color: var(--gray-text);
+}
+
+.search-box input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    border: 1px solid var(--light-gray);
+    border-radius: var(--border-radius);
+    font-family: inherit;
+}
+
+.filter-dropdown select {
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--light-gray);
+    border-radius: var(--border-radius);
+    font-family: inherit;
+    min-width: 180px;
+}
+
+/* Bursary Sections */
+.matched-bursaries,
+.all-bursaries {
+    margin-bottom: 3rem;
+}
+
+.section-header {
+    margin-bottom: 1.5rem;
+}
+
+.section-header h2 {
+    font-size: 1.5rem;
+    color: var(--dark-text);
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.section-header h2 i {
+    color: var(--secondary-blue);
+}
+
+.section-header p {
+    color: var(--gray-text);
+    margin: 0;
+}
+
+/* Bursary Grid */
+.bursaries-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Bursary Card */
+.bursary-card {
+    background-color: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+    transition: transform 0.2s ease;
+}
+
+.bursary-card:hover {
+    transform: translateY(-5px);
+}
+
+.bursary-card.matched {
+    border-left: 4px solid var(--primary-blue);
+}
+
+.card-header {
+    padding: 1.5rem 1.5rem 0;
+    position: relative;
+}
+
+.card-header h3 {
+    margin: 0 0 0.5rem;
+    color: var(--dark-text);
+    font-size: 1.25rem;
+}
+
+.institution {
+    color: var(--gray-text);
+    margin: 0 0 1rem;
+    font-size: 0.95rem;
+}
+
+.match-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background-color: #28a745;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.match-badge i {
+    display: none;
+}
+
+.card-body {
+    padding: 0 1.5rem 1rem;
+}
+
+.bursary-detail {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    color: var(--gray-text);
+    font-size: 0.95rem;
+}
+
+.bursary-detail i {
+    color: var(--secondary-blue);
+    width: 1rem;
+    text-align: center;
+}
+
+.bursary-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.tag {
+    background-color: var(--light-bg);
+    color: var(--dark-text);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+}
+
+.card-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--light-gray);
+    display: flex;
+    gap: 0.75rem;
+}
+
+.save-btn i {
+    margin-right: 0.5rem;
+}
+
+.save-btn {
+    order: 1;
+}
+
+.btn-primary {
+    order: 2;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .bursaries-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-controls {
+        flex-direction: column;
+    }
+
+    .search-box,
+    .filter-dropdown select {
+        width: 100%;
+    }
+}

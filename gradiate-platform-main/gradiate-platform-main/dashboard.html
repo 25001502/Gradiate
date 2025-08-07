@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Gradiate</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- CSS files -->
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo">Grad<span>iate</span></a>
+            
+            <!-- Mobile menu toggle (visible on small screens) -->
+            <button class="mobile-menu-toggle" aria-label="Toggle menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <!-- Main navigation links -->
+            <div class="nav-links">
+                <a href="dashboard.html" class="active">Dashboard</a>
+                <a href="bursaries.html">Bursaries</a>
+                <a href="programs.html">Programs</a>
+                <a href="blog.html">Blog</a>
+                <a href="help.html">Help</a>
+            </div>
+            
+            <!-- User controls (notifications and profile) -->
+            <div class="dashboard-controls">
+                <!-- Notification bell with dropdown -->
+                <div class="notification-bell" aria-label="Notifications" id="notificationBell">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-count">3</span>
+                    <div class="notifications-dropdown">
+                        <div class="notifications-header">
+                            <h3>Notifications</h3>
+                            <a href="#" class="view-all">View All</a>
+                        </div>
+                        <div class="notifications-list">
+                            <div class="notification-item unread">
+                                <div class="notification-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="notification-content">
+                                    <h4>Deadline Reminder</h4>
+                                    <p>University of Cape Town application period closes in 1 day(s)</p>
+                                    <span class="notification-time">2 hours ago</span>
+                                </div>
+                            </div>
+                            <div class="notification-item">
+                                <div class="notification-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="notification-content">
+                                    <h4>Deadline Reminder</h4>
+                                    <p>NSFAS Bursary application closes in 5 day(s)</p>
+                                    <span class="notification-time">1 day ago</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- User profile dropdown -->
+                <div class="user-dropdown">
+                    <img src="images/default-avatar.jpg" alt="User" class="user-avatar" loading="lazy">
+                    <span class="user-name">John D.</span>
+                    <i class="fas fa-chevron-down"></i>
+                    <div class="dropdown-menu">
+                        <a href="profile.html"><i class="fas fa-user"></i> Profile</a>
+                        <a href="settings.html"><i class="fas fa-cog"></i> Settings</a>
+                        <a href="index.html"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Main Content -->
+    <main class="dashboard-container">
+        <div class="container">
+            <div class="page-header">
+                <h1><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
+                <p>View your profile, track your applications, and manage saved opportunities all in one place.</p>
+            <!-- Dashboard Search -->
+            <div class="dashboard-search">
+                <input type="text" placeholder="Search matches, applications..." aria-label="Search dashboard">
+                <button aria-label="Search"><i class="fas fa-search"></i></button>
+            </div>
+
+            <!-- Welcome Banner -->
+            <section class="welcome-banner">
+                <div class="welcome-content">
+                    <h1>Welcome back, John!</h1>
+                    <p>Here's what's happening with your education journey today</p>
+                    <div class="completion-status">
+                        <div class="progress-text">
+                            <span>Profile Completion</span>
+                            <span>85%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 85%;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="welcome-image">
+                    <img src="images/dashboard-hero.jpg" alt="Education journey" loading="lazy">
+                </div>
+            </section>
+
+            <!-- Dashboard Widgets Grid -->
+            <section class="dashboard-widgets">
+                <!-- Top Matches Widget -->
+                <div class="widget top-matches">
+                    <div class="widget-header">
+                        <h2><i class="fas fa-star"></i> Top Matches</h2>
+                        <div class="widget-controls">
+                            <select class="sort-dropdown" aria-label="Sort matches">
+                                <option>Sort by: Match %</option>
+                                <option>Sort by: Deadline</option>
+                                <option>Sort by: Funding Amount</option>
+                            </select>
+                            <a href="bursaries.html" class="view-all">View All</a>
+                        </div>
+                    </div>
+                    <div class="widget-body">
+                        <div class="match-card">
+                            <div class="match-badge">98% Match</div>
+                            <h3>Computer Science Honors</h3>
+                            <p class="institution">University of Johannesburg</p>
+                            <div class="match-details">
+                                <span><i class="fas fa-money-bill-wave"></i> R52,000/year</span>
+                                <span><i class="fas fa-map-marker-alt"></i> Johannesburg</span>
+                            </div>
+                            <div class="match-actions">
+                                <button class="btn btn-outline" aria-label="Save match"><i class="far fa-bookmark"></i> Save</button>
+                                <button class="btn btn-primary">Apply Now</button>
+                            </div>
+                        </div>
+                        <div class="match-card">
+                            <div class="match-badge">92% Match</div>
+                            <h3>Data Science Bursary</h3>
+                            <p class="institution">Cape Town University</p>
+                            <div class="match-details">
+                                <span><i class="fas fa-money-bill-wave"></i> R45,000/year</span>
+                                <span><i class="fas fa-map-marker-alt"></i> Cape Town</span>
+                            </div>
+                            <div class="match-actions">
+                                <button class="btn btn-outline" aria-label="Save match"><i class="far fa-bookmark"></i> Save</button>
+                                <button class="btn btn-primary">Apply Now</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Application Status Widget -->
+                <div class="widget application-status">
+                    <div class="widget-header">
+                        <h2><i class="fas fa-clipboard-list"></i> Application Status</h2>
+                        <a href="#" class="view-all">View All</a>
+                    </div>
+                    <div class="widget-body">
+                        <div class="status-item">
+                            <div class="status-info">
+                                <h3>Engineering Scholarship</h3>
+                                <p>University of Pretoria</p>
+                                <div class="status-details">
+                                    <span><i class="fas fa-calendar-alt"></i> Applied: 15 Aug 2025</span>
+                                </div>
+                            </div>
+                            <div class="status-badge in-review">
+                                <i class="fas fa-clock"></i> In Review
+                            </div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-info">
+                                <h3>Business Admin Program</h3>
+                                <p>Johannesburg Business School</p>
+                                <div class="status-details">
+                                    <span><i class="fas fa-calendar-alt"></i> Applied: 02 Aug 2025</span>
+                                </div>
+                            </div>
+                            <div class="status-badge accepted">
+                                <i class="fas fa-check-circle"></i> Accepted
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions Widget -->
+                <div class="widget quick-actions">
+                    <div class="widget-header">
+                        <h2><i class="fas fa-bolt"></i> Quick Actions</h2>
+                    </div>
+                    <div class="widget-body">
+                        <a href="bursaries.html" class="action-card">
+                            <i class="fas fa-search"></i>
+                            <span>Find New Matches</span>
+                        </a>
+                        <a href="profile.html" class="action-card">
+                            <i class="fas fa-user-edit"></i>
+                            <span>Complete Profile</span>
+                        </a>
+                        <a href="#" class="action-card">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Upload Documents</span>
+                        </a>
+                        <a href="#" class="action-card">
+                            <i class="fas fa-bell"></i>
+                            <span>Notification Settings</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Upcoming Deadlines Widget -->
+                <div class="widget deadlines">
+                    <div class="widget-header">
+                        <h2><i class="fas fa-calendar-day"></i> Upcoming Deadlines</h2>
+                        <a href="#" class="view-all">View Calendar</a>
+                    </div>
+                    <div class="widget-body">
+                        <div class="deadline-item urgent">
+                            <div class="deadline-date">
+                                <span class="day">15</span>
+                                <span class="month">SEP</span>
+                            </div>
+                            <div class="deadline-info">
+                                <h3>Computer Science Bursary</h3>
+                                <p>University of Johannesburg</p>
+                                <span class="days-left">5 days left</span>
+                            </div>
+                        </div>
+                        <div class="deadline-item">
+                            <div class="deadline-date">
+                                <span class="day">30</span>
+                                <span class="month">SEP</span>
+                            </div>
+                            <div class="deadline-info">
+                                <h3>Postgrad Data Science</h3>
+                                <p>Cape Town University</p>
+                                <span class="days-left">20 days left</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics Widget -->
+                <div class="widget stats">
+                    <div class="widget-header">
+                        <h2><i class="fas fa-chart-line"></i> Your Stats</h2>
+                    </div>
+                    <div class="widget-body">
+                        <div class="stat-cards">
+                            <div class="stat-card">
+                                <i class="fas fa-star"></i>
+                                <div class="stat-value">24</div>
+                                <div class="stat-label">Matches</div>
+                            </div>
+                            <div class="stat-card">
+                                <i class="fas fa-file-alt"></i>
+                                <div class="stat-value">5</div>
+                                <div class="stat-label">Applications</div>
+                            </div>
+                            <div class="stat-card">
+                                <i class="fas fa-bookmark"></i>
+                                <div class="stat-value">12</div>
+                                <div class="stat-label">Saved</div>
+                            </div>
+                            <div class="stat-card">
+                                <i class="fas fa-check-circle"></i>
+                                <div class="stat-value">2</div>
+                                <div class="stat-label">Accepted</div>
+                            </div>
+                        </div>
+                        <div class="stat-chart">
+                            <canvas id="applicationChart" aria-label="Application statistics chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Events Widget -->
+                <div class="widget events">
+                    <div class="widget-header">
+                        <h2><i class="fas fa-calendar-check"></i> Upcoming Events</h2>
+                    </div>
+                    <div class="widget-body">
+                        <div class="event-item">
+                            <span class="event-time">10:00 AM</span>
+                            <span class="event-title">University Webinar</span>
+                        </div>
+                        <div class="event-item">
+                            <span class="event-time">02:30 PM</span>
+                            <span class="event-title">Career Fair</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <a href="index.html" class="logo">Grad<span>iate</span></a>
+                    <p>Smart education matching for everyone.</p>
+                </div>
+                <div class="footer-links">
+                    <div class="link-group">
+                        <h4>Platform</h4>
+                        <a href="#">How It Works</a>
+                        <a href="#">Features</a>
+                    </div>
+                    <div class="link-group">
+                        <h4>Resources</h4>
+                        <a href="#">Help Center</a>
+                        <a href="#">Contact</a>
+                    </div>
+                    <div class="link-group">
+                        <h4>Legal</h4>
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div class="social-links">
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                </div>
+                <p class="copyright">&copy; 2025 Gradiate. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
