@@ -1,5 +1,17 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import image from '../images/how-it-works-hero.jpg';
+import image2 from '../images/signup-screen.jpg';
+import image3 from '../images/profile-screen.jpg';
+import image4 from '../images/interests-screen.jpg';
+import image5 from '../images/matches-screen.jpg';
+import image6 from '../images/apply-screen.jpg';
+import image7 from '../images/graduate-profile.jpg';
+import image8 from '../images/upload-screen.jpg';
+import image9 from '../images/graduate-matches.jpg';
+import image10 from '../images/notifications-screen.jpg';
+import image11 from '../images/video-thumbnail.jpg';    
+import {FaSearch, FaBullseye, FaBolt, FaRoad, FaHandsHelping, FaUserGraduate, FaUserTie, FaCheck, FaClock, FaPlay} from 'react-icons/fa';
 
 const How = () => {
 
@@ -55,7 +67,7 @@ const How = () => {
                         </div>
                         <div className="hero-image">
                             <img
-                                src="images/how-it-works-hero.jpg"
+                                src={image}
                                 alt="How Gradiate Works"
                             />
                         </div>
@@ -76,7 +88,7 @@ const How = () => {
                         <div className="benefits-grid">
                             <div className="benefit-card">
                                 <div className="benefit-icon">
-                                    <i className="fas fa-bolt"></i>
+                                    <FaBolt />
                                 </div>
                                 <h3>Quick Matching</h3>
                                 <p>
@@ -86,7 +98,7 @@ const How = () => {
                             </div>
                             <div className="benefit-card">
                                 <div className="benefit-icon">
-                                    <i className="fas fa-check-circle"></i>
+                                    <FaCheck/>
                                 </div>
                                 <h3>Verified Opportunities</h3>
                                 <p>
@@ -96,7 +108,7 @@ const How = () => {
                             </div>
                             <div className="benefit-card">
                                 <div className="benefit-icon">
-                                    <i className="fas fa-clock"></i>
+                                    <FaClock/>
                                 </div>
                                 <h3>Save Time</h3>
                                 <p>
@@ -132,7 +144,7 @@ const How = () => {
                                 </div>
                                 <div className="step-image">
                                     <img
-                                        src="images/signup-screen.jpg"
+                                        src={image2}
                                         alt="Sign Up Screen"
                                     />
                                 </div>
@@ -148,7 +160,7 @@ const How = () => {
                                 </div>
                                 <div className="step-image">
                                     <img
-                                        src="images/profile-screen.jpg"
+                                        src={image3}
                                         alt="Profile Screen"
                                     />
                                 </div>
@@ -164,7 +176,7 @@ const How = () => {
                                 </div>
                                 <div className="step-image">
                                     <img
-                                        src="images/interests-screen.jpg"
+                                        src={image4}
                                         alt="Interests Screen"
                                     />
                                 </div>
@@ -180,7 +192,7 @@ const How = () => {
                                 </div>
                                 <div className="step-image">
                                     <img
-                                        src="images/matches-screen.jpg"
+                                        src={image5}
                                         alt="Matches Screen"
                                     />
                                 </div>
@@ -196,7 +208,7 @@ const How = () => {
                                 </div>
                                 <div className="step-image">
                                     <img
-                                        src="images/apply-screen.jpg"
+                                        src={image6}
                                         alt="Apply Screen"
                                     />
                                 </div>
@@ -234,7 +246,7 @@ const How = () => {
                                 </div>
                                 <div className="step-image">
                                     <img
-                                        src="images/graduate-profile.jpg"
+                                        src={image7}
                                         alt="Graduate Profile"
                                     />
                                 </div>
@@ -250,7 +262,7 @@ const How = () => {
                                 </div>
                                 <div className="step-image">
                                     <img
-                                        src="images/upload-screen.jpg"
+                                        src={image8}
                                         alt="Upload Screen"
                                     />
                                 </div>
@@ -266,7 +278,7 @@ const How = () => {
                                 </div>
                                 <div className="step-image">
                                     <img
-                                        src="images/graduate-matches.jpg"
+                                        src={image9}
                                         alt="Graduate Matches"
                                     />
                                 </div>
@@ -282,7 +294,7 @@ const How = () => {
                                 </div>
                                 <div className="step-image">
                                     <img
-                                        src="images/notifications-screen.jpg"
+                                        src={image10}
                                         alt="Notifications Screen"
                                     />
                                 </div>
@@ -423,11 +435,11 @@ const How = () => {
                         <div className="video-container">
                             <div className="video-placeholder">
                                 <img
-                                    src="images/video-thumbnail.jpg"
+                                    src={image11}
                                     alt="Video Thumbnail"
                                 />
                                 <button className="play-button">
-                                    <i className="fas fa-play"></i>
+                                    <FaPlay />
                                 </button>
                             </div>
                             <div className="video-caption">
