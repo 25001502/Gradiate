@@ -18,7 +18,7 @@ export default function Startup() {
                         <a onClick={()=>navigate('/Bursaryguest')}>Bursaries</a>
                         <a onClick={()=>navigate('/Programsguest')}>Programs</a>
                         <a onClick={()=>navigate('/How')}>How It Works</a>
-                        <a href="about.html">About</a>
+                        <a onClick={()=>navigate('/About')}>About</a>
                     </div>
                     <div className="auth-buttons">
                         <button className="btn btn-primary" onClick={()=> navigate('/AuthForm')}>Sign Up</button>

@@ -14,7 +14,7 @@ import image11 from '../images/video-thumbnail.jpg';
 import {FaSearch, FaBullseye, FaBolt, FaRoad, FaHandsHelping, FaUserGraduate, FaUserTie, FaCheck, FaClock, FaPlay} from 'react-icons/fa';
 
 const How = () => {
-
+    
 
     const navigate = useNavigate();
     return (
@@ -29,10 +29,8 @@ const How = () => {
                         <a onClick={()=>navigate('/')}>Home</a>
                         <a onClick={()=>navigate('/Bursaryguest')}>Bursaries</a>
                         <a onClick={()=>navigate('/Programsguest')}>Programs</a>
-                        <a href="howitworks.html" className="active">
-                            How It Works
-                        </a>
-                        <a href="about.html">About</a>
+                        <a onClick={()=>navigate('/How')}className="active">How It Works</a>
+                        <a onClick={()=>navigate('/About')}>About</a>
                     </div>
                     <div className="auth-buttons">
                         <a href="register.html" className="btn btn-primary">

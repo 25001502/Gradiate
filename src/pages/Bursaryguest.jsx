@@ -16,12 +16,10 @@ const Bursaryguest = () => {
                     </a>
                     <div className="nav-links">
                         <a onClick={()=>navigate('/')}>Home</a>
-                        <a href="bursaries-not-logged-in.html" className="active">
-                            Bursaries
-                        </a>
+                        <a onClick={()=>navigate('/Bursaryguest')}className="active">Bursaries</a>
                         <a onClick={()=>navigate('/Programsguest')}>Programs</a>
                         <a onClick={()=>navigate('/How')}>How It Works</a>
-                        <a href="about.html">About</a>
+                        <a onClick={()=>navigate('/About')}>About</a>
                     </div>
                     <div className="auth-buttons">
                         <a href="register.html" className="btn btn-primary">

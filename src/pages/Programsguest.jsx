@@ -18,11 +18,9 @@ const Programsguest = () => {
                     <div className="nav-links">
                         <a onClick={()=>navigate('/')}>Home</a>
                         <a onClick={()=>navigate('/Bursaryguest')}>Bursaries</a>
-                        <a href="programs-not-logged-in.html" className="active">
-                            Programs
-                        </a>
+                        <a onClick={()=>navigate('/Programsguest')}className="active">Programs</a>
                         <a onClick={()=>navigate('/How')}>How It Works</a>
-                        <a href="about.html">About</a>
+                        <a onClick={()=>navigate('/About')}>About</a>
                     </div>
                     <div className="auth-buttons">
                         <a href="register.html" className="btn btn-primary">
