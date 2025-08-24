@@ -11,7 +11,7 @@ export default function Welcome() {
     <div
       style={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: 'linear-gradient(135deg, #27ff31ff 0%, #fffffffd 100%)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -183,15 +183,15 @@ export default function Welcome() {
           You have successfully logged in.
         </p>
         <p style={{ fontSize: '1rem', opacity: 0.85, textAlign: 'center' }}>
-          We now allow you to apply in your desired University.
+          Explore bursaries, scholarships, and opportunities tailored just for you.
         </p>
         <button
           onClick={() => navigate('/Aplication')}
           style={{
             marginTop: '2rem',
             padding: '0.8rem 2.2rem',
-            background: '#fff',
-            color: '#764ba2',
+            background: '#00c3ffff',
+            color: '#ffffffff',
             border: 'none',
             borderRadius: '8px',
             fontWeight: 700,

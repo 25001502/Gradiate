@@ -1,5 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import {FaTwitter,
+        FaInstagram,
+        FaLinkedin,FaFacebookF} from 'react-icons/fa';
 
 
 const Programsguest = () => {
@@ -23,10 +26,10 @@ const Programsguest = () => {
                         <a onClick={()=>navigate('/About')}>About</a>
                     </div>
                     <div className="auth-buttons">
-                        <a href="register.html" className="btn btn-primary">
+                        <a onClick={()=> navigate('/AuthForm')} className="btn btn-primary">
                             Sign Up
                         </a>
-                        <a href="login.html" className="btn btn-outline">
+                        <a onClick={()=> navigate('/AuthForm')} className="btn btn-outline">
                             Log In
                         </a>
                     </div>
@@ -113,10 +116,10 @@ const Programsguest = () => {
                                     matched to your profile and save your favorites.
                                 </p>
                                 <div className="auth-actions">
-                                    <a href="register.html" className="btn btn-primary">
+                                    <a onClick={()=> navigate('/AuthForm')} className="btn btn-primary">
                                         Sign Up
                                     </a>
-                                    <a href="login.html" className="btn btn-outline">
+                                    <a onClick={()=> navigate('/AuthForm')} className="btn btn-outline">
                                         Log In
                                     </a>
                                 </div>
@@ -193,10 +196,10 @@ const Programsguest = () => {
                     </div>
                     <div className="footer-bottom">
                         <div className="social-links">
-                            <a href="#"><i className="fab fa-facebook-f"></i></a>
-                            <a href="#"><i className="fab fa-twitter"></i></a>
-                            <a href="#"><i className="fab fa-linkedin-in"></i></a>
-                            <a href="#"><i className="fab fa-instagram"></i></a>
+                            <a href="#"><FaFacebookF/></a>
+                            <a href="#"><FaTwitter/></a>
+                            <a href="#"><FaLinkedin/></a>
+                            <a href="#"><FaInstagram/></a>
                         </div>
                         <p className="copyright">
                             &copy; 2025 Gradiate. All rights reserved.

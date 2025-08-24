@@ -2,7 +2,11 @@ import { useNavigate } from "react-router-dom";
 import image from '../images/hero-image.jpg';
 import image2 from '../images/testimonial1.jpg';
 
-import {FaSearch, FaBullseye, FaBolt, FaRoad, FaHandsHelping, FaUserGraduate, FaUserTie, FaCheck} from 'react-icons/fa';
+import {FaSearch, FaBullseye, FaBolt, FaRoad, FaHandsHelping, FaUserGraduate, FaUserTie, FaCheck, FaFacebookF,
+        FaTwitter,
+        FaLinkedinIn,
+        FaInstagram,
+        FaLinkedin} from 'react-icons/fa';
 
 export default function Startup() {
     
@@ -263,10 +267,10 @@ export default function Startup() {
                     </div>
                     <div className="footer-bottom">
                         <div className="social-links">
-                            <a href="#"><i className="fab fa-facebook-f"></i></a>
-                            <a href="#"><i className="fab fa-twitter"></i></a>
-                            <a href="#"><i className="fab fa-linkedin-in"></i></a>
-                            <a href="#"><i className="fab fa-instagram"></i></a>
+                            <a href="#"><FaFacebookF/></a>
+                            <a href="#"><FaTwitter/></a>
+                            <a href="#"><FaLinkedin/></a>
+                            <a href="#"><FaInstagram/></a>
                         </div>
                         <p className="copyright">
                             &copy; 2025 Gradiate. All rights reserved.

@@ -24,6 +24,7 @@ import { useNavigate } from "react-router-dom";
 
 
 
+
 const About = () => {
 
 
@@ -44,10 +45,10 @@ const About = () => {
             <a onClick={()=>navigate('/About')}className="active">About</a>
           </div>
           <div className="auth-buttons">
-            <a href="register.html" className="btn btn-primary">
+            <a onClick={()=> navigate('/AuthForm')} className="btn btn-primary">
               Sign Up
             </a>
-            <a href="login.html" className="btn btn-outline">
+            <a onClick={()=> navigate('/AuthForm')} className="btn btn-outline">
               Log In
             </a>
           </div>
@@ -264,7 +265,7 @@ const About = () => {
             opportunities through Gradiate.
           </p>
           <div className="cta-buttons">
-            <a href="register.html" className="btn btn-primary btn-large">
+            <a onClick={()=> navigate('/AuthForm')} className="btn btn-primary btn-large">
               Get Started
             </a>
           </div>

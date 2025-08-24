@@ -11,7 +11,29 @@ import image8 from '../images/upload-screen.jpg';
 import image9 from '../images/graduate-matches.jpg';
 import image10 from '../images/notifications-screen.jpg';
 import image11 from '../images/video-thumbnail.jpg';    
-import {FaSearch, FaBullseye, FaBolt, FaRoad, FaHandsHelping, FaUserGraduate, FaUserTie, FaCheck, FaClock, FaPlay} from 'react-icons/fa';
+import {FaSearch, FaBullseye, FaBolt, FaRoad, FaHandsHelping, FaUserGraduate, FaUserTie, FaCheck, FaClock, FaPlay,
+        
+        FaRobot,
+        FaShieldAlt,
+        FaMousePointer,
+        FaBell,
+        FaSchool,
+        FaUniversity,
+        FaBriefcase,
+        FaMapMarkerAlt,
+        FaChevronDown,
+        FaFacebookF,
+        FaTwitter,
+        FaLinkedinIn,
+        FaInstagram} from 'react-icons/fa';
+  
+  
+  
+  
+  
+  
+  
+  
 
 const How = () => {
     
@@ -33,10 +55,10 @@ const How = () => {
                         <a onClick={()=>navigate('/About')}>About</a>
                     </div>
                     <div className="auth-buttons">
-                        <a href="register.html" className="btn btn-primary">
+                        <a onClick={()=> navigate('/AuthForm')} className="btn btn-primary">
                             Sign Up
                         </a>
-                        <a href="login.html" className="btn btn-outline">
+                        <a onClick={()=> navigate('/AuthForm')} className="btn btn-outline">
                             Log In
                         </a>
                     </div>
@@ -55,7 +77,7 @@ const How = () => {
                                 graduate opportunity
                             </p>
                             <div className="cta-buttons">
-                                <a href="signup.html" className="btn btn-primary">
+                                <a onClick={()=> navigate('/AuthForm')} className="btn btn-primary">
                                     Get Started
                                 </a>
                                 <a href="#video-explainer" className="btn btn-outline">
@@ -213,7 +235,7 @@ const How = () => {
                             </div>
                         </div>
                         <div className="section-cta">
-                            <a href="signup.html" className="btn btn-primary">
+                            <a onClick={()=> navigate('/AuthForm')} className="btn btn-primary">
                                 Start as a Student
                             </a>
                         </div>
@@ -299,7 +321,7 @@ const How = () => {
                             </div>
                         </div>
                         <div className="section-cta">
-                            <a href="signup.html" className="btn btn-primary">
+                            <a onClick={()=> navigate('/AuthForm')} className="btn btn-primary">
                                 Start as a Graduate
                             </a>
                         </div>
@@ -319,7 +341,7 @@ const How = () => {
                         <div className="difference-cards">
                             <div className="difference-card">
                                 <div className="difference-icon">
-                                    <i className="fas fa-robot"></i>
+                                    <FaRobot />
                                 </div>
                                 <h3>AI-Powered Matching</h3>
                                 <p>
@@ -329,7 +351,7 @@ const How = () => {
                             </div>
                             <div className="difference-card">
                                 <div className="difference-icon">
-                                    <i className="fas fa-shield-alt"></i>
+                                    <FaShieldAlt />
                                 </div>
                                 <h3>Verified Opportunities</h3>
                                 <p>
@@ -339,7 +361,7 @@ const How = () => {
                             </div>
                             <div className="difference-card">
                                 <div className="difference-icon">
-                                    <i className="fas fa-mouse-pointer"></i>
+                                    <FaMousePointer />
                                 </div>
                                 <h3>One-Click Applications</h3>
                                 <p>
@@ -349,7 +371,7 @@ const How = () => {
                             </div>
                             <div className="difference-card">
                                 <div className="difference-icon">
-                                    <i className="fas fa-bell"></i>
+                                    <FaBell />
                                 </div>
                                 <h3>Personalized Alerts</h3>
                                 <p>
@@ -374,7 +396,7 @@ const How = () => {
                         <div className="audience-cards">
                             <div className="audience-card">
                                 <div className="audience-icon">
-                                    <i className="fas fa-school"></i>
+                                    <FaSchool />
                                 </div>
                                 <h3>High School Learners</h3>
                                 <p>
@@ -384,7 +406,7 @@ const How = () => {
                             </div>
                             <div className="audience-card">
                                 <div className="audience-icon">
-                                    <i className="fas fa-university"></i>
+                                    <FaUniversity />
                                 </div>
                                 <h3>University Students</h3>
                                 <p>
@@ -394,7 +416,7 @@ const How = () => {
                             </div>
                             <div className="audience-card">
                                 <div className="audience-icon">
-                                    <i className="fas fa-graduation-cap"></i>
+                                    <FaUserGraduate/>
                                 </div>
                                 <h3>Recent Graduates</h3>
                                 <p>
@@ -404,7 +426,7 @@ const How = () => {
                             </div>
                             <div className="audience-card">
                                 <div className="audience-icon">
-                                    <i className="fas fa-briefcase"></i>
+                                    <FaBriefcase />
                                 </div>
                                 <h3>Career Changers</h3>
                                 <p>
@@ -415,7 +437,7 @@ const How = () => {
                         </div>
                         <div className="local-context">
                             <h3>
-                                <i className="fas fa-map-marker-alt"></i> South African
+                                <FaMapMarkerAlt /> South African
                                 Focus
                             </h3>
                             <p>
@@ -462,7 +484,7 @@ const How = () => {
                             <div className="faq-item">
                                 <button className="faq-question">
                                     Is Gradiate free to use?
-                                    <i className="fas fa-chevron-down"></i>
+                                    <FaChevronDown />
                                 </button>
                                 <div className="faq-answer">
                                     <p>
@@ -475,7 +497,7 @@ const How = () => {
                             <div className="faq-item">
                                 <button className="faq-question">
                                     Can I update my marks or qualifications later?
-                                    <i className="fas fa-chevron-down"></i>
+                                    <FaChevronDown />
                                 </button>
                                 <div className="faq-answer">
                                     <p>
@@ -489,7 +511,7 @@ const How = () => {
                             <div className="faq-item">
                                 <button className="faq-question">
                                     How do I know if I'm eligible htmlFor a bursary?
-                                    <i className="fas fa-chevron-down"></i>
+                                    <FaChevronDown />
                                 </button>
                                 <div className="faq-answer">
                                     <p>
@@ -503,7 +525,7 @@ const How = () => {
                             <div className="faq-item">
                                 <button className="faq-question">
                                     What if I need help with my application?
-                                    <i className="fas fa-chevron-down"></i>
+                                    <FaChevronDown />
                                 </button>
                                 <div className="faq-answer">
                                     <p>
@@ -527,10 +549,10 @@ const How = () => {
                             discovered their path with Gradiate
                         </p>
                         <div className="cta-buttons centered">
-                            <a href="signup.html" className="btn btn-primary">
+                            <a onClick={()=> navigate('/AuthForm')} className="btn btn-primary">
                                 Create Free Account
                             </a>
-                            <a href="bursaries.html" className="btn btn-outline">
+                            <a onClick={()=> navigate('/Bursaryguest')} className="btn btn-outline">
                                 Browse Bursaries
                             </a>
                         </div>
@@ -568,10 +590,10 @@ const How = () => {
                     </div>
                     <div className="footer-bottom">
                         <div className="social-links">
-                            <a href="#"><i className="fab fa-facebook-f"></i></a>
-                            <a href="#"><i className="fab fa-twitter"></i></a>
-                            <a href="#"><i className="fab fa-linkedin-in"></i></a>
-                            <a href="#"><i className="fab fa-instagram"></i></a>
+                            <a href="#"><FaFacebookF /></a>
+                            <a href="#"><FaTwitter /></a>
+                            <a href="#"><FaLinkedinIn /></a>
+                            <a href="#"><FaInstagram /></a>
                         </div>
                         <p className="copyright">
                             &copy; 2025 Gradiate. All rights reserved.
