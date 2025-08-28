@@ -1,76 +1,93 @@
-import React from "react";
-import heroAbout from '../images/hero-about.jpg';
-import aboutTeam from '../images/about-team.jpg';
-import aboutApproach from '../images/about-approach.jpg';
-import billy from '../images/person1.jpg';
-import team1 from '../images/team1.jpg';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faEnvelope, 
-  faGraduationCap, 
-  faUsers, 
-  faBalanceScale, 
-  faShieldAlt 
-} from '@fortawesome/free-solid-svg-icons';
-import { 
-  faLinkedin, 
-  faFacebookF, 
-  faTwitter, 
-  faLinkedinIn, 
-  faInstagram 
-} from '@fortawesome/free-brands-svg-icons';
+import React, { useState } from "react";
+import heroAbout from "../images/hero-about.jpg";
+import aboutTeam from "../images/about-team.jpg";
+import aboutApproach from "../images/about-approach.jpg";
+import billy from "../images/person1.jpg";
+import team1 from "../images/team1.jpg";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faEnvelope,
+  faGraduationCap,
+  faUsers,
+  faBalanceScale,
+  faShieldAlt,
+} from "@fortawesome/free-solid-svg-icons";
+import {
+  faLinkedin,
+  faFacebookF,
+  faTwitter,
+  faLinkedinIn,
+  faInstagram,
+} from "@fortawesome/free-brands-svg-icons";
 
 import { useNavigate } from "react-router-dom";
 
-
-
-
 const About = () => {
-
-
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
   return (
     <>
       {/* Navigation Bar */}
-      <nav className="navbar">
-        <div className="container">
-          <a href="index.html" className="logo">
-            Grad<span>iate</span>
+      <nav className="navbar-responsive">
+        <div className="navbar-container">
+          <a
+            className="logo"
+            href="#"
+            style={{
+              fontWeight: 700,
+              fontSize: "1.5rem",
+              color: "#2c3e50",
+              textDecoration: "none",
+            }}
+          >
+            Grad<span style={{ color: "#3498db" }}>iate</span>
           </a>
-          <div className="nav-links">
-           <a onClick={()=>navigate('/')}>Home</a>
-            <a onClick={()=>navigate('/Bursaryguest')}>Bursaries</a>
-            <a onClick={()=>navigate('/Programsguest')}>Programs</a>
-            <a onClick={()=>navigate('/How')}>How It Works</a>
-            <a onClick={()=>navigate('/About')}className="active">About</a>
-          </div>
-          <div className="auth-buttons">
-            <a onClick={()=> navigate('/AuthForm')} className="btn btn-primary">
+          <div className="nav-actions">
+            <a
+              onClick={() => navigate("/AuthForm")}
+              className="btn btn-primary"
+              style={{ marginLeft: "auto" }}
+            >
               Sign Up
             </a>
-            <a onClick={()=> navigate('/AuthForm')} className="btn btn-outline">
-              Log In
-            </a>
+            <button
+              className="burger"
+              onClick={() => setMenuOpen((open) => !open)}
+              aria-label="Toggle menu"
+            >
+              <span className="burger-bar"></span>
+              <span className="burger-bar"></span>
+              <span className="burger-bar"></span>
+            </button>
           </div>
+          {menuOpen && (
+            <div className="burger-menu">
+              <a onClick={() => navigate("/")}>Home</a>
+              <a onClick={() => navigate("/Bursaryguest")} className="active">
+                Bursaries
+              </a>
+              <a onClick={() => navigate("/Programsguest")}>Programs</a>
+              <a onClick={() => navigate("/How")}>How It Works</a>
+              <a onClick={() => navigate("/About")}>About</a>
+            </div>
+          )}
         </div>
       </nav>
-  
+
       {/* About Hero Section */}
       <section className="about-hero">
-        <img
-          src={heroAbout}
-          alt="Diverse students studying together"
-        />
+        <img src={heroAbout} alt="Diverse students studying together" />
         <div className="hero-image-overlay"></div>
         <div className="container hero-image-content">
           <h1>Our Mission to Transform Education Access</h1>
           <p className="subtitle">
             Gradiate was founded to bridge the gap between students and
-            educational opportunities, making higher education accessible to all.
+            educational opportunities, making higher education accessible to
+            all.
           </p>
         </div>
       </section>
-  
+
       {/* About Content Section */}
       <section className="about-content">
         <div className="container">
@@ -86,8 +103,8 @@ const About = () => {
               <p>
                 What started as a small project to help local students find
                 bursaries has grown into a comprehensive platform serving
-                thousands of students across the country. Today, we're proud to be
-                the most trusted education matching platform in South Africa.
+                thousands of students across the country. Today, we're proud to
+                be the most trusted education matching platform in South Africa.
               </p>
             </div>
             <div className="about-text">
@@ -100,29 +117,23 @@ const About = () => {
               </p>
               <p>
                 Our platform analyzes students' academic records, interests, and
-                goals to recommend relevant bursaries, study programs, and career
-                opportunities — ensuring each user gets matched with what truly
-                fits them.
+                goals to recommend relevant bursaries, study programs, and
+                career opportunities — ensuring each user gets matched with what
+                truly fits them.
               </p>
             </div>
           </div>
           <div className="about-grid">
             <div className="about-image">
-              <img
-                src={aboutTeam}
-                alt="Gradiate team working together"
-              />
+              <img src={aboutTeam} alt="Gradiate team working together" />
             </div>
             <div className="about-image">
-              <img
-                src={aboutApproach}
-                alt="Gradiate approach illustration"
-              />
+              <img src={aboutApproach} alt="Gradiate approach illustration" />
             </div>
           </div>
         </div>
       </section>
-  
+
       {/* Team Section */}
       <section className="team">
         <div className="container">
@@ -131,16 +142,15 @@ const About = () => {
             A diverse group of passionate individuals dedicated to transforming
             education access.
           </p>
-  
+
           <div className="team-grid" style={{}}>
-            
-            <div className="team-card" >
+            <div className="team-card">
               <img src={billy} alt="Nengovhela Thandululo" />
               <h3>Nengovhela Thandululo</h3>
               <p className="position">Founder & CEO</p>
               <p className="bio">
                 Social entrepreneur with a background in computer science and
-                  education.
+                education.
               </p>
               <div className="social-links">
                 <a href="#">
@@ -156,7 +166,8 @@ const About = () => {
               <h3>Nicoroy Zwane</h3>
               <p className="position">Website Designer</p>
               <p className="bio">
-                Former university administrator with 15 years experience in student services
+                Former university administrator with 15 years experience in
+                student services
               </p>
               <div className="social-links">
                 <a href="#">
@@ -167,11 +178,10 @@ const About = () => {
                 </a>
               </div>
             </div>
-          
           </div>
         </div>
       </section>
-  
+
       {/* Values Section */}
       <section className="values-section">
         <div className="container">
@@ -187,8 +197,9 @@ const About = () => {
               </div>
               <h3>Accessibility</h3>
               <p>
-                We're committed to breaking down barriers to education and making
-                opportunities available to all students, regardless of background.
+                We're committed to breaking down barriers to education and
+                making opportunities available to all students, regardless of
+                background.
               </p>
             </div>
             <div className="value-card">
@@ -197,12 +208,12 @@ const About = () => {
               </div>
               <h3>Community</h3>
               <p>
-                We foster connections between students, institutions, and sponsors
-                to create a supportive ecosystem where everyone can thrive
-                together.
+                We foster connections between students, institutions, and
+                sponsors to create a supportive ecosystem where everyone can
+                thrive together.
               </p>
             </div>
-  
+
             <div className="value-card">
               <div className="value-icon">
                 <FontAwesomeIcon icon={faBalanceScale} />
@@ -213,7 +224,7 @@ const About = () => {
                 addressing systemic barriers in education access.
               </p>
             </div>
-  
+
             <div className="value-card">
               <div className="value-icon">
                 <FontAwesomeIcon icon={faShieldAlt} />
@@ -227,7 +238,7 @@ const About = () => {
           </div>
         </div>
       </section>
-  
+
       {/* Stats Section */}
       <section className="stats">
         <div className="container">
@@ -255,7 +266,7 @@ const About = () => {
           </div>
         </div>
       </section>
-  
+
       {/* Call to Action */}
       <section className="cta">
         <div className="container">
@@ -265,19 +276,22 @@ const About = () => {
             opportunities through Gradiate.
           </p>
           <div className="cta-buttons">
-            <a onClick={()=> navigate('/AuthForm')} className="btn btn-primary btn-large">
+            <a
+              onClick={() => navigate("/AuthForm")}
+              className="btn btn-primary btn-large"
+            >
               Get Started
             </a>
           </div>
         </div>
       </section>
-  
+
       {/* Footer */}
       <footer className="footer">
         <div className="container">
           <div className="footer-content">
             <div className="footer-brand">
-              <a href="index.html" className="logo">
+              <a  className="logo">
                 Grad<span>iate</span>
               </a>
               <p>Smart education matching for everyone.</p>
@@ -285,8 +299,8 @@ const About = () => {
             <div className="footer-links">
               <div className="link-group">
                 <h4>Platform</h4>
-                <a href="howitworks.html">How It Works</a>
-                <a href="about.html">About Us</a>
+                <a >How It Works</a>
+                <a >About Us</a>
               </div>
               <div className="link-group">
                 <h4>Resources</h4>
@@ -322,7 +336,6 @@ const About = () => {
         </div>
       </footer>
     </>
-        );
- 
-      };
-  export default About;
+  );
+};
+export default About;

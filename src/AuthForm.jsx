@@ -18,6 +18,7 @@ export default function AuthForm() {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [isLogin, setIsLogin] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const navigate = useNavigate();
 
@@ -38,7 +39,7 @@ export default function AuthForm() {
         );
         await updateProfile(userCredential.user, { displayName: username });
       }
-      navigate("/welcome"); // ✅ redirect after login/signup
+      navigate('/Aplication'); // ✅ redirect after login/signup
     } catch (error) {
       alert(error.message);
     }
@@ -48,19 +49,45 @@ export default function AuthForm() {
 
    
   <>
-    <nav className="navbar">
-      <div className="container">
-        <a href="/" className="logo">
-          Grad<span>iate</span>
-        </a>
-        <div className="auth-buttons">
-          <span>For some extra features</span>
-          <a  className="btn btn-primary">
-            Join us 
+    <nav className="navbar-responsive">
+        <div className="navbar-container">
+          <a
+            className="logo"
+            href="#"
+            style={{
+              fontWeight: 700,
+              fontSize: "1.5rem",
+              color: "#2c3e50",
+              textDecoration: "none",
+            }}
+          >
+            Grad<span style={{ color: "#3498db" }}>iate</span>
           </a>
+          <div className="nav-actions">
+            
+            <button
+              className="burger"
+              onClick={() => setMenuOpen((open) => !open)}
+              aria-label="Toggle menu"
+            >
+              <span className="burger-bar"></span>
+              <span className="burger-bar"></span>
+              <span className="burger-bar"></span>
+            </button>
+          </div>
+          {menuOpen && (
+            <div className="burger-menu">
+              <a onClick={() => navigate("/")}>Home</a>
+              <a onClick={() => navigate("/Bursaryguest")} className="active">
+                Bursaries
+              </a>
+              <a onClick={() => navigate("/Programsguest")}>Programs</a>
+              <a onClick={() => navigate("/How")}>How It Works</a>
+              <a onClick={() => navigate("/About")}>About</a>
+            </div>
+          )}
         </div>
-      </div>
-    </nav>
+      </nav>
 
     <div className="login-container">
       <div className="login-card">

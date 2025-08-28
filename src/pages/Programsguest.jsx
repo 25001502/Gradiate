@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react"
 import { useNavigate } from "react-router-dom";
 import {FaTwitter,
         FaInstagram,
@@ -9,32 +9,55 @@ const Programsguest = () => {
    
    
     const navigate = useNavigate();
+    const [menuOpen, setMenuOpen] = useState(false);
     
     return (
         <>
-            {/* Navigation Bar */}
-            <nav className="navbar">
-                <div className="container">
-                    <a href="index.html" className="logo">
-                        Grad<span>iate</span>
-                    </a>
-                    <div className="nav-links">
-                        <a onClick={()=>navigate('/')}>Home</a>
-                        <a onClick={()=>navigate('/Bursaryguest')}>Bursaries</a>
-                        <a onClick={()=>navigate('/Programsguest')}className="active">Programs</a>
-                        <a onClick={()=>navigate('/How')}>How It Works</a>
-                        <a onClick={()=>navigate('/About')}>About</a>
-                    </div>
-                    <div className="auth-buttons">
-                        <a onClick={()=> navigate('/AuthForm')} className="btn btn-primary">
-                            Sign Up
-                        </a>
-                        <a onClick={()=> navigate('/AuthForm')} className="btn btn-outline">
-                            Log In
-                        </a>
-                    </div>
-                </div>
-            </nav>
+            <nav className="navbar-responsive">
+        <div className="navbar-container">
+          <a
+            className="logo"
+            href="#"
+            style={{
+              fontWeight: 700,
+              fontSize: "1.5rem",
+              color: "#2c3e50",
+              textDecoration: "none",
+            }}
+          >
+            Grad<span style={{ color: "#3498db" }}>iate</span>
+          </a>
+          <div className="nav-actions">
+            <a
+              onClick={() => navigate("/AuthForm")}
+              className="btn btn-primary"
+              style={{ marginLeft: "auto" }}
+            >
+              Sign Up
+            </a>
+            <button
+              className="burger"
+              onClick={() => setMenuOpen((open) => !open)}
+              aria-label="Toggle menu"
+            >
+              <span className="burger-bar"></span>
+              <span className="burger-bar"></span>
+              <span className="burger-bar"></span>
+            </button>
+          </div>
+          {menuOpen && (
+            <div className="burger-menu">
+              <a onClick={() => navigate("/")}>Home</a>
+              <a onClick={() => navigate("/Bursaryguest")} className="active">
+                Bursaries
+              </a>
+              <a onClick={() => navigate("/Programsguest")}>Programs</a>
+              <a onClick={() => navigate("/How")}>How It Works</a>
+              <a onClick={() => navigate("/About")}>About</a>
+            </div>
+          )}
+        </div>
+      </nav>
 
             {/* Programs Main Content */}
             <main className="programs-container">
@@ -171,7 +194,7 @@ const Programsguest = () => {
                 <div className="container">
                     <div className="footer-content">
                         <div className="footer-brand">
-                            <a href="index.html" className="logo">
+                            <a  className="logo">
                                 Grad<span>iate</span>
                             </a>
                             <p>Smart education matching for everyone.</p>

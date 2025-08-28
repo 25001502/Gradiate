@@ -26,6 +26,47 @@ function Login() {
 
   return (
     <div className="login-bg">
+
+      <nav className="navbar">
+                      <div className="container" style={{ position: "relative" }}>
+                          <a className="logo mx-auto w-center bg-blue-500">
+                              Grad<span>iate</span>
+                          </a>
+      
+                           <a onClick={()=> navigate('/AuthForm')} className="btn btn-primary">
+                                  Sign Up
+                              </a>
+      
+                          {/* Burger icon */}
+                          <button
+                              className="burger"
+                              onClick={() => setMenuOpen((open) => !open)}
+                              style={{justifyContent:"space-between"}}
+                              aria-label="Toggle menu"
+                          >
+                              {/* Simple burger icon */}
+                              <span className="burger-bar"></span>
+                              <span className="burger-bar"></span>
+                              <span className="burger-bar"></span>
+                          </button>
+                          {/* Menu options */}
+                          {menuOpen && (
+                              <div className="burger-menu">
+                                  <a onClick={() => alert("Profile Manager  is Comming soon")}>Me</a>
+                                  <a onClick={() => alert("Academic Helper is Comming soon")}>Academic Helper</a>
+                                  <a onClick={() => alert("Gradiate Beta is Comming soon")}>Gradiate Beta</a>
+      
+                              </div>
+                          )}
+                      </div>
+                  </nav>
+
+
+
+
+
+
+
       <form className="login-form" onSubmit={handleLogin}>
         <img
           src="https://www.univen.ac.za/docs/univen-logo.png"
