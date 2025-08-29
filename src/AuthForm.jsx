@@ -6,6 +6,8 @@ import {
   signInWithEmailAndPassword,
   updateProfile,
   sendEmailVerification,
+  signInWithPhoneNumber,
+  RecaptchaVerifier,
 } from "firebase/auth";
 
 import {
@@ -15,47 +17,130 @@ import {
   FaFacebookF,
 } from "react-icons/fa";
 
+import toast, { Toaster } from "react-hot-toast";
+
 export default function AuthForm() {
+  const [authMode, setAuthMode] = useState("email"); // "email" or "phone"
+  const [isLogin, setIsLogin] = useState(true);
+
+  // Email/password state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
-  const [isLogin, setIsLogin] = useState(true);
-  const [menuOpen, setMenuOpen] = useState(false);
 
+  // Phone/SMS state
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [step, setStep] = useState("phone"); // "phone" or "otp"
+  const [confirmationResult, setConfirmationResult] = useState(null);
+
+  const [loading, setLoading] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  // Reset phone step when switching modes
+  const handleAuthModeSwitch = (mode) => {
+    setAuthMode(mode);
+    setStep("phone");
+    setPhone("");
+    setOtp("");
+    setConfirmationResult(null);
+    setLoading(false);
+  };
+
+  // Email/password handlers
+  const handleEmailSubmit = async (e) => {
     e.preventDefault();
     if (!isLogin && !username.trim()) {
-      alert("Please enter a username.");
+      toast.error("Please enter a username.");
       return;
     }
     try {
       if (isLogin) {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         if (!userCredential.user.emailVerified) {
-          alert("An emailhas been sent to your Gmail. Check your Gmail and Spam for the verification email.");
+          toast.error("Please verify your email before logging in.");
+          await sendEmailVerification(userCredential.user);
+          toast.success("Verification email re-sent!");
           return;
         }
       } else {
-        const userCredential = await createUserWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         await updateProfile(userCredential.user, { displayName: username });
         await sendEmailVerification(userCredential.user);
-        alert("Verification email sent! Please check your inbox and verify your email before logging in.");
-        return; // Prevent auto-login after signup
+        toast.success("Verification email sent! Please verify before logging in.");
+        return;
       }
-      navigate('/Aplication'); // ✅ redirect after login/signup
+      navigate("/Aplication"); // ✅ fixed spelling
     } catch (error) {
-      alert(error.message);
+      toast.error(error.message);
     }
+  };
+
+  // Setup Recaptcha
+  const setupRecaptcha = () => {
+    if (window.recaptchaVerifier) {
+      window.recaptchaVerifier.clear();
+      window.recaptchaVerifier = null;
+    }
+
+    window.recaptchaVerifier = new RecaptchaVerifier(
+      "recaptcha-container",
+      {
+        size: "invisible",
+        callback: () => {
+          console.log("Recaptcha solved");
+        },
+      },
+      auth
+    );
+
+    window.recaptchaVerifier.render().catch(console.error);
+  };
+
+  // Phone/SMS handlers
+  const handlePhoneSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setupRecaptcha();
+    try {
+      const appVerifier = window.recaptchaVerifier;
+      const result = await signInWithPhoneNumber(auth, phone, appVerifier);
+      setConfirmationResult(result);
+      setStep("otp");
+      toast.success("OTP sent! Please check your SMS.");
+    } catch (error) {
+      toast.error(error.message);
+      if (window.recaptchaVerifier) window.recaptchaVerifier.clear();
+    }
+    setLoading(false);
+  };
+
+  const handleOtpSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await confirmationResult.confirm(otp);
+      toast.success("Phone verified! You are now logged in.");
+      navigate("/Aplication");
+    } catch (error) {
+      console.error(error);
+      toast.error("Invalid code. Please try again.");
+    }
+    setLoading(false);
+  };
+
+  const resendOtp = async () => {
+    setStep("phone");
+    setOtp("");
+    toast("You can now resend OTP.");
   };
 
   return (
     <>
+      <Toaster position="top-center" />
+
+      {/* NAVBAR */}
       <nav className="navbar-responsive">
         <div className="navbar-container">
           <a
@@ -95,18 +180,62 @@ export default function AuthForm() {
         </div>
       </nav>
 
-      <div className="login-container">
-        <div className="login-card">
-          <div className="login-header">
-            <h1>{isLogin ? "Login" : "Create Account"}</h1>
-            <p>
-              {isLogin
-                ? "Enter your credentials to access your account"
-                : "Fill in the details to create a new account"}
-            </p>
-          </div>
+      {/* MAIN FORM */}
+      <div
+        style={{
+          maxWidth: 340,
+          width: "95vw",
+          margin: "1.2rem auto",
+          padding: "1rem",
+          background: "#f8fafc",
+          borderRadius: 10,
+          boxShadow: "0 2px 8px #e0e7ef",
+        }}
+      >
+        {/* Auth mode switcher */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            marginBottom: 20,
+          }}
+        >
+          <button
+            onClick={() => handleAuthModeSwitch("email")}
+            style={{
+              background: authMode === "email" ? "#2563eb" : "#e0e7ef",
+              color: authMode === "email" ? "#fff" : "#222",
+              border: "none",
+              borderRadius: "6px 0 0 6px",
+              padding: "0.5rem 1.2rem",
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+          >
+            Email
+          </button>
+          <button
+            onClick={() => handleAuthModeSwitch("phone")}
+            style={{
+              background: authMode === "phone" ? "#2563eb" : "#e0e7ef",
+              color: authMode === "phone" ? "#fff" : "#222",
+              border: "none",
+              borderRadius: "0 6px 6px 0",
+              padding: "0.5rem 1.2rem",
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+          >
+            Phone
+          </button>
+        </div>
 
-          <form className="login-form" onSubmit={handleSubmit}>
+        {/* Email/password form */}
+        {authMode === "email" ? (
+          <form className="login-form" onSubmit={handleEmailSubmit}>
+            <h2 style={{ textAlign: "center", marginBottom: 16 }}>
+              {isLogin ? "Login" : "Create Account"}
+            </h2>
             {!isLogin && (
               <div className="form-group">
                 <label htmlFor="username">Username</label>
@@ -121,7 +250,6 @@ export default function AuthForm() {
                 />
               </div>
             )}
-
             <div className="form-group">
               <label htmlFor="email">Email Address</label>
               <input
@@ -134,7 +262,6 @@ export default function AuthForm() {
                 required
               />
             </div>
-
             <div className="form-group password-input">
               <label htmlFor="password">Password</label>
               <input
@@ -145,34 +272,139 @@ export default function AuthForm() {
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
                 required
+                minLength={6}
               />
             </div>
-
-            <button type="submit" className="btn btn-login">
-              {isLogin ? "Login" : "Sign Up"}
+            <button type="submit" className="btn btn-login" disabled={loading}>
+              {loading ? "Please wait..." : isLogin ? "Login" : "Sign Up"}
             </button>
+            <div style={{ textAlign: "center", marginTop: "1rem" }}>
+              <button
+                onClick={() => setIsLogin(!isLogin)}
+                type="button"
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#2563eb",
+                  cursor: "pointer",
+                  textDecoration: "underline",
+                  fontSize: "0.95rem",
+                }}
+              >
+                {isLogin
+                  ? "Need an account? Sign up"
+                  : "Already have an account? Log in"}
+              </button>
+            </div>
           </form>
-
-          <div style={{ textAlign: "center", marginTop: "1rem" }}>
-            <button
-              onClick={() => setIsLogin(!isLogin)}
-              style={{
-                background: "none",
-                border: "none",
-                color: "var(--secondary-blue)",
-                cursor: "pointer",
-                textDecoration: "underline",
-                fontSize: "0.95rem",
-              }}
-            >
-              {isLogin
-                ? "Need an account? Sign up"
-                : "Already have an account? Log in"}
-            </button>
+        ) : (
+          // Phone/SMS form
+          <div>
+            <h2 style={{ textAlign: "center", marginBottom: 100 }}>
+              Sign In / Sign Up with Phone
+            </h2>
+            {step === "phone" && (
+              <form onSubmit={handlePhoneSubmit}>
+                <label
+                  htmlFor="phone"
+                  style={{ display: "block", marginBottom: 8 }}
+                >
+                  Phone Number (with country code)
+                </label>
+                <input
+                  id="phone"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+27 82 123 4567"
+                  required
+                  style={{
+                    width: "100%",
+                    padding: 8,
+                    marginBottom: 16,
+                    borderRadius: 4,
+                    border: "1px solid #ccc",
+                  }}
+                />
+                <div id="recaptcha-container" style={{ marginBottom: 16 }}></div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  style={{
+                    width: "100%",
+                    padding: "0.7rem",
+                    background: "#2563eb",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: 4,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                  }}
+                >
+                  {loading ? "Sending..." : "Send OTP"}
+                </button>
+              </form>
+            )}
+            {step === "otp" && (
+              <form onSubmit={handleOtpSubmit}>
+                <label
+                  htmlFor="otp"
+                  style={{ display: "block", marginBottom: 8 }}
+                >
+                  Enter OTP
+                </label>
+                <input
+                  id="otp"
+                  type="text"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  placeholder="Enter the code you received"
+                  required
+                  style={{
+                    width: "100%",
+                    padding: 8,
+                    marginBottom: 16,
+                    borderRadius: 4,
+                    border: "1px solid #ccc",
+                  }}
+                />
+                <button
+                  type="submit"
+                  disabled={loading}
+                  style={{
+                    width: "100%",
+                    padding: "0.7rem",
+                    background: "#2563eb",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: 4,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                  }}
+                >
+                  {loading ? "Verifying..." : "Verify & Login"}
+                </button>
+                <button
+                  type="button"
+                  onClick={resendOtp}
+                  style={{
+                    marginTop: 10,
+                    background: "none",
+                    border: "none",
+                    color: "#2563eb",
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                  }}
+                >
+                  Resend OTP
+                </button>
+              </form>
+            )}
           </div>
-        </div>
+        )}
       </div>
 
+      {/* FOOTER */}
       <footer className="footer">
         <div className="container">
           <div className="footer-content">
@@ -221,6 +453,18 @@ export default function AuthForm() {
           </div>
         </div>
       </footer>
+      <style>{`
+  @media (max-width: 500px) {
+    .login-form input,
+    .login-form button {
+      font-size: 0.97rem !important;
+      padding: 0.6rem !important;
+    }
+    .login-form label {
+      font-size: 0.97rem !important;
+    }
+  }
+`}</style>
     </>
   );
 }
