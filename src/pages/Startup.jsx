@@ -254,7 +254,7 @@ export default function Startup() {
             opportunities through Gradiate.
           </p>
           <div className="cta-buttons">
-            <a href="register.html" className="btn btn-primary btn-large">
+            <a  className="btn btn-primary btn-large">
               Get Started
             </a>
           </div>

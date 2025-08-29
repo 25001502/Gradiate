@@ -7,6 +7,7 @@ import Bursaryguest from './pages/Bursaryguest';
 import ProgramsGuest from './pages/Programsguest';
 import How from './pages/How';
 import About from './pages/About';
+import Practise from './pages/Practise';
 
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
         <Route path="/Programsguest" element={<ProgramsGuest />} />
         <Route path="/How" element={<How />} />
         <Route path="/About" element={<About />} />
+        <Route path="/Practise" element={<Practise />} />
       </Routes>
     </Router>
   );

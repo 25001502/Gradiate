@@ -45,10 +45,15 @@ export default function Aplication() {
           {menuOpen && (
             <div className="burger-menu">
               <a>{user?.displayName || user?.email || "Guest"}</a>
+
+              <a onClick={() => navigate("/Practise")}>Practise</a>
+              
               <a onClick={() => navigate()} className="active">
                 Bursaries
               </a>
+              
             </div>
+              
           )}
         </div>
       </nav>
