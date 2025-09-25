@@ -13,72 +13,97 @@ const subjects = [
   {
     name: "Mathematics",
     papers: [
-      { year: 2023, url: "/downloads/Maths_2023.pdf" },
-      { year: 2022, url: "/downloads/Maths_2022.pdf" },
-      { year: 2021, url: "/downloads/Maths_2021.pdf" },
+      { year: 2023, type: "P1", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=M_7mZq2zE5o%3d&tabid=4682&portalid=0&mid=12681&forcedownload=true" },
+      { year: 2023, type: "P2", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=Zoios-rCurI%3d&tabid=4682&portalid=0&mid=12681&forcedownload=true" },
+      { year: 2022, type: "P1", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=Juy5nA5N3fM%3d&tabid=3294&portalid=0&mid=10986&forcedownload=true" },
+      { year: 2022, type: "P2", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=DqfP-i10rEE%3d&tabid=3294&portalid=0&mid=10986&forcedownload=true" },
+      { year: 2021, type: "P1", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=sGgq9FNv0lQ%3d&tabid=2922&portalid=0&mid=10135&forcedownload=true" },
+      { year: 2021, type: "P2", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=jgMJbW3Aa0o%3d&tabid=2922&portalid=0&mid=10135&forcedownload=true" },
     ],
   },
   {
     name: "Physical Sciences",
     papers: [
-      { year: 2023, url: "/downloads/PhysicalSciences_2023.pdf" },
-      { year: 2022, url: "/downloads/PhysicalSciences_2022.pdf" },
+      { year: 2023, type: "P1", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=oTJzzXEU6Ng%3d&tabid=4682&portalid=0&mid=12685&forcedownload=true" },
+      { year: 2023, type: "P2", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=Gs2cDJBpRR0%3d&tabid=4682&portalid=0&mid=12685&forcedownload=true" },
+      { year: 2022, type: "P1", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=5l5vQTQBaU4%3d&tabid=3294&portalid=0&mid=10990&forcedownload=true" },
+      { year: 2022, type: "P2", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=_7CRVUkWGMA%3d&tabid=3294&portalid=0&mid=10990&forcedownload=true" },
     ],
   },
   {
     name: "Life Sciences",
     papers: [
-      { year: 2023, url: "/downloads/LifeSciences_2023.pdf" },
-      { year: 2022, url: "/downloads/LifeSciences_2022.pdf" },
+      { year: 2023, type: "P1", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=5Xc2L4uffmA%3d&tabid=4682&portalid=0&mid=12679&forcedownload=true" },
+      { year: 2023, type: "P2", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=4yWO4CegNNE%3d&tabid=4682&portalid=0&mid=12679&forcedownload=true" },
+      { year: 2022, type: "P1", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=Fg44KuXQ8Es%3d&tabid=3294&portalid=0&mid=10984&forcedownload=true" },
+      { year: 2022, type: "P2", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=FPGyIKhYDUw%3d&tabid=3294&portalid=0&mid=10984&forcedownload=true" },
     ],
   },
   {
     name: "Geography",
     papers: [
-      { year: 2023, url: "/downloads/Geography_2023.pdf" },
-      { year: 2022, url: "/downloads/Geography_2022.pdf" },
+      { year: 2023, type: "P1", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=sOLlvteQCeM%3d&tabid=4682&portalid=0&mid=12674&forcedownload=true" },
+      { year: 2023, type: "P2", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=qCvbCunZPCY%3d&tabid=4682&portalid=0&mid=12674&forcedownload=true" },
+      { year: 2022, type: "P1", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=T4gsWEf6_A0%3d&tabid=3294&portalid=0&mid=10979&forcedownload=true" },
+      { year: 2022, type: "P2", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=yFfqSPQtFNw%3d&tabid=3294&portalid=0&mid=10979&forcedownload=true" },
     ],
   },
   {
     name: "History",
     papers: [
-      { year: 2023, url: "/downloads/History_2023.pdf" },
-      { year: 2022, url: "/downloads/History_2022.pdf" },
+      { year: 2023, type: "P1", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=DrznBkYP4P0%3d&tabid=4682&portalid=0&mid=12675&forcedownload=true" },
+      { year: 2023, type: "P2", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=YIVtG2z_yWE%3d&tabid=4682&portalid=0&mid=12675&forcedownload=true" },
+      { year: 2022, type: "P1", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=y2jZuQHPLLs%3d&tabid=3294&portalid=0&mid=10980&forcedownload=true" },
+      { year: 2022, type: "P2", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=zuyAs-Eq55E%3d&tabid=3294&portalid=0&mid=10980&forcedownload=true" },
     ],
   },
   {
     name: "Accounting",
     papers: [
-      { year: 2023, url: "/downloads/Accounting_2023.pdf" },
-      { year: 2022, url: "/downloads/Accounting_2022.pdf" },
+      { year: 2023, type: "P1", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=I3ZOntNTjjo%3d&tabid=4682&portalid=0&mid=12660&forcedownload=true" },
+      { year: 2023, type: "P2", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=89AYULMK6WY%3d&tabid=4682&portalid=0&mid=12660&forcedownload=true" },
+      { year: 2022, type: "P1", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=l3HgEye_Xg8%3d&tabid=3294&portalid=0&mid=10965&forcedownload=true" },
+      { year: 2022, type: "P2", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=rEzVzZbaHTs%3d&tabid=3294&portalid=0&mid=10965&forcedownload=true" },
     ],
   },
   {
     name: "English FAL",
     papers: [
-      { year: 2023, url: "/downloads/EnglishFAL_2023.pdf" },
-      { year: 2022, url: "/downloads/EnglishFAL_2022.pdf" },
+      { year: 2023, type: "P1", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=rzKvzSdEjAU%3d&tabid=4682&portalid=0&mid=12648&forcedownload=true" },
+      { year: 2023, type: "P2", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=8l6DnwdLPXY%3d&tabid=4682&portalid=0&mid=12648&forcedownload=true" },
+      { year: 2023, type: "P3", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=ehLuStOw2jA%3d&tabid=4682&portalid=0&mid=12648&forcedownload=true" },
+      { year: 2022, type: "P1", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=6u3vvGSi-40%3d&tabid=3294&portalid=0&mid=10953&forcedownload=true" },
+      { year: 2022, type: "P2", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=7MabwVLlFcQ%3d&tabid=3294&portalid=0&mid=10953&forcedownload=true" },
+      { year: 2022, type: "P3", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=gFBCYV3CPk0%3d&tabid=3294&portalid=0&mid=10953&forcedownload=true" },
     ],
   },
   {
     name: "Economics",
     papers: [
-      { year: 2023, url: "/downloads/Economics_2023.pdf" },
-      { year: 2022, url: "/downloads/Economics_2022.pdf" },
+      { year: 2023, type: "P1", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=Dlshc30RtYk%3d&tabid=4682&portalid=0&mid=12671&forcedownload=true" },
+      { year: 2023, type: "P2", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=sct4D9kRRhY%3d&tabid=4682&portalid=0&mid=12671&forcedownload=true" },
+      { year: 2022, type: "P1", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=ZbwLwi4Nbbk%3d&tabid=3294&portalid=0&mid=10976&forcedownload=true" },
+      { year: 2022, type: "P2", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=mz3AECevBTo%3d&tabid=3294&portalid=0&mid=10976&forcedownload=true" },
     ],
   },
   {
     name: "Tshivenda",
     papers: [
-      { year: 2023, url: "/downloads/Tshivenda_2023.pdf" },
-      { year: 2022, url: "/downloads/Tshivenda_2022.pdf" },
+      { year: 2023, type: "P1", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=wCCGQHOQMJw%3d&tabid=4682&portalid=0&mid=12657&forcedownload=true" },
+      { year: 2023, type: "P2", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=JG3CRnCamJU%3d&tabid=4682&portalid=0&mid=12657&forcedownload=true" },
+      { year: 2023, type: "P3", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=Zc--UDPGU-k%3d&tabid=4682&portalid=0&mid=12657&forcedownload=true" },
+      { year: 2022, type: "P1", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=DDfl_Fd0ruE%3d&tabid=3294&portalid=0&mid=10962&forcedownload=true" },
+      { year: 2023, type: "P2", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=g5wCgeulASo%3d&tabid=3294&portalid=0&mid=10962&forcedownload=true" },
+      { year: 2023, type: "P3", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=-2P9opC9-Jw%3d&tabid=3294&portalid=0&mid=10962&forcedownload=true" },
     ],
   },
   {
     name: "Business Studies",
     papers: [
-      { year: 2023, url: "/downloads/BusinessStudies_2023.pdf" },
-      { year: 2022, url: "/downloads/BusinessStudies_2022.pdf" },
+      { year: 2023, type: "P1", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=j-o_oRFFS7A%3d&tabid=4682&portalid=0&mid=12664&forcedownload=true" },
+      { year: 2023, type: "P2", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=d0WgLcInBU8%3d&tabid=4682&portalid=0&mid=12664&forcedownload=true" },
+      { year: 2022, type: "P1", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=XKSOkexd5ho%3d&tabid=3294&portalid=0&mid=10969&forcedownload=true" },
+      { year: 2022, type: "P2", url: "https://www.education.gov.za/LinkClick.aspx?fileticket=j4GWWzHMKt4%3d&tabid=3294&portalid=0&mid=10969&forcedownload=true" },
     ],
   },
 ];
@@ -157,7 +182,7 @@ export default function Practise() {
           fontSize: "1.3rem",
         }}
       >
-        Grade 12 Past Exam Papers
+        Grade 12 NSC Past Exam Papers
       </h1>
       <p
         style={{
@@ -222,7 +247,7 @@ export default function Practise() {
                 }}
               >
                 {subject.papers.map((paper) => (
-                  <li key={paper.year} style={{ marginBottom: 6 }}>
+                  <li key={`${paper.year}-${paper.type}`} style={{ marginBottom: 6 }}>
                     <a
                       href={paper.url}
                       download
@@ -235,7 +260,8 @@ export default function Practise() {
                       }}
                       onClick={(e) => e.stopPropagation()}
                     >
-                      Download {subject.name} {paper.year} Paper
+                      Download {subject.name} {paper.year} {paper.type}
+                      
                     </a>
                   </li>
                 ))}
