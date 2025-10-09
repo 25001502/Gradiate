@@ -897,8 +897,8 @@ p {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.1);
-    color: var(--white);
+    background-color: var(--secondary-blue);
+    color: var(--secondary-blue);
     transition: var(--transition);
 }
 
@@ -910,6 +910,8 @@ p {
     color: rgba(255, 255, 255, 0.5);
     font-size: 0.9rem;
 }
+
+
 
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 1024px) {

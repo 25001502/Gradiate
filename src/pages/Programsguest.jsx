@@ -142,9 +142,7 @@ const Programsguest = () => {
                                     <a onClick={()=> navigate('/AuthForm')} className="btn btn-primary">
                                         Sign Up
                                     </a>
-                                    <a onClick={()=> navigate('/AuthForm')} className="btn btn-outline">
-                                        Log In
-                                    </a>
+                                   
                                 </div>
                             </div>
                         </div>

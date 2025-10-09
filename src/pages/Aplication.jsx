@@ -9,6 +9,7 @@ import {
   FaFacebookF,
 } from "react-icons/fa";
 
+
 export default function Aplication() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showIntro, setShowIntro] = useState(false);
@@ -44,11 +45,11 @@ export default function Aplication() {
           </div>
           {menuOpen && (
             <div className="burger-menu">
-              <a>{user?.displayName || user?.email || "Guest"}</a>
+              <a onClick={() => alert("Sorry! this feature is not yet available")}>{user?.displayName || user?.email || "Guest"}</a>
 
               <a onClick={() => navigate("/Practise")}>Practise</a>
               
-              <a onClick={() => navigate()} className="active">
+              <a onClick={() => alert("Sorry! this feature is not yet available")} className="active">
                 Bursaries
               </a>
               

@@ -59,7 +59,7 @@ export default function Startup() {
           </div>
           {menuOpen && (
             <div className="burger-menu">
-              <a onClick={() => navigate("/")} >Home</a>
+              <a onClick={() => navigate("/")}>Home</a>
               <a onClick={() => navigate("/Bursaryguest")} className="active">
                 Bursaries
               </a>
@@ -79,15 +79,7 @@ export default function Startup() {
               Gradiate instantly connects students with bursaries and graduates
               with ideal programs based on their qualifications.
             </p>
-            <div className="search-container">
-              <input
-                type="text"
-                placeholder="Search by program or opportunity..."
-              />
-              <button className="btn btn-accent">
-                <i className="fas fa-search"></i> Search
-              </button>
-            </div>
+           
           </div>
           <div className="hero-image">
             <img src={image} alt="Students celebrating graduation" />
@@ -163,7 +155,10 @@ export default function Startup() {
                   <FaCheck /> Download prospectuses and save options
                 </li>
               </ul>
-              <a href="#" className="btn btn-outline">
+              <a
+                onClick={() => navigate("/AuthForm")}
+                className="btn btn-outline"
+              >
                 Explore Options
               </a>
             </div>
@@ -183,7 +178,10 @@ export default function Startup() {
                   <FaCheck /> Postgraduate funding and scholarships
                 </li>
               </ul>
-              <a href="#" className="btn btn-outline">
+              <a
+                onClick={() => navigate("/AuthForm")}
+                className="btn btn-outline"
+              >
                 Find Opportunities
               </a>
             </div>
@@ -254,9 +252,9 @@ export default function Startup() {
             opportunities through Gradiate.
           </p>
           <div className="cta-buttons">
-            <a  className="btn btn-primary btn-large">
-              Get Started
-            </a>
+            <a  onClick={() => navigate("/AuthForm")}
+             className="btn btn-primary btn-large">Get Started</a>
+
           </div>
         </div>
       </section>
@@ -265,7 +263,7 @@ export default function Startup() {
         <div className="container">
           <div className="footer-content">
             <div className="footer-brand">
-              <a  className="logo">
+              <a className="logo">
                 Grad<span>iate</span>
               </a>
               <p>Smart education matching for everyone.</p>
@@ -273,7 +271,7 @@ export default function Startup() {
             <div className="footer-links">
               <div className="link-group">
                 <h4>Platform</h4>
-                <a href="#">How It Works</a>
+                <a onClick={() => navigate("/How")}>How It Works</a>
                 <a href="#">Features</a>
               </div>
               <div className="link-group">

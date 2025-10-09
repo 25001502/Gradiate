@@ -258,11 +258,7 @@ const How = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="section-cta">
-                            <a onClick={()=> navigate('/AuthForm')} className="btn btn-primary">
-                                Start as a Student
-                            </a>
-                        </div>
+                        
                     </div>
                 </section>
 
@@ -344,11 +340,7 @@ const How = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="section-cta">
-                            <a onClick={()=> navigate('/AuthForm')} className="btn btn-primary">
-                                Start as a Graduate
-                            </a>
-                        </div>
+                     
                     </div>
                 </section>
 
@@ -534,7 +526,7 @@ const How = () => {
                             </div>
                             <div className="faq-item">
                                 <button className="faq-question">
-                                    How do I know if I'm eligible htmlFor a bursary?
+                                    How do I know if I'm eligible For a bursary?
                                     <FaChevronDown />
                                 </button>
                                 <div className="faq-answer">
@@ -576,9 +568,7 @@ const How = () => {
                             <a onClick={()=> navigate('/AuthForm')} className="btn btn-primary">
                                 Create Free Account
                             </a>
-                            <a onClick={()=> navigate('/Bursaryguest')} className="btn btn-outline">
-                                Browse Bursaries
-                            </a>
+                           
                         </div>
                     </div>
                 </section>
@@ -592,12 +582,12 @@ const How = () => {
                             <a  className="logo">
                                 Grad<span>iate</span>
                             </a>
-                            <p>Smart education matching htmlFor everyone.</p>
+                            <p>Smart education matching For everyone.</p>
                         </div>
                         <div className="footer-links">
                             <div className="link-group">
                                 <h4>Platform</h4>
-                                <a >How It Works</a>
+                                <a onClick={() => navigate("/How")}>How It Works</a>
                                 <a href="#">Features</a>
                             </div>
                             <div className="link-group">

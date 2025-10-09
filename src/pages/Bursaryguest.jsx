@@ -122,12 +122,7 @@ const Bursaryguest = () => {
                   >
                     Sign Up
                   </a>
-                  <a
-                    onClick={() => navigate("/AuthForm")}
-                    className="btn btn-outline"
-                  >
-                    Log In
-                  </a>
+                 
                 </div>
               </div>
             </div>

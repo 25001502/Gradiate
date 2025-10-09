@@ -143,21 +143,20 @@ const About = () => {
             education access.
           </p>
 
-          <div className="team-grid" style={{}}>
+          <div className="team-grid">
             <div className="team-card">
               <img src={billy} alt="Nengovhela Thandululo" />
               <h3>Nengovhela Thandululo</h3>
               <p className="position">Founder & CEO</p>
               <p className="bio">
-                Social entrepreneur with a background in computer science and
-                education.
+                The Young man with a passion for education equity and helping the disadvantaged, and has a good background in software development.
               </p>
-              <div className="social-links">
-                <a href="#">
-                  <FontAwesomeIcon icon={faLinkedin} />
+              <div className="social-links" style={{ marginTop: 12 }}>
+                <a href="https://www.linkedin.com/in/nengovhela-thandululo-880080367/" style={{ marginRight: 16, color: "#0077b5" }}>
+                  <FontAwesomeIcon icon={faLinkedin} size="2x" />
                 </a>
-                <a href="#">
-                  <FontAwesomeIcon icon={faEnvelope} />
+                <a href="mailto:thandululo99@gmail.com" style={{ color: "#333" }}>
+                  <FontAwesomeIcon icon={faEnvelope} size="2x" />
                 </a>
               </div>
             </div>
@@ -166,23 +165,20 @@ const About = () => {
               <h3>Nicoroy Zwane</h3>
               <p className="position">Website Designer</p>
               <p className="bio">
-                Former university administrator with 15 years experience in
-                student services
+                Experienced web designer who laid a hand focused on creating user-friendly interfaces. he also braught a wealth of experience in graphic design and branding including how Gradiate must stand up.
               </p>
-              <div className="social-links">
-                <a href="#">
-                  <FontAwesomeIcon icon={faLinkedin} />
+              <div className="social-links" style={{ marginTop: 12 }}>
+                <a href="#" style={{ marginRight: 16, color: "#0077b5" }}>
+                  <FontAwesomeIcon icon={faLinkedin} size="2x" />
                 </a>
-                <a href="#">
-                  <FontAwesomeIcon icon={faEnvelope} />
+                <a href="#" style={{ color: "#333333ff" }}>
+                  <FontAwesomeIcon icon={faEnvelope} size="2x" />
                 </a>
               </div>
             </div>
           </div>
         </div>
       </section>
-
-      {/* Values Section */}
       <section className="values-section">
         <div className="container">
           <h2>Our Core Values</h2>
@@ -299,7 +295,7 @@ const About = () => {
             <div className="footer-links">
               <div className="link-group">
                 <h4>Platform</h4>
-                <a >How It Works</a>
+                <a onClick={() => navigate("/How")}>How It Works</a>
                 <a >About Us</a>
               </div>
               <div className="link-group">
