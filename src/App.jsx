@@ -8,6 +8,7 @@ import ProgramsGuest from './pages/Programsguest';
 import How from './pages/How';
 import About from './pages/About';
 import Practise from './pages/Practise';
+import Profile from './pages/Profile';
 
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
         <Route path="/How" element={<How />} />
         <Route path="/About" element={<About />} />
         <Route path="/Practise" element={<Practise />} />
+        <Route path="/Profile" element={<Profile />} />
       </Routes>
     </Router>
   );

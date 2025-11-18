@@ -45,7 +45,7 @@ export default function Aplication() {
           </div>
           {menuOpen && (
             <div className="burger-menu">
-              <a onClick={() => alert("Sorry! this feature is not yet available")}>{user?.displayName || user?.email || "Guest"}</a>
+              <a onClick={() => navigate("/Profile")}>{user?.displayName || user?.email || "Guest"}</a>
 
               <a onClick={() => navigate("/Practise")}>Practise</a>
               
@@ -115,7 +115,7 @@ export default function Aplication() {
                 textShadow: "0 2px 8px rgba(255,255,255,0.7)",
               }}
             >
-              How to Use Gradiate
+              Steps to follow!
             </h2>
             <ol style={{ paddingLeft: 20, marginBottom: 8 }}>
               <li>
