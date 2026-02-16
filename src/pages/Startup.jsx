@@ -59,13 +59,13 @@ export default function Startup() {
           </div>
           {menuOpen && (
             <div className="burger-menu">
-              <a onClick={() => navigate("/")}>Home</a>
-              <a onClick={() => navigate("/Bursaryguest")} className="active">
+              <a className="cursor-pointer" onClick={() => navigate("/")} >Home</a>
+              <a onClick={() => navigate("/Bursaryguest")} className="active cursor-pointer">
                 Bursaries
               </a>
-              <a onClick={() => navigate("/Programsguest")}>Programs</a>
-              <a onClick={() => navigate("/How")}>How It Works</a>
-              <a onClick={() => navigate("/About")}>About</a>
+              <a onClick={() => navigate("/Programsguest")} className="cursor-pointer">Programs</a>
+              <a onClick={() => navigate("/How")} className="cursor-pointer">How It Works</a>
+              <a onClick={() => navigate("/About")} className="cursor-pointer">About</a>
             </div>
           )}
         </div>
