@@ -149,7 +149,7 @@ export default function Practise() {
           </div>
           {menuOpen && (
             <div className="burger-menu">
-              <a onClick={() => alert("Sorry! this feature is not yet available")}>{user?.displayName || user?.email || "Guest"}</a>
+              <a onClick={() => navigate("/Profile")}>{user?.displayName || user?.email || "Guest"}</a>
 
              <a onClick={() => navigate("/Aplication")}>Application</a>
             
