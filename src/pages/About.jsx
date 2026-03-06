@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import heroAbout from "../images/hero-about.jpg";
 import aboutTeam from "../images/about-team.jpg";
 import aboutApproach from "../images/about-approach.jpg";
-import billy from "../images/person1.jpg";
 import team1 from "../images/team1.jpg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {

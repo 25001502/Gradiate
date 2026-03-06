@@ -160,7 +160,14 @@ const Profile = () => {
 
   if (loading)
     return (
-      <div style={{ padding: 20, textAlign: "center" }}>Loading profile...</div>
+         <div className="loading-container">
+      <h1 className="loading-text">
+        Loading
+        <span className="dot dot1">.</span>
+        <span className="dot dot2">.</span>
+        <span className="dot dot3">.</span>
+      </h1>
+    </div>
     );
   if (!user)
     return (
