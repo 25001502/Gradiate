@@ -145,7 +145,7 @@ const About = () => {
 
           <div className="team-grid">
             <div className="team-card">
-              <img src={billy} alt="Nengovhela Thandululo" />
+              <img src={"https://firebasestorage.googleapis.com/v0/b/my-univen-project.firebasestorage.app/o/gemini-2.5-flash-image_make_me_look_profetional_for_a_portfolio_profile_picture_and_make_the_suit_black-0.jpg?alt=media&token=7a85f9f2-d8cc-47f1-be49-7684677b2522"} alt="Nengovhela Thandululo" />
               <h3>Nengovhela Thandululo</h3>
               <p className="position">Founder & CEO</p>
               <p className="bio">
