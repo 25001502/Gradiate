@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import AuthForm from './AuthForm';
-import Welcome from './pages/Welcome';
 import Application from './pages/Aplication';
 import Startup from './pages/Startup';
 import Bursaryguest from './pages/Bursaryguest';
@@ -17,7 +16,6 @@ function App() {
       <Routes>
         <Route path="/" element={<Startup />} />
         <Route path="/AuthForm" element={<AuthForm />} />
-        <Route path="/welcome" element={<Welcome />} />
         <Route path="/Aplication" element={<Application />} />
         <Route path="/Bursaryguest" element={<Bursaryguest />} />
         <Route path="/Programsguest" element={<ProgramsGuest />} />

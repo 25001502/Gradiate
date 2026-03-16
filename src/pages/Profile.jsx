@@ -6,7 +6,7 @@ import av2 from "../images/team2.jpg";
 import av3 from "../images/team3.jpg";
 import image from "../images/dashboard-hero.jpg";
 import { getAuth, updateProfile, signOut } from "firebase/auth";
-import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
+import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 
 const Profile = () => {
   const auth = getAuth();
@@ -14,6 +14,7 @@ const Profile = () => {
   const db = getFirestore();
   const [user, setUser] = useState(null);
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [savedAvatarUrl, setSavedAvatarUrl] = useState("");
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -28,16 +29,22 @@ const Profile = () => {
         setLoading(true);
         if (currentUser) {
           setUser(currentUser);
-          setAvatarUrl(currentUser.photoURL || "");
+          const fallbackAvatar = currentUser.photoURL || "";
+          setAvatarUrl(fallbackAvatar);
+          setSavedAvatarUrl(fallbackAvatar);
 
           const userRef = doc(db, "users", currentUser.uid);
           const docSnap = await getDoc(userRef);
           if (docSnap.exists()) {
             const data = docSnap.data();
-            setAvatarUrl(data.photoURL || currentUser.photoURL || "");
+            const resolvedAvatar = data.photoURL || currentUser.photoURL || "";
+            setAvatarUrl(resolvedAvatar);
+            setSavedAvatarUrl(resolvedAvatar);
           }
         } else {
           setUser(null);
+          setAvatarUrl("");
+          setSavedAvatarUrl("");
         }
       } catch (err) {
         console.error(err);
@@ -52,40 +59,10 @@ const Profile = () => {
   // Allow selecting from a set of bundled avatars instead of uploading to Storage
   const avatarOptions = [avDefault, av1, av2, av3];
 
-  const selectAvatar = async (url) => {
-    if (!user) return;
-    setLoading(true);
-    try {
-      // update immediately in Firestore so avatar is persistent without using Storage
-      await updateDoc(doc(db, "users", user.uid), { photoURL: url });
-      setAvatarUrl(url);
-      setShowAvatarPicker(false);
-    } catch (err) {
-      console.error("Failed to set avatar from options", err);
-      // If Firestore write is blocked by rules, fall back to saving photoURL in the Auth profile
-      const code = err && (err.code || "").toLowerCase();
-      if (
-        code.includes("permission") ||
-        code.includes("denied") ||
-        code.includes("missing") ||
-        code.includes("insufficient")
-      ) {
-        try {
-          if (auth.currentUser) {
-            await updateProfile(auth.currentUser, { photoURL: url });
-            setAvatarUrl(url);
-            setShowAvatarPicker(false);
-
-            return;
-          }
-        } catch (authErr) {
-          console.error("Failed to update Auth profile as fallback", authErr);
-        }
-      }
-      setError("Failed to set avatar.");
-    } finally {
-      setLoading(false);
-    }
+  const selectAvatar = (url) => {
+    setAvatarUrl(url);
+    setShowAvatarPicker(false);
+    setError(null);
   };
 
   const handleLogout = async () => {
@@ -102,8 +79,19 @@ const Profile = () => {
     if (!user) return;
     setLoading(true);
     try {
-      // persist avatar selection in Firestore (only photoURL)
-      await updateDoc(doc(db, "users", user.uid), { photoURL: avatarUrl });
+      await setDoc(
+        doc(db, "users", user.uid),
+        { photoURL: avatarUrl },
+        { merge: true }
+      );
+
+      if (auth.currentUser && auth.currentUser.photoURL !== avatarUrl) {
+        await updateProfile(auth.currentUser, { photoURL: avatarUrl });
+      }
+
+      setSavedAvatarUrl(avatarUrl);
+      setShowAvatarPicker(false);
+      setError(null);
       setEditing(false);
     } catch (err) {
       console.error(err);
@@ -372,7 +360,9 @@ const Profile = () => {
                         <button
                           style={newStyles.ghostBtn}
                           onClick={() => {
+                            setAvatarUrl(savedAvatarUrl);
                             setEditing(false);
+                            setShowAvatarPicker(false);
                             setError(null);
                           }}
                         >
