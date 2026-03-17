@@ -16,6 +16,7 @@ import {
 import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
 const defaultProfileData = {
+  academicStage: "tertiary",
   bio: "",
   location: "",
   phone: "",
@@ -24,18 +25,39 @@ const defaultProfileData = {
   gradYear: "",
   careerGoal: "",
   skills: "",
+  highSchoolName: "",
+  highSchoolGrade: "",
+  highSchoolStatus: "",
+  matricYear: "",
+  highSchoolSubjects: "",
 };
 
-const normalizeProfileData = (data = {}) => ({
-  bio: data.bio || "",
-  location: data.location || "",
-  phone: data.phone || "",
-  institution: data.institution || "",
-  qualification: data.qualification || "",
-  gradYear: data.gradYear || "",
-  careerGoal: data.careerGoal || "",
-  skills: data.skills || "",
-});
+const normalizeProfileData = (data = {}) => {
+  const hasHighSchoolData = Boolean(
+    data.highSchoolName ||
+      data.highSchoolGrade ||
+      data.highSchoolStatus ||
+      data.matricYear ||
+      data.highSchoolSubjects
+  );
+
+  return {
+    academicStage: data.academicStage || (hasHighSchoolData ? "highSchool" : "tertiary"),
+    bio: data.bio || "",
+    location: data.location || "",
+    phone: data.phone || "",
+    institution: data.institution || "",
+    qualification: data.qualification || "",
+    gradYear: data.gradYear || "",
+    careerGoal: data.careerGoal || "",
+    skills: data.skills || "",
+    highSchoolName: data.highSchoolName || "",
+    highSchoolGrade: data.highSchoolGrade || "",
+    highSchoolStatus: data.highSchoolStatus || "",
+    matricYear: data.matricYear || "",
+    highSchoolSubjects: data.highSchoolSubjects || "",
+  };
+};
 
 const Profile = () => {
   const auth = getAuth();
@@ -301,11 +323,21 @@ const Profile = () => {
     profileData.bio,
     profileData.location,
     profileData.phone,
-    profileData.institution,
-    profileData.qualification,
-    profileData.gradYear,
     profileData.careerGoal,
-    profileData.skills,
+    ...(profileData.academicStage === "highSchool"
+      ? [
+          profileData.highSchoolName,
+          profileData.highSchoolGrade,
+          profileData.highSchoolStatus,
+          profileData.matricYear,
+          profileData.highSchoolSubjects,
+        ]
+      : [
+          profileData.institution,
+          profileData.qualification,
+          profileData.gradYear,
+          profileData.skills,
+        ]),
   ];
   const completedCount = completionChecks.filter((item) => String(item).trim() !== "").length;
   const profileCompletion = Math.round((completedCount / completionChecks.length) * 100);
@@ -460,6 +492,9 @@ const Profile = () => {
                 <p style={{ color: "#666", marginTop: 4 }}>
                   {profileData.location || "Add your location"}
                 </p>
+                <p style={{ color: "#475569", marginTop: 4, fontSize: 13 }}>
+                  Stage: {profileData.academicStage === "highSchool" ? "High School" : "Tertiary"}
+                </p>
               </div>
 
               <div style={newStyles.infoActions}>
@@ -506,6 +541,17 @@ const Profile = () => {
                 <h3 style={newStyles.sectionTitle}>Edit Profile</h3>
                 <div style={newStyles.editorGrid}>
                   <label style={newStyles.fieldWrap}>
+                    Academic Stage
+                    <select
+                      style={newStyles.input}
+                      value={profileData.academicStage}
+                      onChange={(e) => handleFieldChange("academicStage", e.target.value)}
+                    >
+                      <option value="tertiary">Tertiary / University</option>
+                      <option value="highSchool">High School</option>
+                    </select>
+                  </label>
+                  <label style={newStyles.fieldWrap}>
                     Phone Number
                     <input
                       style={newStyles.input}
@@ -523,42 +569,86 @@ const Profile = () => {
                       placeholder="Johannesburg, South Africa"
                     />
                   </label>
-                  <label style={newStyles.fieldWrap}>
-                    Institution
-                    <input
-                      style={newStyles.input}
-                      value={profileData.institution}
-                      onChange={(e) => handleFieldChange("institution", e.target.value)}
-                      placeholder="University / College"
-                    />
-                  </label>
-                  <label style={newStyles.fieldWrap}>
-                    Qualification / Major
-                    <input
-                      style={newStyles.input}
-                      value={profileData.qualification}
-                      onChange={(e) => handleFieldChange("qualification", e.target.value)}
-                      placeholder="BSc Computer Science"
-                    />
-                  </label>
-                  <label style={newStyles.fieldWrap}>
-                    Graduation Year
-                    <input
-                      style={newStyles.input}
-                      value={profileData.gradYear}
-                      onChange={(e) => handleFieldChange("gradYear", e.target.value)}
-                      placeholder="2027"
-                    />
-                  </label>
-                  <label style={newStyles.fieldWrap}>
-                    Skills (comma separated)
-                    <input
-                      style={newStyles.input}
-                      value={profileData.skills}
-                      onChange={(e) => handleFieldChange("skills", e.target.value)}
-                      placeholder="React, Communication, Java"
-                    />
-                  </label>
+                  {profileData.academicStage !== "highSchool" && (
+                    <>
+                      <label style={newStyles.fieldWrap}>
+                        Institution
+                        <input
+                          style={newStyles.input}
+                          value={profileData.institution}
+                          onChange={(e) => handleFieldChange("institution", e.target.value)}
+                          placeholder="University / College"
+                        />
+                      </label>
+                      <label style={newStyles.fieldWrap}>
+                        Qualification / Major
+                        <input
+                          style={newStyles.input}
+                          value={profileData.qualification}
+                          onChange={(e) => handleFieldChange("qualification", e.target.value)}
+                          placeholder="BSc Computer Science"
+                        />
+                      </label>
+                      <label style={newStyles.fieldWrap}>
+                        Graduation Year
+                        <input
+                          style={newStyles.input}
+                          value={profileData.gradYear}
+                          onChange={(e) => handleFieldChange("gradYear", e.target.value)}
+                          placeholder="2027"
+                        />
+                      </label>
+                      <label style={newStyles.fieldWrap}>
+                        Skills (comma separated)
+                        <input
+                          style={newStyles.input}
+                          value={profileData.skills}
+                          onChange={(e) => handleFieldChange("skills", e.target.value)}
+                          placeholder="React, Communication, Java"
+                        />
+                      </label>
+                    </>
+                  )}
+                  {profileData.academicStage === "highSchool" && (
+                    <>
+                      <label style={newStyles.fieldWrap}>
+                        High School Name
+                        <input
+                          style={newStyles.input}
+                          value={profileData.highSchoolName}
+                          onChange={(e) => handleFieldChange("highSchoolName", e.target.value)}
+                          placeholder="Name of your high school"
+                        />
+                      </label>
+                      <label style={newStyles.fieldWrap}>
+                        Current Grade / Level
+                        <input
+                          style={newStyles.input}
+                          value={profileData.highSchoolGrade}
+                          onChange={(e) => handleFieldChange("highSchoolGrade", e.target.value)}
+                          placeholder="Grade 11 / Grade 12"
+                        />
+                      </label>
+                      <label style={newStyles.fieldWrap}>
+                        High School Status
+                        <input
+                          style={newStyles.input}
+                          value={profileData.highSchoolStatus}
+                          onChange={(e) => handleFieldChange("highSchoolStatus", e.target.value)}
+                          placeholder="Currently enrolled / Completed"
+                        />
+                      </label>
+                      <label style={newStyles.fieldWrap}>
+                        Expected Matric Year
+                        <input
+                          style={newStyles.input}
+                          value={profileData.matricYear}
+                          onChange={(e) => handleFieldChange("matricYear", e.target.value)}
+                          placeholder="2026"
+                        />
+                      </label>
+                    </>
+                  )}
                 </div>
 
                 <label style={{ ...newStyles.fieldWrap, marginTop: 14 }}>
@@ -570,6 +660,18 @@ const Profile = () => {
                     placeholder="Graduate internship in software engineering"
                   />
                 </label>
+
+                {profileData.academicStage === "highSchool" && (
+                  <label style={{ ...newStyles.fieldWrap, marginTop: 14 }}>
+                    High School Subjects (comma separated)
+                    <input
+                      style={newStyles.input}
+                      value={profileData.highSchoolSubjects}
+                      onChange={(e) => handleFieldChange("highSchoolSubjects", e.target.value)}
+                      placeholder="Mathematics, Physical Sciences, English"
+                    />
+                  </label>
+                )}
 
                 <label style={{ ...newStyles.fieldWrap, marginTop: 14 }}>
                   Bio
@@ -650,9 +752,21 @@ const Profile = () => {
               </div>
               <div style={newStyles.contentCard}>
                 <h3 style={newStyles.sectionTitle}>Academic Profile</h3>
-                <p style={newStyles.valueText}>Institution: {profileData.institution || "Not added"}</p>
-                <p style={newStyles.valueText}>Qualification: {profileData.qualification || "Not added"}</p>
-                <p style={newStyles.valueText}>Graduation Year: {profileData.gradYear || "Not added"}</p>
+                {profileData.academicStage === "highSchool" ? (
+                  <>
+                    <p style={newStyles.valueText}>School: {profileData.highSchoolName || "Not added"}</p>
+                    <p style={newStyles.valueText}>Current Grade: {profileData.highSchoolGrade || "Not added"}</p>
+                    <p style={newStyles.valueText}>Status: {profileData.highSchoolStatus || "Not added"}</p>
+                    <p style={newStyles.valueText}>Expected Matric Year: {profileData.matricYear || "Not added"}</p>
+                    <p style={newStyles.valueText}>Subjects: {profileData.highSchoolSubjects || "Not added"}</p>
+                  </>
+                ) : (
+                  <>
+                    <p style={newStyles.valueText}>Institution: {profileData.institution || "Not added"}</p>
+                    <p style={newStyles.valueText}>Qualification: {profileData.qualification || "Not added"}</p>
+                    <p style={newStyles.valueText}>Graduation Year: {profileData.gradYear || "Not added"}</p>
+                  </>
+                )}
               </div>
               <div style={newStyles.contentCard}>
                 <h3 style={newStyles.sectionTitle}>Career Goals</h3>
