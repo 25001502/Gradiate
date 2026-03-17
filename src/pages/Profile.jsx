@@ -59,6 +59,16 @@ const normalizeProfileData = (data = {}) => {
   };
 };
 
+const highSchoolFieldNames = [
+  "highSchoolName",
+  "highSchoolGrade",
+  "highSchoolStatus",
+  "matricYear",
+  "highSchoolSubjects",
+];
+
+const tertiaryFieldNames = ["institution", "qualification", "gradYear", "skills"];
+
 const Profile = () => {
   const auth = getAuth();
   const navigate = useNavigate();
@@ -138,7 +148,21 @@ const Profile = () => {
   };
 
   const handleFieldChange = (field, value) => {
-    setProfileData((prev) => ({ ...prev, [field]: value }));
+    setProfileData((prev) => {
+      const next = { ...prev, [field]: value };
+      const hasValue = String(value || "").trim() !== "";
+
+      // Smart switching: infer stage when users type into stage-specific fields.
+      if (field !== "academicStage" && hasValue) {
+        if (highSchoolFieldNames.includes(field)) {
+          next.academicStage = "highSchool";
+        } else if (tertiaryFieldNames.includes(field)) {
+          next.academicStage = "tertiary";
+        }
+      }
+
+      return next;
+    });
     setError(null);
     setSuccess("");
   };
