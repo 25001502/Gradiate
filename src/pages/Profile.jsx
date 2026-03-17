@@ -512,7 +512,7 @@ const Profile = () => {
             >
               <div style={newStyles.identityBlock}>
                 <h2 style={{ margin: 0 }}>{user.displayName || "User"}</h2>
-                <p style={{ color: "#555", marginTop: 6 }}>{user.email}</p>
+                {/* <p style={{ color: "#555", marginTop: 6 }}>{user.email}</p> */}
                 <p style={{ color: "#666", marginTop: 4 }}>
                   {profileData.location || "Add your location"}
                 </p>
