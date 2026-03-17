@@ -398,12 +398,12 @@ const Profile = () => {
       <div
         className="core"
         style={{
-          // show the full image without cropping and let it scroll with the page
-          backgroundImage: `linear-gradient(rgba(240,246,255,0.75), rgba(240,246,255,0.75)), url(${image})`,
+          // Keep text readable while letting the background image stay prominent.
+          backgroundImage: `linear-gradient(160deg, rgba(10, 25, 47, 0.42), rgba(240, 246, 255, 0.78)), url(${image})`,
           backgroundRepeat: "no-repeat",
-          backgroundPosition: "center top",
-          backgroundSize: "contain",
-          backgroundAttachment: "scroll",
+          backgroundPosition: isMobile ? "center top" : "center center",
+          backgroundSize: "cover",
+          backgroundAttachment: isMobile ? "scroll" : "fixed",
           minHeight: "100vh",
         }}
       >
