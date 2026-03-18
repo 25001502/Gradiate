@@ -9,7 +9,6 @@ import {
   getAuth,
   updateProfile,
   signOut,
-  sendEmailVerification,
   updatePassword,
   reload,
 } from "firebase/auth";
@@ -70,6 +69,9 @@ const highSchoolFieldNames = [
 const tertiaryFieldNames = ["institution", "qualification", "gradYear", "skills"];
 
 const Profile = () => {
+  const verificationEndpoint =
+    import.meta.env.VITE_SEND_VERIFICATION_ENDPOINT || "/api/send-verification";
+
   const auth = getAuth();
   const navigate = useNavigate();
   const db = getFirestore();
@@ -204,11 +206,30 @@ const Profile = () => {
     setSecuritySuccess("");
 
     try {
-      await sendEmailVerification(auth.currentUser);
+      const idToken = await auth.currentUser.getIdToken();
+      const response = await fetch(verificationEndpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: auth.currentUser.email,
+          idToken,
+        }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error("Verification service is unavailable. Start Firebase Functions emulator or deploy functions.");
+        }
+        throw new Error(data.error || "Could not send verification email.");
+      }
+
       setSecuritySuccess("Verification email sent. Check your inbox.");
     } catch (err) {
       console.error(err);
-      setSecurityError("Could not send verification email.");
+      setSecurityError(err.message || "Could not send verification email.");
     } finally {
       setSecurityLoading(false);
     }

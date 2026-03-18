@@ -5,7 +5,6 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updateProfile,
-  sendEmailVerification,
   signInWithPhoneNumber,
   RecaptchaVerifier,
 } from "firebase/auth";
@@ -20,6 +19,9 @@ import {
 import toast, { Toaster } from "react-hot-toast";
 
 export default function AuthForm() {
+  const verificationEndpoint =
+    import.meta.env.VITE_SEND_VERIFICATION_ENDPOINT || "/api/send-verification";
+
   const [authMode, setAuthMode] = useState("email"); // "email" or "phone"
   const [isLogin, setIsLogin] = useState(true);
 
@@ -37,6 +39,28 @@ export default function AuthForm() {
   const [loading, setLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
+
+  const sendCustomVerificationEmail = async (targetEmail) => {
+    const idToken = auth.currentUser ? await auth.currentUser.getIdToken() : null;
+    const response = await fetch(verificationEndpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: targetEmail,
+        idToken,
+      }),
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error("Verification service is unavailable. Start Firebase Functions emulator or deploy functions.");
+      }
+      throw new Error(data.error || "Failed to send verification email.");
+    }
+  };
 
   // Reset phone step when switching modes
   const handleAuthModeSwitch = (mode) => {
@@ -60,18 +84,33 @@ export default function AuthForm() {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         if (!userCredential.user.emailVerified) {
           toast.error("Please verify your email before logging in.");
-          await sendEmailVerification(userCredential.user);
+          await sendCustomVerificationEmail(userCredential.user.email);
           toast.success("Verification email re-sent!");
           return;
         }
       } else {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         await updateProfile(userCredential.user, { displayName: username });
-        await sendEmailVerification(userCredential.user);
+        await sendCustomVerificationEmail(userCredential.user.email);
         toast.success("Verification email sent! Please verify before logging in.");
         return;
       }
       navigate("/Aplication"); // ✅ fixed spelling
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const resendVerificationEmail = async () => {
+    const targetEmail = auth.currentUser?.email || email;
+    if (!targetEmail) {
+      toast.error("Enter your email first.");
+      return;
+    }
+
+    try {
+      await sendCustomVerificationEmail(targetEmail);
+      toast.success("Verification email sent.");
     } catch (error) {
       toast.error(error.message);
     }
@@ -295,6 +334,24 @@ export default function AuthForm() {
                   ? "Need an account? Sign up"
                   : "Already have an account? Log in"}
               </button>
+              {isLogin && (
+                <button
+                  type="button"
+                  onClick={resendVerificationEmail}
+                  style={{
+                    display: "block",
+                    margin: "0.75rem auto 0",
+                    background: "none",
+                    border: "none",
+                    color: "#2563eb",
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                    fontSize: "0.95rem",
+                  }}
+                >
+                  Resend verification email
+                </button>
+              )}
             </div>
           </form>
         ) : (

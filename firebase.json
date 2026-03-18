@@ -8,6 +8,10 @@
     ],
     "rewrites": [
       {
+        "source": "api/**",
+        "function": "apiRouter"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }
