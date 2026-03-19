@@ -1,23 +1,140 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import image from "../images/hero-about.jpg";
 import {
   FaTwitter,
   FaInstagram,
   FaLinkedin,
   FaFacebookF,
+  FaSearch,
+  FaBookmark,
+  FaRegBookmark,
+  FaExternalLinkAlt,
+  FaMapMarkerAlt,
+  FaUserCircle,
+  FaPencilAlt,
+  FaGraduationCap,
 } from "react-icons/fa";
 
+// ── University data ──────────────────────────────────────────────────────────
+const UNIVERSITIES = [
+  {
+    id: "univen",
+    name: "University of Venda",
+    shortName: "Univen",
+    location: "Thohoyandou, Limpopo",
+    logo: "https://www.univen.ac.za/docs/univen-logo.png",
+    description:
+      "Known for its diverse programs and commitment to rural development. Find your path in science, education, law, and more.",
+    applyUrl:
+      "https://www.univen.ac.za/students/student-support-services/how-to-apply/",
+  },
+  {
+    id: "ul",
+    name: "University of Limpopo",
+    shortName: "UL",
+    location: "Mankweng, Limpopo",
+    logo: "https://edurank.org/assets/img/uni-logos/university-of-limpopo-logo.png",
+    description:
+      "Strong programs in health sciences, agriculture, and education. Dedicated to empowering students from all backgrounds.",
+    applyUrl: "https://www.ul.ac.za/tgsl/tgsl-programmes/",
+  },
+  {
+    id: "uj",
+    name: "University of Johannesburg",
+    shortName: "UJ",
+    location: "Johannesburg, Gauteng",
+    logo: "https://public.flourish.studio/uploads/70accd09-8527-4e3a-8c5c-af8fed4825d2.png",
+    description:
+      "A vibrant urban university with a reputation for innovation and inclusivity. Explore a wide range of undergraduate and postgraduate programs.",
+    applyUrl: "https://www.uj.ac.za/admission-aid/undergraduate/",
+  },
+  {
+    id: "wits",
+    name: "University of the Witwatersrand",
+    shortName: "Wits",
+    location: "Johannesburg, Gauteng",
+    logo: "https://th.bing.com/th/id/OIP.QF-zHDVgl2X_DmzSc_nc5wAAAA?r=0&rs=1&pid=ImgDetMain&cb=idpwebpc2",
+    description:
+      "A leading research university in Africa, renowned for academic excellence and social impact. Ideal for world-class education.",
+    applyUrl: "https://www.wits.ac.za/undergraduate/apply-to-wits/",
+  },
+  {
+    id: "tut",
+    name: "Tshwane University of Technology",
+    shortName: "TUT",
+    location: "Pretoria, Gauteng",
+    logo: "https://wikisouthafrica.co.za/wp-content/uploads/2020/08/Tshwane-University-of-Technology-1024x986.png",
+    description:
+      "One of South Africa's largest residential universities, offering practical and career-focused programs in engineering, science, and the arts.",
+    applyUrl: "https://www.tut.ac.za/",
+  },
+  {
+    id: "uct",
+    name: "University of Cape Town",
+    shortName: "UCT",
+    location: "Cape Town, Western Cape",
+    logo: "https://www.freelogovectors.net/wp-content/uploads/2021/04/university-of-cape-town-logo-freelogovectors.net_.png",
+    description:
+      "Africa's top-ranked university, celebrated for its beautiful campus and academic leadership in science, business, and the humanities.",
+    applyUrl:
+      "https://uct.ac.za/students/applications-apply-undergraduate-qualifications/application-procedure",
+  },
+];
 
+// ── Component ────────────────────────────────────────────────────────────────
 export default function Aplication() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [showIntro, setShowIntro] = useState(false);
+  const [search, setSearch] = useState("");
+  const [bookmarks, setBookmarks] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("gradiate_bookmarks")) || [];
+    } catch {
+      return [];
+    }
+  });
+  const [activeTab, setActiveTab] = useState("all"); // "all" | "saved"
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  // Derived data
+  const toggleBookmark = (id) => {
+    setBookmarks((prev) => {
+      const next = prev.includes(id)
+        ? prev.filter((b) => b !== id)
+        : [...prev, id];
+      localStorage.setItem("gradiate_bookmarks", JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const filteredUnis = useMemo(() => {
+    let list = UNIVERSITIES;
+
+    if (activeTab === "saved") {
+      list = list.filter((u) => bookmarks.includes(u.id));
+    }
+
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      list = list.filter(
+        (u) =>
+          u.name.toLowerCase().includes(q) ||
+          u.shortName.toLowerCase().includes(q) ||
+          u.location.toLowerCase().includes(q) ||
+          u.description.toLowerCase().includes(q)
+      );
+    }
+
+    return list;
+  }, [search, bookmarks, activeTab]);
+
+  const provinces = [...new Set(UNIVERSITIES.map((u) => u.location.split(", ").pop()))];
+
+  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div>
+      {/* Navbar */}
       <nav className="navbar-responsive">
         <div className="navbar-container">
           <a
@@ -45,355 +162,175 @@ export default function Aplication() {
           </div>
           {menuOpen && (
             <div className="burger-menu">
-              <a onClick={() => navigate("/Profile")}>{user?.displayName || user?.email || "Guest"}</a>
-
+              <a onClick={() => navigate("/Profile")}>
+                {user?.displayName || user?.email || "Guest"}
+              </a>
               <a onClick={() => navigate("/Practise")}>Practise</a>
-              
-              <a onClick={() => alert("Sorry! this feature is not yet available")} className="active">
+              <a
+                onClick={() =>
+                  alert("Sorry! this feature is not yet available")
+                }
+                className="active"
+              >
                 Bursaries
               </a>
-              
             </div>
-              
           )}
         </div>
       </nav>
 
-      <div className="core" style={{
-              background: `linear-gradient(rgba(240,246,255,0.75), rgba(240,246,255,0.75)), url(${image}) center/cover no-repeat`,
-              
-            }}>
+      {/* Dashboard Content */}
+      <div className="dashboard-page">
+        {/* Welcome */}
+        <header className="dashboard-welcome">
+          <h1 className="dashboard-welcome__greeting">
+            Welcome back, <span>{user?.displayName || "Student"}</span> 👋
+          </h1>
+          <p className="dashboard-welcome__sub">
+            Explore universities and find your perfect academic match.
+          </p>
+        </header>
 
-        {/* Intro Toggle Button */}
-        <div
-          style={{
-            textAlign: "left",
-            marginTop: "0.2rem",
-            marginLeft: "1.5rem",
-            marginBottom: "0.9rem",
-          }}
-        >
+        {/* Search */}
+        <div className="dashboard-search">
+          <div className="dashboard-search__wrapper">
+            <FaSearch className="dashboard-search__icon" />
+            <input
+              className="dashboard-search__input"
+              type="text"
+              placeholder="Search universities by name, location..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {/* Quick Nav Shortcuts */}
+        <div className="dashboard-shortcuts">
           <button
-            onClick={() => setShowIntro((v) => !v)}
-            style={{
-              background: "#3498db",
-              color: "#fff",
-              border: "none",
-              borderRadius: "8px",
-              padding: "0.7rem 1.5rem",
-              fontSize: "1rem",
-              fontWeight: 600,
-              cursor: "pointer",
-              boxShadow: "0 2px 8px #e0e7ef",
-              transition: "background 0.2s",
-            }}
+            className="dashboard-shortcut"
+            onClick={() => navigate("/Profile")}
           >
-            {showIntro ? "Hide Guide" : "Show How to Use Gradiate"}
+            <FaUserCircle /> My Profile
+          </button>
+          <button
+            className="dashboard-shortcut"
+            onClick={() => navigate("/Practise")}
+          >
+            <FaPencilAlt /> Past Papers
+          </button>
+          <button
+            className="dashboard-shortcut"
+            onClick={() =>
+              alert("Sorry! this feature is not yet available")
+            }
+          >
+            <FaGraduationCap /> Bursaries
           </button>
         </div>
-        {/* Intro Section (conditionally rendered) */}
-        {showIntro && (
-          <div
-            className="intro-guide"
-            style={{
-              background: `linear-gradient(rgba(240,246,255,0.75), rgba(240,246,255,0.75)), url(${image}) center/cover no-repeat`,
-              borderRadius: "12px",
-              margin: "0.7rem auto 1.5rem auto",
-              padding: "1.5rem 1rem",
-              maxWidth: "700px",
-              width: "95vw",
-              minWidth: 0,
-              boxSizing: "border-box",
-              boxShadow: "0 2px 12px #e0e7ef",
-              border: "1.5px solid #b3c6e0",
-            }}
-          >
-            <h2
-              style={{
-                color: "#2c3e50",
-                marginBottom: 8,
-                textShadow: "0 2px 8px rgba(255,255,255,0.7)",
-              }}
-            >
-              Steps to follow!
-            </h2>
-            <ol style={{ paddingLeft: 20, marginBottom: 8 }}>
-              <li>
-                {" "}
-                Browse the university cards below to learn about each
-                institution and their application process.
-              </li>
-              <li>
-                {" "}
-                Click "Apply Now" on any card to visit the official application
-                page for that university.
-              </li>
-              <li>
-                {" "}
-                Use the navigation menu for more features, bursaries, and
-                support.
-              </li>
-            </ol>
-            <p
-              style={{
-                color: "#3498db",
-                fontWeight: 500,
-                textShadow: "0 2px 8px rgba(255,255,255,0.7)",
-              }}
-            >
-              Tip: Each card includes a short description to help you get to
-              know the university before applying!
-            </p>
-            {/* Responsive style for mobile */}
-            <style>{`
-            @media (max-width: 600px) {
-              .intro-guide {
-                padding: 1rem 0.5rem !important;
-                max-width: 98vw !important;
-                font-size: 0.97rem !important;
-              }
-              .intro-guide h2 {
-                font-size: 1.1rem !important;
-              }
-              .intro-guide ol, .intro-guide p {
-                font-size: 0.97rem !important;
-              }
-            }
-          `}</style>
-          </div>
-        )}
 
-        <div className="container">
-          <div className="card1">
-            <img
-              className="img1"
-              src="https://www.univen.ac.za/docs/univen-logo.png"
-              alt="Univen Logo"
-            />
-            <p
-              className="description1"
-              style={{
-                fontFamily: '"Poppins", "Segoe UI", Arial, sans-serif',
-                fontSize: "0.9rem",
-                lineHeight: 1.6,
-              }}
-            >
-              <strong>University of Venda</strong> — Located in Thohoyandou,
-              Univen is known for its diverse programs and commitment to rural
-              development. Find your path in science, education, law, and more.
+        {/* Stats */}
+        <div className="dashboard-stats">
+          <div className="dashboard-stat">
+            <p className="dashboard-stat__value dashboard-stat__value--blue">
+              {UNIVERSITIES.length}
             </p>
-            <button
-              className="button1"
-              onClick={() =>
-                window.open(
-                  "https://www.univen.ac.za/students/student-support-services/how-to-apply/"
-                )
-              }
-            >
-              Apply Now
-            </button>
+            <p className="dashboard-stat__label">Universities</p>
           </div>
-
-          <div className="card2">
-            <img
-              className="img2"
-              src="https://edurank.org/assets/img/uni-logos/university-of-limpopo-logo.png"
-              alt="University of Limpopo"
-            />
-            <p
-              className="description2"
-              style={{
-                fontFamily: '"Poppins", "Segoe UI", Arial, sans-serif',
-                fontSize: "0.9rem",
-                lineHeight: 1.6,
-              }}
-            >
-              <strong>University of Limpopo</strong> — Situated in Mankweng, UL
-              offers strong programs in health sciences, agriculture, and
-              education. It is dedicated to empowering students from all
-              backgrounds.
+          <div className="dashboard-stat">
+            <p className="dashboard-stat__value dashboard-stat__value--green">
+              {provinces.length}
             </p>
-            <button
-              className="button2"
-              onClick={() =>
-                window.open("https://www.ul.ac.za/tgsl/tgsl-programmes/")
-              }
-            >
-              Apply Now
-            </button>
+            <p className="dashboard-stat__label">Provinces</p>
           </div>
-
-          <div className="card3">
-            <img
-              className="img3"
-              src="https://public.flourish.studio/uploads/70accd09-8527-4e3a-8c5c-af8fed4825d2.png"
-              alt="University of Johannesburg"
-            />
-            <p
-              className="description3"
-              style={{
-                fontFamily: '"Poppins", "Segoe UI", Arial, sans-serif',
-                fontSize: "0.9rem",
-                lineHeight: 1.6,
-              }}
-            >
-              <strong>University of Johannesburg</strong> — UJ is a vibrant
-              urban university with a reputation for innovation and inclusivity.
-              Explore a wide range of undergraduate and postgraduate programs in
-              the heart of Johannesburg.
+          <div className="dashboard-stat">
+            <p className="dashboard-stat__value dashboard-stat__value--purple">
+              {bookmarks.length}
             </p>
-            <button
-              className="button3"
-              onClick={() =>
-                window.open("https://www.uj.ac.za/admission-aid/undergraduate/")
-              }
-            >
-              Apply Now
-            </button>
-          </div>
-
-          <div className="card4">
-            <img
-              className="img4"
-              src="https://th.bing.com/th/id/OIP.QF-zHDVgl2X_DmzSc_nc5wAAAA?r=0&rs=1&pid=ImgDetMain&cb=idpwebpc2"
-              alt="University of Witswatersrand"
-            />
-            <p
-              className="description4"
-              style={{
-                fontFamily: '"Poppins", "Segoe UI", Arial, sans-serif',
-                fontSize: "0.9rem",
-                lineHeight: 1.6,
-              }}
-            >
-              <strong>University of the Witwatersrand (Wits)</strong> — Wits is
-              a leading research university in Africa, renowned for its academic
-              excellence and social impact. Ideal for students seeking a
-              world-class education in Johannesburg.
-            </p>
-            <button
-              className="button4"
-              onClick={() =>
-                window.open(
-                  "https://www.wits.ac.za/undergraduate/apply-to-wits/"
-                )
-              }
-            >
-              Apply Now
-            </button>
-          </div>
-
-          <div className="card5">
-            <img
-              className="img5"
-              src="https://wikisouthafrica.co.za/wp-content/uploads/2020/08/Tshwane-University-of-Technology-1024x986.png"
-              alt="Tshwane University of Technology"
-            />
-            <p
-              className="description5"
-              style={{
-                fontFamily: '"Poppins", "Segoe UI", Arial, sans-serif',
-                fontSize: "0.9rem",
-                lineHeight: 1.6,
-              }}
-            >
-              <strong>Tshwane University of Technology (TUT)</strong> — TUT is
-              one of South Africa's largest residential universities, offering
-              practical and career-focused programs in engineering, science, and
-              the arts.
-            </p>
-            <button
-              className="button5"
-              onClick={() => window.open("https://www.tut.ac.za/")}
-            >
-              Apply Now
-            </button>
-          </div>
-
-          <div className="card6">
-            <img
-              className="img6"
-              src="https://www.freelogovectors.net/wp-content/uploads/2021/04/university-of-cape-town-logo-freelogovectors.net_.png"
-              alt="University of CapeTown"
-            />
-            <p
-              className="description6"
-              style={{
-                fontFamily: '"Poppins", "Segoe UI", Arial, sans-serif',
-                fontSize: "0.9rem",
-                lineHeight: 1.6,
-              }}
-            >
-              <strong>University of Cape Town (UCT)</strong> — UCT is Africa's
-              top-ranked university, celebrated for its beautiful campus and
-              academic leadership in science, business, and the humanities.
-            </p>
-            <button
-              className="button6"
-              onClick={() =>
-                window.open(
-                  "https://uct.ac.za/students/applications-apply-undergraduate-qualifications/application-procedure"
-                )
-              }
-            >
-              Apply Now
-            </button>
+            <p className="dashboard-stat__label">Saved</p>
           </div>
         </div>
 
-        <style>{`
-        .burger {
-          background: none;
-          border: none;
-          cursor: pointer;
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-          padding: 8px;
-          margin-left: auto;
-          z-index: 102; /* Make sure burger stays above the menu */
-          position: relative;
-        }
-        .burger-bar {
-          width: 28px;
-          height: 3px;
-          background: #333;
-          border-radius: 2px;
-          display: block;
-        }
-        .burger-menu {
-          position: absolute;
-          top: 56px; /* Move menu below navbar */
-          right: 0;
-          background: #fff;
-          border: 1px solid #eee;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-          padding: 1rem;
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-          z-index: 101;
-          min-width: 160px;
-        }
-        /* Remove or comment out this block to always show burger menu */
-        /* 
-        @media (min-width: 800px) {
-          .burger, .burger-menu {
-            display: none;
-          }
-        }
-        */
-        @keyframes bounceIn {
-          0% { transform: scale(0.8); opacity: 0.7; }
-          60% { transform: scale(1.05); opacity: 1; }
-          80% { transform: scale(0.97); }
-          100% { transform: scale(1); }
-        }
-        .bounce-in {
-          animation: bounceIn 1.2s infinite alternate;
-        }
-      `}</style>
+        {/* Tabs */}
+        <div className="dashboard-tabs">
+          <button
+            className={`dashboard-tab ${activeTab === "all" ? "dashboard-tab--active" : ""}`}
+            onClick={() => setActiveTab("all")}
+          >
+            All Universities
+          </button>
+          <button
+            className={`dashboard-tab ${activeTab === "saved" ? "dashboard-tab--active" : ""}`}
+            onClick={() => setActiveTab("saved")}
+          >
+            Saved ({bookmarks.length})
+          </button>
+        </div>
+
+        {/* University Cards Grid */}
+        {filteredUnis.length > 0 ? (
+          <div className="uni-grid" key={activeTab}>
+            {filteredUnis.map((uni) => (
+              <article className="uni-card" key={uni.id}>
+                <div className="uni-card__header">
+                  <img
+                    className="uni-card__logo"
+                    src={uni.logo}
+                    alt={`${uni.name} logo`}
+                  />
+                  <button
+                    className={`uni-card__bookmark ${bookmarks.includes(uni.id) ? "uni-card__bookmark--active" : ""}`}
+                    onClick={() => toggleBookmark(uni.id)}
+                    aria-label={
+                      bookmarks.includes(uni.id)
+                        ? "Remove bookmark"
+                        : "Add bookmark"
+                    }
+                    title={
+                      bookmarks.includes(uni.id)
+                        ? "Remove from saved"
+                        : "Save for later"
+                    }
+                  >
+                    {bookmarks.includes(uni.id) ? (
+                      <FaBookmark />
+                    ) : (
+                      <FaRegBookmark />
+                    )}
+                  </button>
+                </div>
+
+                <div className="uni-card__body">
+                  <h3 className="uni-card__name">{uni.name}</h3>
+                  <p className="uni-card__location">
+                    <FaMapMarkerAlt /> {uni.location}
+                  </p>
+                  <p className="uni-card__desc">{uni.description}</p>
+                  <div className="uni-card__actions">
+                    <button
+                      className="uni-card__btn uni-card__btn--primary"
+                      onClick={() => window.open(uni.applyUrl)}
+                    >
+                      Apply Now <FaExternalLinkAlt style={{ fontSize: "0.7rem" }} />
+                    </button>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="dashboard-empty">
+            <div className="dashboard-empty__icon">🔍</div>
+            <p className="dashboard-empty__text">
+              {activeTab === "saved"
+                ? "You haven't saved any universities yet. Tap the bookmark icon to save."
+                : "No universities match your search."}
+            </p>
+          </div>
+        )}
       </div>
+
+      {/* Footer */}
       <footer className="footer">
         <div className="container">
           <div className="footer-content">
