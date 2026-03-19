@@ -13,6 +13,16 @@ import {
   FaUserCircle,
   FaPencilAlt,
   FaGraduationCap,
+  FaCalculator,
+  FaFlask,
+  FaLeaf,
+  FaGlobeAfrica,
+  FaLandmark,
+  FaChartLine,
+  FaBook,
+  FaCoins,
+  FaLanguage,
+  FaBriefcase,
 } from "react-icons/fa";
 
 const subjects = [
@@ -113,6 +123,19 @@ const subjects = [
     ],
   },
 ];
+
+const subjectLogoMap = {
+  Mathematics: { icon: FaCalculator, background: "#eff6ff", color: "#1d4ed8" },
+  "Physical Sciences": { icon: FaFlask, background: "#ecfeff", color: "#0f766e" },
+  "Life Sciences": { icon: FaLeaf, background: "#ecfdf5", color: "#166534" },
+  Geography: { icon: FaGlobeAfrica, background: "#eff6ff", color: "#1e40af" },
+  History: { icon: FaLandmark, background: "#fefce8", color: "#854d0e" },
+  Accounting: { icon: FaChartLine, background: "#eef2ff", color: "#4338ca" },
+  "English FAL": { icon: FaBook, background: "#fff7ed", color: "#9a3412" },
+  Economics: { icon: FaCoins, background: "#f5f3ff", color: "#6d28d9" },
+  Tshivenda: { icon: FaLanguage, background: "#fff1f2", color: "#be123c" },
+  "Business Studies": { icon: FaBriefcase, background: "#f0fdf4", color: "#166534" },
+};
 
 export default function Practise() {
   const [openIndex, setOpenIndex] = useState(null);
@@ -271,20 +294,27 @@ export default function Practise() {
             {filteredSubjects.map((subject, idx) => {
               const isOpen = openIndex === idx;
               const isSaved = savedSubjects.includes(subject.name);
+              const logoConfig =
+                subjectLogoMap[subject.name] ||
+                { icon: FaBook, background: "#eff6ff", color: "#1d4ed8" };
+              const SubjectIcon = logoConfig.icon;
 
               return (
                 <article className="uni-card" key={subject.name}>
                   <div className="uni-card__header">
-                    <div className="uni-card__logo" style={{
-                      display: "grid",
-                      placeItems: "center",
-                      background: "#eff6ff",
-                      color: "#1d4ed8",
-                      fontSize: "0.8rem",
-                      fontWeight: 700,
-                      borderRadius: 12,
-                    }}>
-                      NSC
+                    <div
+                      className="uni-card__logo"
+                      style={{
+                        display: "grid",
+                        placeItems: "center",
+                        background: logoConfig.background,
+                        color: logoConfig.color,
+                        fontSize: "1.15rem",
+                        borderRadius: 12,
+                      }}
+                      title={`${subject.name} logo`}
+                    >
+                      <SubjectIcon aria-hidden="true" />
                     </div>
                     <button
                       className={`uni-card__bookmark ${isSaved ? "uni-card__bookmark--active" : ""}`}
