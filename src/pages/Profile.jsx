@@ -68,6 +68,28 @@ const highSchoolFieldNames = [
 
 const tertiaryFieldNames = ["institution", "qualification", "gradYear", "skills"];
 
+const avatarMap = {
+  default: avDefault,
+  team1: av1,
+  team2: av2,
+  team3: av3,
+};
+
+const resolveAvatarFromKey = (key) => {
+  if (!key) return "";
+  return avatarMap[key] || "";
+};
+
+const inferAvatarKeyFromUrl = (url = "") => {
+  const normalized = String(url).toLowerCase();
+  if (!normalized) return "";
+  if (normalized.includes("default-avatar")) return "default";
+  if (normalized.includes("team1")) return "team1";
+  if (normalized.includes("team2")) return "team2";
+  if (normalized.includes("team3")) return "team3";
+  return "";
+};
+
 const Profile = () => {
   const verificationEndpoint =
     import.meta.env.VITE_SEND_VERIFICATION_ENDPOINT || "/api/send-verification";
@@ -77,7 +99,9 @@ const Profile = () => {
   const db = getFirestore();
   const [user, setUser] = useState(null);
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [avatarKey, setAvatarKey] = useState("");
   const [savedAvatarUrl, setSavedAvatarUrl] = useState("");
+  const [savedAvatarKey, setSavedAvatarKey] = useState("");
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -102,28 +126,41 @@ const Profile = () => {
         if (currentUser) {
           setUser(currentUser);
           setEmailVerified(Boolean(currentUser.emailVerified));
-          const fallbackAvatar = currentUser.photoURL || "";
+          const inferredFallbackKey = inferAvatarKeyFromUrl(currentUser.photoURL || "");
+          const fallbackAvatar =
+            resolveAvatarFromKey(inferredFallbackKey) || currentUser.photoURL || "";
+          setAvatarKey(inferredFallbackKey);
           setAvatarUrl(fallbackAvatar);
+          setSavedAvatarKey(inferredFallbackKey);
           setSavedAvatarUrl(fallbackAvatar);
 
           const userRef = doc(db, "users", currentUser.uid);
           const docSnap = await getDoc(userRef);
           if (docSnap.exists()) {
             const data = docSnap.data();
-            const resolvedAvatar = data.photoURL || currentUser.photoURL || "";
+            const resolvedAvatarKey =
+              data.avatarKey || inferAvatarKeyFromUrl(data.photoURL || currentUser.photoURL || "");
+            const resolvedAvatar =
+              resolveAvatarFromKey(resolvedAvatarKey) || data.photoURL || currentUser.photoURL || "";
             const resolvedProfile = normalizeProfileData(data);
+            setAvatarKey(resolvedAvatarKey);
             setAvatarUrl(resolvedAvatar);
+            setSavedAvatarKey(resolvedAvatarKey);
             setSavedAvatarUrl(resolvedAvatar);
             setProfileData(resolvedProfile);
             setSavedProfileData(resolvedProfile);
           } else {
+            setAvatarKey(inferredFallbackKey);
+            setSavedAvatarKey(inferredFallbackKey);
             setProfileData(defaultProfileData);
             setSavedProfileData(defaultProfileData);
           }
         } else {
           setUser(null);
           setEmailVerified(false);
+          setAvatarKey("");
           setAvatarUrl("");
+          setSavedAvatarKey("");
           setSavedAvatarUrl("");
           setProfileData(defaultProfileData);
           setSavedProfileData(defaultProfileData);
@@ -140,10 +177,16 @@ const Profile = () => {
   }, [auth, db]);
 
   // Allow selecting from a set of bundled avatars instead of uploading to Storage
-  const avatarOptions = [avDefault, av1, av2, av3];
+  const avatarOptions = [
+    { key: "default", url: avDefault },
+    { key: "team1", url: av1 },
+    { key: "team2", url: av2 },
+    { key: "team3", url: av3 },
+  ];
 
-  const selectAvatar = (url) => {
-    setAvatarUrl(url);
+  const selectAvatar = (option) => {
+    setAvatarKey(option.key);
+    setAvatarUrl(option.url);
     setShowAvatarPicker(false);
     setError(null);
     setSuccess("");
@@ -285,6 +328,7 @@ const Profile = () => {
           email: user.email || "",
           displayName: user.displayName || "",
           photoURL: avatarUrl,
+          avatarKey,
           ...profileData,
           updatedAt: serverTimestamp(),
         },
@@ -295,6 +339,7 @@ const Profile = () => {
         await updateProfile(auth.currentUser, { photoURL: avatarUrl });
       }
 
+      setSavedAvatarKey(avatarKey);
       setSavedAvatarUrl(avatarUrl);
       setSavedProfileData(profileData);
       setShowAvatarPicker(false);
@@ -314,6 +359,7 @@ const Profile = () => {
         try {
           if (auth.currentUser) {
             await updateProfile(auth.currentUser, { photoURL: avatarUrl });
+            setSavedAvatarKey(avatarKey);
             setSavedAvatarUrl(avatarUrl);
             setSavedProfileData(profileData);
             setSuccess("Profile photo updated. Other details need Firestore access.");
@@ -740,12 +786,12 @@ const Profile = () => {
                     <div style={newStyles.avatarGrid}>
                       {avatarOptions.map((a, idx) => (
                         <button
-                          key={idx}
+                          key={a.key}
                           onClick={() => selectAvatar(a)}
                           style={newStyles.avatarOptionBtn}
                         >
                           <img
-                            src={a}
+                            src={a.url}
                             alt={`avatar-${idx}`}
                             style={{
                               width: 54,
@@ -753,7 +799,7 @@ const Profile = () => {
                               borderRadius: "50%",
                               objectFit: "cover",
                               border:
-                                a === avatarUrl
+                                a.key === avatarKey
                                   ? "2px solid #2563eb"
                                   : "2px solid transparent",
                             }}
@@ -771,6 +817,7 @@ const Profile = () => {
                   <button
                     style={newStyles.ghostBtn}
                     onClick={() => {
+                      setAvatarKey(savedAvatarKey);
                       setAvatarUrl(savedAvatarUrl);
                       setProfileData(savedProfileData);
                       setEditing(false);
