@@ -437,7 +437,7 @@ export default function Aplication() {
               </a>
             </div>
             <p className="copyright">
-              &copy; 2025 Gradiate. All rights reserved.
+              &copy; 2026 THANDULULO TECHNOLOGIES. All rights reserved.
             </p>
           </div>
         </div>
