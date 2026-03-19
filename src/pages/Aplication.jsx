@@ -45,9 +45,9 @@ export default function Aplication() {
           </div>
           {menuOpen && (
             <div className="burger-menu">
-              <a onClick={() => navigate("/Profile")}>{user?.displayName || user?.email || "Guest"}</a>
+              <a onClick={() => navigate("/profile")}>{user?.displayName || user?.email || "Guest"}</a>
 
-              <a onClick={() => navigate("/Practise")}>Practise</a>
+              <a onClick={() => navigate("/practice")}>Practise</a>
               
               <a onClick={() => alert("Sorry! this feature is not yet available")} className="active">
                 Bursaries

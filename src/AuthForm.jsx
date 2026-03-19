@@ -95,7 +95,7 @@ export default function AuthForm() {
         toast.success("Verification email sent! Please verify before logging in.");
         return;
       }
-      navigate("/Aplication"); // ✅ fixed spelling
+      navigate("/application"); // ✅ fixed spelling
     } catch (error) {
       toast.error(error.message);
     }
@@ -161,7 +161,7 @@ export default function AuthForm() {
     try {
       await confirmationResult.confirm(otp);
       toast.success("Phone verified! You are now logged in.");
-      navigate("/Aplication");
+      navigate("/application");
     } catch (error) {
       console.error(error);
       toast.error("Invalid code. Please try again.");
@@ -208,12 +208,12 @@ export default function AuthForm() {
           {menuOpen && (
             <div className="burger-menu">
               <a onClick={() => navigate("/")}>Home</a>
-              <a onClick={() => navigate("/Bursaryguest")} className="active">
+              <a onClick={() => navigate("/bursaries")} className="active">
                 Bursaries
               </a>
-              <a onClick={() => navigate("/Programsguest")}>Programs</a>
-              <a onClick={() => navigate("/How")}>How It Works</a>
-              <a onClick={() => navigate("/About")}>About</a>
+              <a onClick={() => navigate("/programs")}>Programs</a>
+              <a onClick={() => navigate("/how-it-works")}>How It Works</a>
+              <a onClick={() => navigate("/about")}>About</a>
             </div>
           )}
         </div>

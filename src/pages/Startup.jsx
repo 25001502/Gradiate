@@ -41,7 +41,7 @@ export default function Startup() {
           </a>
           <div className="nav-actions">
             <a
-              onClick={() => navigate("/AuthForm")}
+              onClick={() => navigate("/auth")}
               className="btn btn-primary"
               style={{ marginLeft: "auto" }}
             >
@@ -60,12 +60,12 @@ export default function Startup() {
           {menuOpen && (
             <div className="burger-menu">
               <a className="cursor-pointer" onClick={() => navigate("/")} >Home</a>
-              <a onClick={() => navigate("/Bursaryguest")} className="active cursor-pointer">
+              <a onClick={() => navigate("/bursaries")} className="active cursor-pointer">
                 Bursaries
               </a>
-              <a onClick={() => navigate("/Programsguest")} className="cursor-pointer">Programs</a>
-              <a onClick={() => navigate("/How")} className="cursor-pointer">How It Works</a>
-              <a onClick={() => navigate("/About")} className="cursor-pointer">About</a>
+              <a onClick={() => navigate("/programs")} className="cursor-pointer">Programs</a>
+              <a onClick={() => navigate("/how-it-works")} className="cursor-pointer">How It Works</a>
+              <a onClick={() => navigate("/about")} className="cursor-pointer">About</a>
             </div>
           )}
         </div>
@@ -156,7 +156,7 @@ export default function Startup() {
                 </li>
               </ul>
               <a
-                onClick={() => navigate("/AuthForm")}
+                onClick={() => navigate("/auth")}
                 className="btn btn-outline"
               >
                 Explore Options
@@ -179,7 +179,7 @@ export default function Startup() {
                 </li>
               </ul>
               <a
-                onClick={() => navigate("/AuthForm")}
+                onClick={() => navigate("/auth")}
                 className="btn btn-outline"
               >
                 Find Opportunities
@@ -252,7 +252,7 @@ export default function Startup() {
             opportunities through Gradiate.
           </p>
           <div className="cta-buttons">
-            <a  onClick={() => navigate("/AuthForm")}
+            <a  onClick={() => navigate("/auth")}
              className="btn btn-primary btn-large">Get Started</a>
 
           </div>
@@ -271,7 +271,7 @@ export default function Startup() {
             <div className="footer-links">
               <div className="link-group">
                 <h4>Platform</h4>
-                <a onClick={() => navigate("/How")}>How It Works</a>
+                <a onClick={() => navigate("/how-it-works")}>How It Works</a>
                 <a href="#">Features</a>
               </div>
               <div className="link-group">

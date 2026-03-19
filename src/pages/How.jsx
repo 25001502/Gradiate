@@ -59,7 +59,7 @@ const How = () => {
           </a>
           <div className="nav-actions">
             <a
-              onClick={() => navigate("/AuthForm")}
+              onClick={() => navigate("/auth")}
               className="btn btn-primary"
               style={{ marginLeft: "auto" }}
             >
@@ -78,12 +78,12 @@ const How = () => {
           {menuOpen && (
             <div className="burger-menu">
               <a onClick={() => navigate("/")}>Home</a>
-              <a onClick={() => navigate("/Bursaryguest")} className="active">
+              <a onClick={() => navigate("/bursaries")} className="active">
                 Bursaries
               </a>
-              <a onClick={() => navigate("/Programsguest")}>Programs</a>
-              <a onClick={() => navigate("/How")}>How It Works</a>
-              <a onClick={() => navigate("/About")}>About</a>
+              <a onClick={() => navigate("/programs")}>Programs</a>
+              <a onClick={() => navigate("/how-it-works")}>How It Works</a>
+              <a onClick={() => navigate("/about")}>About</a>
             </div>
           )}
         </div>
@@ -101,7 +101,7 @@ const How = () => {
                                 graduate opportunity
                             </p>
                             <div className="cta-buttons">
-                                <a onClick={()=> navigate('/AuthForm')} className="btn btn-primary">
+                                <a onClick={()=> navigate('/auth')} className="btn btn-primary">
                                     Get Started
                                 </a>
                                 <a href="#video-explainer" className="btn btn-outline">
@@ -565,7 +565,7 @@ const How = () => {
                             discovered their path with Gradiate
                         </p>
                         <div className="cta-buttons centered">
-                            <a onClick={()=> navigate('/AuthForm')} className="btn btn-primary">
+                            <a onClick={()=> navigate('/auth')} className="btn btn-primary">
                                 Create Free Account
                             </a>
                            
@@ -587,7 +587,7 @@ const How = () => {
                         <div className="footer-links">
                             <div className="link-group">
                                 <h4>Platform</h4>
-                                <a onClick={() => navigate("/How")}>How It Works</a>
+                                <a onClick={() => navigate("/how-it-works")}>How It Works</a>
                                 <a href="#">Features</a>
                             </div>
                             <div className="link-group">

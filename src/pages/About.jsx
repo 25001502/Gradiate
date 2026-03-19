@@ -43,7 +43,7 @@ const About = () => {
           </a>
           <div className="nav-actions">
             <a
-              onClick={() => navigate("/AuthForm")}
+              onClick={() => navigate("/auth")}
               className="btn btn-primary"
               style={{ marginLeft: "auto" }}
             >
@@ -62,12 +62,12 @@ const About = () => {
           {menuOpen && (
             <div className="burger-menu">
               <a onClick={() => navigate("/")}>Home</a>
-              <a onClick={() => navigate("/Bursaryguest")} className="active">
+              <a onClick={() => navigate("/bursaries")} className="active">
                 Bursaries
               </a>
-              <a onClick={() => navigate("/Programsguest")}>Programs</a>
-              <a onClick={() => navigate("/How")}>How It Works</a>
-              <a onClick={() => navigate("/About")}>About</a>
+              <a onClick={() => navigate("/programs")}>Programs</a>
+              <a onClick={() => navigate("/how-it-works")}>How It Works</a>
+              <a onClick={() => navigate("/about")}>About</a>
             </div>
           )}
         </div>
@@ -272,7 +272,7 @@ const About = () => {
           </p>
           <div className="cta-buttons">
             <a
-              onClick={() => navigate("/AuthForm")}
+              onClick={() => navigate("/auth")}
               className="btn btn-primary btn-large"
             >
               Get Started
@@ -294,7 +294,7 @@ const About = () => {
             <div className="footer-links">
               <div className="link-group">
                 <h4>Platform</h4>
-                <a onClick={() => navigate("/How")}>How It Works</a>
+                <a onClick={() => navigate("/how-it-works")}>How It Works</a>
                 <a >About Us</a>
               </div>
               <div className="link-group">
