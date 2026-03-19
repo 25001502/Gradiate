@@ -1,12 +1,18 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import image from "../images/hero-about.jpg";
+import DashboardSection from "../components/DashboardSection";
 import {
   FaTwitter,
   FaInstagram,
   FaLinkedin,
   FaFacebookF,
+  FaBookmark,
+  FaRegBookmark,
+  FaExternalLinkAlt,
+  FaUserCircle,
+  FaPencilAlt,
+  FaGraduationCap,
 } from "react-icons/fa";
 
 const subjects = [
@@ -110,19 +116,64 @@ const subjects = [
 
 export default function Practise() {
   const [openIndex, setOpenIndex] = useState(null);
+  const [search, setSearch] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("all"); // "all" | "saved"
+  const [savedSubjects, setSavedSubjects] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("gradiate_practice_saved_subjects")) || [];
+    } catch {
+      return [];
+    }
+  });
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const toggleSubjectSave = (subjectName) => {
+    setSavedSubjects((prev) => {
+      const next = prev.includes(subjectName)
+        ? prev.filter((item) => item !== subjectName)
+        : [...prev, subjectName];
+      localStorage.setItem("gradiate_practice_saved_subjects", JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const totalPapers = useMemo(
+    () => subjects.reduce((sum, subject) => sum + subject.papers.length, 0),
+    []
+  );
+
+  const filteredSubjects = useMemo(() => {
+    let list = subjects;
+
+    if (activeTab === "saved") {
+      list = list.filter((subject) => savedSubjects.includes(subject.name));
+    }
+
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      list = list.filter(
+        (subject) =>
+          subject.name.toLowerCase().includes(q) ||
+          subject.papers.some(
+            (paper) =>
+              String(paper.year).includes(q) ||
+              paper.type.toLowerCase().includes(q)
+          )
+      );
+    }
+
+    return list;
+  }, [activeTab, savedSubjects, search]);
 
   const handleToggle = (idx) => {
     setOpenIndex(openIndex === idx ? null : idx);
   };
 
-  const navigate = useNavigate();
-    const { user } = useAuth();
-     const [menuOpen, setMenuOpen] = useState(false);
-      
-
   return (
-<div style={{background: `linear-gradient(rgba(240,246,255,0.75), rgba(240,246,255,0.75)), url(${image}) center/cover no-repeat`,}}>
-    <nav className="navbar-responsive">
+    <div>
+      <nav className="navbar-responsive">
         <div className="navbar-container">
           <a
             className="logo"
@@ -149,194 +200,220 @@ export default function Practise() {
           </div>
           {menuOpen && (
             <div className="burger-menu">
-              <a onClick={() => navigate("/profile")}>{user?.displayName || user?.email || "Guest"}</a>
-
-             <a onClick={() => navigate("/application")}>Application</a>
-            
-
-              <a onClick={() => alert("Sorry! this feature is not yet available")} className="active">
+              <a onClick={() => navigate("/profile")}>
+                {user?.displayName || user?.email || "Guest"}
+              </a>
+              <a onClick={() => navigate("/application")}>Application</a>
+              <a
+                onClick={() =>
+                  alert("Sorry! this feature is not yet available")
+                }
+                className="active"
+              >
                 Bursaries
               </a>
-
-              
             </div>
           )}
         </div>
       </nav>
 
-    <div
-      style={{
-        maxWidth: 480,
-        margin: "1.2rem auto",
-        marginBottom: "0.09rem",
-        marginTop: "0.09rem",
-        padding: "0.5rem",
-        width: "99vw",
-         background: `linear-gradient(rgba(240,246,255,0.75), rgba(240,246,255,0.75)), url(${image}) center/cover no-repeat`,
-      }} 
-    >
-      <h1
-        style={{
-          textAlign: "center",
-          marginBottom: "1rem",
-          fontSize: "1.3rem",
-        }}
-      >
-        Grade 12 NSC Past Exam Papers
-      </h1>
-      <p
-        style={{
-          textAlign: "center",
-          marginBottom: "1.2rem",
-          color: "#555",
-          fontSize: "0.98rem",
-        }}
-      >
-        Tap a subject to view and download past Grade 12 exam questions.
-      </p>
-      <div>
-        {subjects.map((subject, idx) => (
-          <div
-            key={subject.name}
-            style={{
-              background: "#f8fafc",
-              borderRadius: 8,
-              maxWidth: "100%",
-              marginBottom: 14,
-              boxShadow: "0 1px 4px #318deaff",
-              cursor: "pointer",
-              transition: "box-shadow 0.2s",
-              border:
-                openIndex === idx
-                  ? "2px solid #2563eb"
-                  : "2px solid transparent",
-            }}
-            onClick={() => handleToggle(idx)}
-          >
-            <div
-              style={{
-                padding: "0.9rem 1rem",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                fontWeight: 700,
-                fontSize: "1rem",
-                color: "#2a5a95ff",
-              }}
-            >
-              {subject.name}
-              <span
-                style={{
-                  fontSize: "1.1rem",
-                  color: openIndex === idx ? "#2563eb" : "#bbb",
-                  transition: "transform 0.2s",
-                  transform:
-                    openIndex === idx ? "rotate(90deg)" : "rotate(0deg)",
-                }}
-              >
-                ▶
-              </span>
-            </div>
-            {openIndex === idx && (
-              <ul
-                style={{
-                  listStyle: "none",
-                  padding: "0 1rem 0.7rem 1rem",
-                  margin: 0,
-                  animation: "fadeIn 0.3s",
-                }}
-              >
-                {subject.papers.map((paper) => (
-                  <li key={`${paper.year}-${paper.type}`} style={{ marginBottom: 6 }}>
-                    <a
-                      href={paper.url}
-                      download
-                      style={{
-                        color: "#2563eb",
-                        textDecoration: "underline",
-                        fontWeight: 500,
-                        fontSize: "0.97rem",
-                        wordBreak: "break-word",
-                      }}
-                      onClick={(e) => e.stopPropagation()}
+      <div className="dashboard-page">
+        <DashboardSection
+          title="Past Paper Hub"
+          subtitle="Find Grade 12 NSC papers by subject, year, and paper type."
+          searchPlaceholder="Search subjects, year, or paper type..."
+          searchValue={search}
+          onSearchChange={setSearch}
+          shortcuts={[
+            {
+              label: "My Profile",
+              icon: <FaUserCircle />,
+              onClick: () => navigate("/profile"),
+            },
+            {
+              label: "Application",
+              icon: <FaPencilAlt />,
+              onClick: () => navigate("/application"),
+            },
+            {
+              label: "Bursaries",
+              icon: <FaGraduationCap />,
+              onClick: () => alert("Sorry! this feature is not yet available"),
+            },
+          ]}
+          stats={[
+            {
+              label: "Subjects",
+              value: subjects.length,
+              valueClass: "dashboard-stat__value--blue",
+            },
+            {
+              label: "Total Papers",
+              value: totalPapers,
+              valueClass: "dashboard-stat__value--green",
+            },
+            {
+              label: "Saved Subjects",
+              value: savedSubjects.length,
+              valueClass: "dashboard-stat__value--purple",
+            },
+          ]}
+          tabs={[
+            { key: "all", label: "All Subjects" },
+            { key: "saved", label: `Saved (${savedSubjects.length})` },
+          ]}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
+
+        {filteredSubjects.length > 0 ? (
+          <div className="uni-grid" key={activeTab}>
+            {filteredSubjects.map((subject, idx) => {
+              const isOpen = openIndex === idx;
+              const isSaved = savedSubjects.includes(subject.name);
+
+              return (
+                <article className="uni-card" key={subject.name}>
+                  <div className="uni-card__header">
+                    <div className="uni-card__logo" style={{
+                      display: "grid",
+                      placeItems: "center",
+                      background: "#eff6ff",
+                      color: "#1d4ed8",
+                      fontSize: "0.8rem",
+                      fontWeight: 700,
+                      borderRadius: 12,
+                    }}>
+                      NSC
+                    </div>
+                    <button
+                      className={`uni-card__bookmark ${isSaved ? "uni-card__bookmark--active" : ""}`}
+                      onClick={() => toggleSubjectSave(subject.name)}
+                      aria-label={isSaved ? "Remove bookmark" : "Add bookmark"}
+                      title={isSaved ? "Remove from saved" : "Save for later"}
                     >
-                      Download {subject.name} {paper.year} {paper.type}
-                      
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            )}
+                      {isSaved ? <FaBookmark /> : <FaRegBookmark />}
+                    </button>
+                  </div>
+
+                  <div className="uni-card__body">
+                    <h3 className="uni-card__name">{subject.name}</h3>
+                    <p className="uni-card__location">{subject.papers.length} papers available</p>
+                    <p className="uni-card__desc">
+                      Tap open to view downloadable papers by year and paper type.
+                    </p>
+                    <div className="uni-card__actions" style={{ marginBottom: isOpen ? 8 : 0 }}>
+                      <button
+                        className="uni-card__btn uni-card__btn--primary"
+                        onClick={() => handleToggle(idx)}
+                      >
+                        {isOpen ? "Hide Papers" : "View Papers"}
+                      </button>
+                    </div>
+
+                    {isOpen && (
+                      <div style={{ display: "grid", gap: 8, marginTop: 6 }}>
+                        {subject.papers.map((paper) => (
+                          <a
+                            key={`${subject.name}-${paper.year}-${paper.type}`}
+                            href={paper.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="uni-card__btn"
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              width: "100%",
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <span>{paper.year} {paper.type}</span>
+                            <FaExternalLinkAlt style={{ fontSize: "0.75rem" }} />
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
           </div>
-        ))}
+        ) : (
+          <div className="dashboard-empty">
+            <div className="dashboard-empty__icon">🔍</div>
+            <p className="dashboard-empty__text">
+              {activeTab === "saved"
+                ? "You have not saved any subjects yet. Tap the bookmark icon to save."
+                : "No subjects match your search."}
+            </p>
+          </div>
+        )}
       </div>
-      {/* Responsive and fadeIn animation */}
+
       <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(-10px);}
-          to { opacity: 1; transform: translateY(0);}
+        .uni-card__btn {
+          border: 1px solid #dbe5f5;
+          border-radius: 12px;
+          padding: 10px 12px;
+          color: #1e3a8a;
+          text-decoration: none;
+          background: #f8fbff;
+          transition: background 0.2s ease;
         }
-        @media (max-width: 600px) {
-          div[style*="max-width"] {
-            max-width: 98vw !important;
-            padding: 0.5rem !important;
-          }
-          h1 {
-            font-size: 1.1rem !important;
-          }
+        .uni-card__btn:hover {
+          background: #edf4ff;
         }
       `}</style>
-    </div>
 
-        <footer className="footer">
-                <div className="container">
-                  <div className="footer-content">
-                    <div className="footer-brand">
-                      <a className="logo">
-                        Grad<span>iate</span>
-                      </a>
-                      <p>Smart education matching for everyone.</p>
-                    </div>
-                    <div className="footer-links">
-                      <div className="link-group">
-                        <h4>Platform</h4>
-                        <a href="#">How It Works</a>
-                        <a href="#">Features</a>
-                      </div>
-                      <div className="link-group">
-                        <h4>Resources</h4>
-                        <a href="#">Help Center</a>
-                        <a href="#">Contact</a>
-                      </div>
-                      <div className="link-group">
-                        <h4>Legal</h4>
-                        <a href="#">Privacy Policy</a>
-                        <a href="#">Terms of Service</a>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="footer-bottom">
-                    <div className="social-links">
-                      <a href="#" title="Facebook" aria-label="Facebook">
-                        <FaFacebookF />
-                      </a>
-                      <a href="#" title="Twitter" aria-label="Twitter">
-                        <FaTwitter />
-                      </a>
-                      <a href="#" title="LinkedIn" aria-label="LinkedIn">
-                        <FaLinkedin />
-                      </a>
-                      <a href="#" title="Instagram" aria-label="Instagram">
-                        <FaInstagram />
-                      </a>
-                    </div>
-                    <p className="copyright">
-                      &copy; 2026 THANDULULO TECHNOLOGIES. All rights reserved.
-                    </p>
-                  </div>
-                </div>
-              </footer>
-        
+      <footer className="footer">
+        <div className="container">
+          <div className="footer-content">
+            <div className="footer-brand">
+              <a className="logo">
+                Grad<span>iate</span>
+              </a>
+              <p>Smart education matching for everyone.</p>
+            </div>
+            <div className="footer-links">
+              <div className="link-group">
+                <h4>Platform</h4>
+                <a href="#">How It Works</a>
+                <a href="#">Features</a>
+              </div>
+              <div className="link-group">
+                <h4>Resources</h4>
+                <a href="#">Help Center</a>
+                <a href="#">Contact</a>
+              </div>
+              <div className="link-group">
+                <h4>Legal</h4>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+              </div>
+            </div>
+          </div>
+          <div className="footer-bottom">
+            <div className="social-links">
+              <a href="#" title="Facebook" aria-label="Facebook">
+                <FaFacebookF />
+              </a>
+              <a href="#" title="Twitter" aria-label="Twitter">
+                <FaTwitter />
+              </a>
+              <a href="#" title="LinkedIn" aria-label="LinkedIn">
+                <FaLinkedin />
+              </a>
+              <a href="#" title="Instagram" aria-label="Instagram">
+                <FaInstagram />
+              </a>
+            </div>
+            <p className="copyright">
+              &copy; 2026 THANDULULO TECHNOLOGIES. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
