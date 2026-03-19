@@ -436,7 +436,7 @@ const Profile = () => {
               <a
                 onClick={() => {
                   setMenuOpen(false);
-                  navigate("/Aplication");
+                  navigate("/application");
                 }}
               >
                 Application
@@ -444,7 +444,7 @@ const Profile = () => {
               <a
                 onClick={() => {
                   setMenuOpen(false);
-                  navigate("/Practise");
+                  navigate("/practice");
                 }}
               >
                 Practise
