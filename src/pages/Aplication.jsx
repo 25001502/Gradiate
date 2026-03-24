@@ -167,9 +167,7 @@ export default function Aplication() {
               </a>
               <a onClick={() => navigate("/Practise")}>Practise</a>
               <a
-                onClick={() =>
-                  alert("Sorry! this feature is not yet available")
-                }
+                onClick={() => navigate("/Bursary")}
                 className="active"
               >
                 Bursaries
@@ -221,9 +219,7 @@ export default function Aplication() {
           </button>
           <button
             className="dashboard-shortcut"
-            onClick={() =>
-              alert("Sorry! this feature is not yet available")
-            }
+            onClick={() => navigate("/Bursary")}
           >
             <FaGraduationCap /> Bursaries
           </button>
