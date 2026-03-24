@@ -9,6 +9,7 @@ import How from './pages/How';
 import About from './pages/About';
 import Practise from './pages/Practise';
 import Profile from './pages/Profile';
+import Bursary from './pages/Bursary';
 
 function CanonicalTagManager() {
   const location = useLocation();
@@ -47,6 +48,7 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/practice" element={<Practise />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/bursary" element={<Bursary />} />
 
         {/* Legacy paths kept for backward compatibility */}
         <Route path="/AuthForm" element={<AuthForm />} />
@@ -57,6 +59,7 @@ function App() {
         <Route path="/About" element={<About />} />
         <Route path="/Practise" element={<Practise />} />
         <Route path="/Profile" element={<Profile />} />
+        <Route path="/Bursary" element={<Bursary />} />
       </Routes>
     </Router>
   );
