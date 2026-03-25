@@ -23,6 +23,9 @@ import {
   FaUserCircle,
   FaPencilAlt,
   FaGraduationCap,
+  FaBell,
+  FaBalanceScale,
+  FaClock,
 } from "react-icons/fa";
 
 // ── University data ──────────────────────────────────────────────────────────
@@ -91,6 +94,36 @@ const UNIVERSITIES = [
   },
 ];
 
+const BOOKMARK_FOLDERS = ["General", "Dream", "Safe", "Applied"];
+
+const UNIVERSITY_DEADLINES = {
+  univen: "2026-09-30",
+  ul: "2026-08-31",
+  uj: "2026-09-15",
+  wits: "2026-07-31",
+  tut: "2026-10-15",
+  uct: "2026-07-31",
+};
+
+function daysUntil(dateString) {
+  const today = new Date();
+  const target = new Date(dateString);
+  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const end = new Date(target.getFullYear(), target.getMonth(), target.getDate());
+  return Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+}
+
+function getAvailabilityStatus(dateString) {
+  const days = daysUntil(dateString);
+  if (days < 0) {
+    return { label: "Closed", color: "#991b1b", background: "#fee2e2", days };
+  }
+  if (days <= 14) {
+    return { label: "Closing Soon", color: "#9a3412", background: "#ffedd5", days };
+  }
+  return { label: "Applications Open", color: "#166534", background: "#dcfce7", days };
+}
+
 // ── Component ────────────────────────────────────────────────────────────────
 export default function Aplication() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -103,10 +136,14 @@ export default function Aplication() {
     }
   });
   const [activeTab, setActiveTab] = useState("all"); // "all" | "saved"
+  const [savedFolderFilter, setSavedFolderFilter] = useState("all");
+  const [bookmarkMeta, setBookmarkMeta] = useState({});
+  const [compareIds, setCompareIds] = useState([]);
+  const [alertsEnabled, setAlertsEnabled] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const buildBookmarkPayload = (universityId) => {
+  const buildBookmarkPayload = (universityId, overrides = {}) => {
     const uni = UNIVERSITIES.find((item) => item.id === universityId);
     if (!uni) {
       return null;
@@ -115,7 +152,13 @@ export default function Aplication() {
     return {
       name: uni.name,
       category: uni.location.split(", ").pop() || "General",
+      folder: "General",
+      notes: "",
+      reminderEnabled: true,
+      deadline: UNIVERSITY_DEADLINES[universityId] || null,
       createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      ...overrides,
     };
   };
 
@@ -134,6 +177,21 @@ export default function Aplication() {
     });
   };
 
+  const updateBookmarkMetaInFirestore = async (universityId, partialMeta) => {
+    if (!user?.uid) {
+      return;
+    }
+
+    await setDoc(
+      doc(db, "users", user.uid, "bookmarks", universityId),
+      {
+        ...partialMeta,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+  };
+
   const removeBookmarkFromFirestore = async (universityId) => {
     if (!user?.uid) {
       return;
@@ -144,11 +202,18 @@ export default function Aplication() {
 
   const loadBookmarksFromFirestore = async () => {
     if (!user?.uid) {
-      return;
+      return { ids: [], metaById: {} };
     }
 
     const snapshot = await getDocs(collection(db, "users", user.uid, "bookmarks"));
-    return snapshot.docs.map((bookmarkDoc) => bookmarkDoc.id);
+    const ids = snapshot.docs.map((bookmarkDoc) => bookmarkDoc.id);
+    const metaById = {};
+
+    snapshot.docs.forEach((bookmarkDoc) => {
+      metaById[bookmarkDoc.id] = bookmarkDoc.data() || {};
+    });
+
+    return { ids, metaById };
   };
 
   useEffect(() => {
@@ -168,7 +233,8 @@ export default function Aplication() {
           }
         })();
 
-        const cloudBookmarks = (await loadBookmarksFromFirestore()) || [];
+        const cloud = await loadBookmarksFromFirestore();
+        const cloudBookmarks = cloud.ids || [];
 
         const missingInCloud = localBookmarks.filter(
           (bookmarkId) => !cloudBookmarks.includes(bookmarkId)
@@ -180,10 +246,12 @@ export default function Aplication() {
           })
         );
 
-        const mergedBookmarks = [...new Set([...cloudBookmarks, ...localBookmarks])];
+        const refreshedCloud = await loadBookmarksFromFirestore();
+        const mergedBookmarks = [...new Set([...(refreshedCloud.ids || []), ...localBookmarks])];
 
         if (!isCancelled) {
           setBookmarks(mergedBookmarks);
+          setBookmarkMeta(refreshedCloud.metaById || {});
           localStorage.setItem("gradiate_bookmarks", JSON.stringify(mergedBookmarks));
         }
       } catch (error) {
@@ -215,8 +283,79 @@ export default function Aplication() {
         });
       }
 
+      setBookmarkMeta((prevMeta) => {
+        const nextMeta = { ...prevMeta };
+        if (isRemoving) {
+          delete nextMeta[id];
+        } else if (!nextMeta[id]) {
+          nextMeta[id] = {
+            folder: "General",
+            notes: "",
+            reminderEnabled: true,
+            deadline: UNIVERSITY_DEADLINES[id] || null,
+          };
+        }
+        return nextMeta;
+      });
+
       localStorage.setItem("gradiate_bookmarks", JSON.stringify(next));
       return next;
+    });
+  };
+
+  const updateBookmarkMeta = (id, partialMeta) => {
+    setBookmarkMeta((prevMeta) => ({
+      ...prevMeta,
+      [id]: {
+        ...(prevMeta[id] || {}),
+        ...partialMeta,
+      },
+    }));
+
+    updateBookmarkMetaInFirestore(id, partialMeta).catch((error) => {
+      console.error("Failed to update bookmark details:", error);
+    });
+  };
+
+  const toggleCompare = (id) => {
+    setCompareIds((prev) => {
+      if (prev.includes(id)) {
+        return prev.filter((item) => item !== id);
+      }
+      if (prev.length >= 4) {
+        return prev;
+      }
+      return [...prev, id];
+    });
+  };
+
+  const sendDeadlineReminders = async () => {
+    if (!("Notification" in window)) {
+      return;
+    }
+
+    const permission = await Notification.requestPermission();
+    if (permission !== "granted") {
+      return;
+    }
+
+    const upcoming = bookmarks
+      .map((id) => {
+        const deadline = bookmarkMeta[id]?.deadline || UNIVERSITY_DEADLINES[id];
+        const days = deadline ? daysUntil(deadline) : null;
+        return { id, days, deadline, reminderEnabled: bookmarkMeta[id]?.reminderEnabled !== false };
+      })
+      .filter((item) => item.deadline && item.days !== null && item.days >= 0 && item.days <= 14 && item.reminderEnabled);
+
+    upcoming.forEach((item) => {
+      const uni = UNIVERSITIES.find((u) => u.id === item.id);
+      if (!uni) {
+        return;
+      }
+
+      new Notification("Application Deadline Reminder", {
+        body: `${uni.name} closes in ${item.days} day${item.days === 1 ? "" : "s"}.`,
+      });
     });
   };
 
@@ -225,6 +364,12 @@ export default function Aplication() {
 
     if (activeTab === "saved") {
       list = list.filter((u) => bookmarks.includes(u.id));
+
+      if (savedFolderFilter !== "all") {
+        list = list.filter(
+          (u) => (bookmarkMeta[u.id]?.folder || "General") === savedFolderFilter
+        );
+      }
     }
 
     if (search.trim()) {
@@ -239,7 +384,47 @@ export default function Aplication() {
     }
 
     return list;
-  }, [search, bookmarks, activeTab]);
+  }, [search, bookmarks, activeTab, savedFolderFilter, bookmarkMeta]);
+
+  const compareUnis = useMemo(
+    () => UNIVERSITIES.filter((u) => compareIds.includes(u.id)),
+    [compareIds]
+  );
+
+  const savedFolders = useMemo(() => {
+    const folders = bookmarks.map((id) => bookmarkMeta[id]?.folder || "General");
+    return [...new Set(folders)];
+  }, [bookmarks, bookmarkMeta]);
+
+  const recommendations = useMemo(() => {
+    if (!bookmarks.length) {
+      return UNIVERSITIES.slice(0, 3);
+    }
+
+    const favoriteProvinces = bookmarks
+      .map((id) => {
+        const uni = UNIVERSITIES.find((u) => u.id === id);
+        return uni?.location?.split(", ").pop();
+      })
+      .filter(Boolean);
+
+    const provinceScores = favoriteProvinces.reduce((acc, province) => {
+      acc[province] = (acc[province] || 0) + 1;
+      return acc;
+    }, {});
+
+    return UNIVERSITIES
+      .filter((u) => !bookmarks.includes(u.id))
+      .map((u) => {
+        const province = u.location.split(", ").pop();
+        return {
+          ...u,
+          score: provinceScores[province] || 0,
+        };
+      })
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3);
+  }, [bookmarks]);
 
   const provinces = [...new Set(UNIVERSITIES.map((u) => u.location.split(", ").pop()))];
 
@@ -335,6 +520,15 @@ export default function Aplication() {
           >
             <FaGraduationCap /> Bursaries
           </button>
+          <button
+            className="dashboard-shortcut"
+            onClick={() => {
+              setAlertsEnabled((prev) => !prev);
+              sendDeadlineReminders();
+            }}
+          >
+            <FaBell /> {alertsEnabled ? "Reminders On" : "Enable Reminders"}
+          </button>
         </div>
 
         {/* Stats */}
@@ -375,56 +569,249 @@ export default function Aplication() {
           </button>
         </div>
 
+        {activeTab === "saved" && savedFolders.length > 0 && (
+          <div className="dashboard-tabs" style={{ marginTop: 8 }}>
+            <button
+              className={`dashboard-tab ${savedFolderFilter === "all" ? "dashboard-tab--active" : ""}`}
+              onClick={() => setSavedFolderFilter("all")}
+            >
+              All Folders
+            </button>
+            {savedFolders.map((folder) => (
+              <button
+                key={folder}
+                className={`dashboard-tab ${savedFolderFilter === folder ? "dashboard-tab--active" : ""}`}
+                onClick={() => setSavedFolderFilter(folder)}
+              >
+                {folder}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {compareUnis.length > 0 && (
+          <section className="dashboard-compare" aria-label="Compare Universities">
+            <div className="dashboard-compare__header">
+              <p className="dashboard-stat__label" style={{ margin: 0 }}>
+                <FaBalanceScale /> Compare Universities ({compareUnis.length}/4)
+              </p>
+              <button className="dashboard-tab dashboard-compare__clear" onClick={() => setCompareIds([])}>
+                Clear Compare
+              </button>
+            </div>
+            <div className="dashboard-compare__table-wrap">
+              <table className="dashboard-compare__table">
+                <thead>
+                  <tr>
+                    <th>University</th>
+                    <th>Province</th>
+                    <th>Deadline</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {compareUnis.map((uni) => {
+                    const deadline = bookmarkMeta[uni.id]?.deadline || UNIVERSITY_DEADLINES[uni.id];
+                    const status = deadline ? getAvailabilityStatus(deadline) : null;
+                    const statusClass =
+                      status?.label === "Applications Open"
+                        ? "dashboard-compare__status--open"
+                        : status?.label === "Closing Soon"
+                          ? "dashboard-compare__status--soon"
+                          : status?.label === "Closed"
+                            ? "dashboard-compare__status--closed"
+                            : "dashboard-compare__status--neutral";
+
+                    return (
+                      <tr key={`compare-${uni.id}`}>
+                        <td data-label="University">{uni.name}</td>
+                        <td data-label="Province">{uni.location.split(", ").pop()}</td>
+                        <td data-label="Deadline">{deadline || "N/A"}</td>
+                        <td data-label="Status">
+                          <span className={`dashboard-compare__status ${statusClass}`}>
+                            {status?.label || "Unknown"}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
+
+        {recommendations.length > 0 && (
+          <section className="dashboard-recommendations" aria-label="Smart Recommendations">
+            <div className="dashboard-recommendations__header">
+              <p className="dashboard-stat__label" style={{ margin: 0 }}>
+                Smart Recommendations
+              </p>
+              <span className="dashboard-recommendations__hint">
+                Based on your saved universities and preferred provinces.
+              </span>
+            </div>
+            <div className="dashboard-recommendations__grid">
+              {recommendations.map((uni) => {
+                const isSaved = bookmarks.includes(uni.id);
+                const province = uni.location.split(", ").pop();
+
+                return (
+                  <button
+                    key={`rec-${uni.id}`}
+                    className={`dashboard-recommendation ${isSaved ? "dashboard-recommendation--saved" : ""}`}
+                    onClick={() => toggleBookmark(uni.id)}
+                  >
+                    <span className="dashboard-recommendation__title">{uni.name}</span>
+                    <span className="dashboard-recommendation__meta">
+                      <FaMapMarkerAlt /> {province}
+                    </span>
+                    <span className="dashboard-recommendation__cta">
+                      {isSaved ? "Saved" : "Save Recommendation"}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
         {/* University Cards Grid */}
         {filteredUnis.length > 0 ? (
           <div className="uni-grid" key={activeTab}>
-            {filteredUnis.map((uni) => (
-              <article className="uni-card" key={uni.id}>
-                <div className="uni-card__header">
-                  <img
-                    className="uni-card__logo"
-                    src={uni.logo}
-                    alt={`${uni.name} logo`}
-                  />
-                  <button
-                    className={`uni-card__bookmark ${bookmarks.includes(uni.id) ? "uni-card__bookmark--active" : ""}`}
-                    onClick={() => toggleBookmark(uni.id)}
-                    aria-label={
-                      bookmarks.includes(uni.id)
-                        ? "Remove bookmark"
-                        : "Add bookmark"
-                    }
-                    title={
-                      bookmarks.includes(uni.id)
-                        ? "Remove from saved"
-                        : "Save for later"
-                    }
-                  >
-                    {bookmarks.includes(uni.id) ? (
-                      <FaBookmark />
-                    ) : (
-                      <FaRegBookmark />
-                    )}
-                  </button>
-                </div>
+            {filteredUnis.map((uni) => {
+              const deadline = bookmarkMeta[uni.id]?.deadline || UNIVERSITY_DEADLINES[uni.id];
+              const status = deadline ? getAvailabilityStatus(deadline) : null;
+              const noteValue = bookmarkMeta[uni.id]?.notes || "";
+              const folderValue = bookmarkMeta[uni.id]?.folder || "General";
+              const compareSelected = compareIds.includes(uni.id);
 
-                <div className="uni-card__body">
-                  <h3 className="uni-card__name">{uni.name}</h3>
-                  <p className="uni-card__location">
-                    <FaMapMarkerAlt /> {uni.location}
-                  </p>
-                  <p className="uni-card__desc">{uni.description}</p>
-                  <div className="uni-card__actions">
+              return (
+                <article className="uni-card" key={uni.id}>
+                  <div className="uni-card__header">
+                    <img
+                      className="uni-card__logo"
+                      src={uni.logo}
+                      alt={`${uni.name} logo`}
+                    />
                     <button
-                      className="uni-card__btn uni-card__btn--primary"
-                      onClick={() => window.open(uni.applyUrl)}
+                      className={`uni-card__bookmark ${bookmarks.includes(uni.id) ? "uni-card__bookmark--active" : ""}`}
+                      onClick={() => toggleBookmark(uni.id)}
+                      aria-label={
+                        bookmarks.includes(uni.id)
+                          ? "Remove bookmark"
+                          : "Add bookmark"
+                      }
+                      title={
+                        bookmarks.includes(uni.id)
+                          ? "Remove from saved"
+                          : "Save for later"
+                      }
                     >
-                      Apply Now <FaExternalLinkAlt style={{ fontSize: "0.7rem" }} />
+                      {bookmarks.includes(uni.id) ? (
+                        <FaBookmark />
+                      ) : (
+                        <FaRegBookmark />
+                      )}
                     </button>
                   </div>
-                </div>
-              </article>
-            ))}
+
+                  <div className="uni-card__body">
+                    <h3 className="uni-card__name">{uni.name}</h3>
+                    <p className="uni-card__location">
+                      <FaMapMarkerAlt /> {uni.location}
+                    </p>
+                    {status && (
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 8 }}>
+                        <span
+                          style={{
+                            background: status.background,
+                            color: status.color,
+                            padding: "4px 10px",
+                            borderRadius: 999,
+                            fontSize: "0.78rem",
+                            fontWeight: 700,
+                          }}
+                        >
+                          {status.label}
+                        </span>
+                        <span
+                          style={{
+                            background: "#eef2ff",
+                            color: "#3730a3",
+                            padding: "4px 10px",
+                            borderRadius: 999,
+                            fontSize: "0.78rem",
+                            fontWeight: 700,
+                          }}
+                        >
+                          <FaClock style={{ marginRight: 6 }} />
+                          {status.days < 0 ? "Closed" : `${status.days} days left`}
+                        </span>
+                      </div>
+                    )}
+                    <p className="uni-card__desc">{uni.description}</p>
+                    <div className="uni-card__actions" style={{ gap: 8, display: "flex", flexWrap: "wrap" }}>
+                      <button
+                        className="uni-card__btn uni-card__btn--primary"
+                        onClick={() => window.open(uni.applyUrl)}
+                      >
+                        Apply Now <FaExternalLinkAlt style={{ fontSize: "0.7rem" }} />
+                      </button>
+                      <button
+                        className="uni-card__btn"
+                        onClick={() => toggleCompare(uni.id)}
+                        style={{
+                          borderColor: compareSelected ? "#4338ca" : undefined,
+                          color: compareSelected ? "#4338ca" : undefined,
+                        }}
+                      >
+                        <FaBalanceScale /> {compareSelected ? "Added to Compare" : "Compare"}
+                      </button>
+                    </div>
+
+                    {bookmarks.includes(uni.id) && activeTab === "saved" && (
+                      <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
+                        <label style={{ fontSize: "0.82rem", color: "#334155", fontWeight: 600 }}>
+                          Folder
+                        </label>
+                        <select
+                          value={folderValue}
+                          onChange={(e) => updateBookmarkMeta(uni.id, { folder: e.target.value })}
+                          style={{ border: "1px solid #cbd5e1", borderRadius: 10, padding: 8 }}
+                        >
+                          {BOOKMARK_FOLDERS.map((folder) => (
+                            <option key={`${uni.id}-${folder}`} value={folder}>
+                              {folder}
+                            </option>
+                          ))}
+                        </select>
+
+                        <label style={{ fontSize: "0.82rem", color: "#334155", fontWeight: 600 }}>
+                          Notes
+                        </label>
+                        <textarea
+                          value={noteValue}
+                          placeholder="Write private notes for this university..."
+                          onChange={(e) => updateBookmarkMeta(uni.id, { notes: e.target.value })}
+                          rows={3}
+                          style={{ border: "1px solid #cbd5e1", borderRadius: 10, padding: 8, resize: "vertical" }}
+                        />
+
+                        <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "0.83rem" }}>
+                          <input
+                            type="checkbox"
+                            checked={bookmarkMeta[uni.id]?.reminderEnabled !== false}
+                            onChange={(e) => updateBookmarkMeta(uni.id, { reminderEnabled: e.target.checked })}
+                          />
+                          Enable reminder notifications
+                        </label>
+                      </div>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
           </div>
         ) : (
           <div className="dashboard-empty">
