@@ -1,6 +1,15 @@
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import db from "../firebase";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  serverTimestamp,
+  setDoc,
+} from "firebase/firestore";
 import {
   FaTwitter,
   FaInstagram,
@@ -97,12 +106,115 @@ export default function Aplication() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  const buildBookmarkPayload = (universityId) => {
+    const uni = UNIVERSITIES.find((item) => item.id === universityId);
+    if (!uni) {
+      return null;
+    }
+
+    return {
+      name: uni.name,
+      category: uni.location.split(", ").pop() || "General",
+      createdAt: serverTimestamp(),
+    };
+  };
+
+  const saveBookmarkToFirestore = async (universityId) => {
+    if (!user?.uid) {
+      return;
+    }
+
+    const payload = buildBookmarkPayload(universityId);
+    if (!payload) {
+      return;
+    }
+
+    await setDoc(doc(db, "users", user.uid, "bookmarks", universityId), payload, {
+      merge: true,
+    });
+  };
+
+  const removeBookmarkFromFirestore = async (universityId) => {
+    if (!user?.uid) {
+      return;
+    }
+
+    await deleteDoc(doc(db, "users", user.uid, "bookmarks", universityId));
+  };
+
+  const loadBookmarksFromFirestore = async () => {
+    if (!user?.uid) {
+      return;
+    }
+
+    const snapshot = await getDocs(collection(db, "users", user.uid, "bookmarks"));
+    return snapshot.docs.map((bookmarkDoc) => bookmarkDoc.id);
+  };
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    const syncBookmarks = async () => {
+      if (!user?.uid) {
+        return;
+      }
+
+      try {
+        const localBookmarks = (() => {
+          try {
+            return JSON.parse(localStorage.getItem("gradiate_bookmarks")) || [];
+          } catch {
+            return [];
+          }
+        })();
+
+        const cloudBookmarks = (await loadBookmarksFromFirestore()) || [];
+
+        const missingInCloud = localBookmarks.filter(
+          (bookmarkId) => !cloudBookmarks.includes(bookmarkId)
+        );
+
+        await Promise.all(
+          missingInCloud.map(async (bookmarkId) => {
+            await saveBookmarkToFirestore(bookmarkId);
+          })
+        );
+
+        const mergedBookmarks = [...new Set([...cloudBookmarks, ...localBookmarks])];
+
+        if (!isCancelled) {
+          setBookmarks(mergedBookmarks);
+          localStorage.setItem("gradiate_bookmarks", JSON.stringify(mergedBookmarks));
+        }
+      } catch (error) {
+        console.error("Failed to sync bookmarks from Firestore:", error);
+      }
+    };
+
+    syncBookmarks();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [user?.uid]);
+
   // Derived data
   const toggleBookmark = (id) => {
     setBookmarks((prev) => {
-      const next = prev.includes(id)
+      const isRemoving = prev.includes(id);
+      const next = isRemoving
         ? prev.filter((b) => b !== id)
         : [...prev, id];
+
+      if (user?.uid) {
+        const persistPromise = isRemoving
+          ? removeBookmarkFromFirestore(id)
+          : saveBookmarkToFirestore(id);
+        persistPromise.catch((error) => {
+          console.error("Failed to update bookmark in Firestore:", error);
+        });
+      }
+
       localStorage.setItem("gradiate_bookmarks", JSON.stringify(next));
       return next;
     });

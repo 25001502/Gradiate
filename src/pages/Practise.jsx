@@ -1,6 +1,15 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import db from "../firebase";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  serverTimestamp,
+  setDoc,
+} from "firebase/firestore";
 import DashboardSection from "../components/DashboardSection";
 import {
   FaTwitter,
@@ -152,11 +161,108 @@ export default function Practise() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  const subjectToKey = (subjectName) =>
+    subjectName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+  const saveSubjectToFirestore = async (subjectName) => {
+    if (!user?.uid) {
+      return;
+    }
+
+    const subjectKey = subjectToKey(subjectName);
+    await setDoc(
+      doc(db, "users", user.uid, "practiceSavedSubjects", subjectKey),
+      {
+        name: subjectName,
+        category: "past-paper-subject",
+        createdAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+  };
+
+  const removeSubjectFromFirestore = async (subjectName) => {
+    if (!user?.uid) {
+      return;
+    }
+
+    const subjectKey = subjectToKey(subjectName);
+    await deleteDoc(doc(db, "users", user.uid, "practiceSavedSubjects", subjectKey));
+  };
+
+  const loadSavedSubjectsFromFirestore = async () => {
+    if (!user?.uid) {
+      return [];
+    }
+
+    const snapshot = await getDocs(collection(db, "users", user.uid, "practiceSavedSubjects"));
+    return snapshot.docs
+      .map((savedDoc) => savedDoc.data()?.name)
+      .filter((name) => typeof name === "string");
+  };
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    const syncSavedSubjects = async () => {
+      if (!user?.uid) {
+        return;
+      }
+
+      try {
+        const localSubjects = (() => {
+          try {
+            return JSON.parse(localStorage.getItem("gradiate_practice_saved_subjects")) || [];
+          } catch {
+            return [];
+          }
+        })();
+
+        const cloudSubjects = await loadSavedSubjectsFromFirestore();
+        const missingInCloud = localSubjects.filter(
+          (subjectName) => !cloudSubjects.includes(subjectName)
+        );
+
+        await Promise.all(
+          missingInCloud.map(async (subjectName) => {
+            await saveSubjectToFirestore(subjectName);
+          })
+        );
+
+        const mergedSubjects = [...new Set([...cloudSubjects, ...localSubjects])];
+
+        if (!isCancelled) {
+          setSavedSubjects(mergedSubjects);
+          localStorage.setItem("gradiate_practice_saved_subjects", JSON.stringify(mergedSubjects));
+        }
+      } catch (error) {
+        console.error("Failed to sync saved subjects from Firestore:", error);
+      }
+    };
+
+    syncSavedSubjects();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [user?.uid]);
+
   const toggleSubjectSave = (subjectName) => {
     setSavedSubjects((prev) => {
-      const next = prev.includes(subjectName)
+      const isRemoving = prev.includes(subjectName);
+      const next = isRemoving
         ? prev.filter((item) => item !== subjectName)
         : [...prev, subjectName];
+
+      if (user?.uid) {
+        const persistPromise = isRemoving
+          ? removeSubjectFromFirestore(subjectName)
+          : saveSubjectToFirestore(subjectName);
+        persistPromise.catch((error) => {
+          console.error("Failed to update saved subject in Firestore:", error);
+        });
+      }
+
       localStorage.setItem("gradiate_practice_saved_subjects", JSON.stringify(next));
       return next;
     });
