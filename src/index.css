@@ -424,6 +424,33 @@
   gap: 0.3rem;
 }
 
+.uni-card__status-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.uni-card__status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.28rem 0.72rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.uni-card__status-pill--days {
+    background: #eef2ff;
+    color: #3730a3;
+}
+
+.uni-card__status-icon {
+    font-size: 0.78rem;
+}
+
 .uni-card__desc {
   font-size: 0.88rem;
   color: #64748b;

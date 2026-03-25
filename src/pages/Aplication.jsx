@@ -121,7 +121,13 @@ function getAvailabilityStatus(dateString) {
   if (days <= 14) {
     return { label: "Closing Soon", color: "#9a3412", background: "#ffedd5", days };
   }
-  return { label: "Applications Open", color: "#166534", background: "#dcfce7", days };
+  return { label: "Application Open", color: "#166534", background: "#dcfce7", days };
+}
+
+function getDaysLeftLabel(days) {
+  if (days < 0) return "Closed";
+  if (days === 1) return "1 day left";
+  return `${days} days left`;
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
@@ -614,7 +620,7 @@ export default function Aplication() {
                     const deadline = bookmarkMeta[uni.id]?.deadline || UNIVERSITY_DEADLINES[uni.id];
                     const status = deadline ? getAvailabilityStatus(deadline) : null;
                     const statusClass =
-                      status?.label === "Applications Open"
+                      status?.label === "Application Open"
                         ? "dashboard-compare__status--open"
                         : status?.label === "Closing Soon"
                           ? "dashboard-compare__status--soon"
@@ -722,31 +728,19 @@ export default function Aplication() {
                       <FaMapMarkerAlt /> {uni.location}
                     </p>
                     {status && (
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 8 }}>
+                      <div className="uni-card__status-row">
                         <span
+                          className="uni-card__status-pill"
                           style={{
                             background: status.background,
                             color: status.color,
-                            padding: "4px 10px",
-                            borderRadius: 999,
-                            fontSize: "0.78rem",
-                            fontWeight: 700,
                           }}
                         >
                           {status.label}
                         </span>
-                        <span
-                          style={{
-                            background: "#eef2ff",
-                            color: "#3730a3",
-                            padding: "4px 10px",
-                            borderRadius: 999,
-                            fontSize: "0.78rem",
-                            fontWeight: 700,
-                          }}
-                        >
-                          <FaClock style={{ marginRight: 6 }} />
-                          {status.days < 0 ? "Closed" : `${status.days} days left`}
+                        <span className="uni-card__status-pill uni-card__status-pill--days">
+                          <FaClock className="uni-card__status-icon" />
+                          {getDaysLeftLabel(status.days)}
                         </span>
                       </div>
                     )}
