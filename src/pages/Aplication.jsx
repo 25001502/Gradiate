@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import db from "../firebase";
@@ -149,7 +149,7 @@ export default function Aplication() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const buildBookmarkPayload = (universityId, overrides = {}) => {
+  const buildBookmarkPayload = useCallback((universityId, overrides = {}) => {
     const uni = UNIVERSITIES.find((item) => item.id === universityId);
     if (!uni) {
       return null;
@@ -166,9 +166,9 @@ export default function Aplication() {
       updatedAt: serverTimestamp(),
       ...overrides,
     };
-  };
+  }, []);
 
-  const saveBookmarkToFirestore = async (universityId) => {
+  const saveBookmarkToFirestore = useCallback(async (universityId) => {
     if (!user?.uid) {
       return;
     }
@@ -181,7 +181,7 @@ export default function Aplication() {
     await setDoc(doc(db, "users", user.uid, "bookmarks", universityId), payload, {
       merge: true,
     });
-  };
+  }, [buildBookmarkPayload, user?.uid]);
 
   const updateBookmarkMetaInFirestore = async (universityId, partialMeta) => {
     if (!user?.uid) {
@@ -206,7 +206,7 @@ export default function Aplication() {
     await deleteDoc(doc(db, "users", user.uid, "bookmarks", universityId));
   };
 
-  const loadBookmarksFromFirestore = async () => {
+  const loadBookmarksFromFirestore = useCallback(async () => {
     if (!user?.uid) {
       return { ids: [], metaById: {} };
     }
@@ -220,7 +220,7 @@ export default function Aplication() {
     });
 
     return { ids, metaById };
-  };
+  }, [user?.uid]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -270,7 +270,7 @@ export default function Aplication() {
     return () => {
       isCancelled = true;
     };
-  }, [user?.uid]);
+  }, [loadBookmarksFromFirestore, saveBookmarkToFirestore, user?.uid]);
 
   // Derived data
   const toggleBookmark = (id) => {
