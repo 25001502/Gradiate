@@ -143,20 +143,28 @@ export default function AuthForm() {
 
       {/* MAIN FORM */}
       <div
+        className="auth-shell"
         style={{
-          maxWidth: 340,
-          width: "95vw",
-          margin: "1.2rem auto",
-          padding: "1rem",
-          background: "#f8fafc",
-          borderRadius: 10,
-          boxShadow: "0 2px 8px #e0e7ef",
+          maxWidth: 430,
+          width: "94vw",
+          margin: "2.2rem auto",
+          padding: "1.35rem",
+          background: "linear-gradient(180deg, #ffffff 0%, #f9fcff 100%)",
+          borderRadius: 20,
+          border: "1px solid #dbeafe",
+          boxShadow: "0 18px 40px rgba(15, 23, 42, 0.12)",
         }}
       >
         <form className="login-form" onSubmit={handleEmailSubmit}>
-            <h2 style={{ textAlign: "center", marginBottom: 16 }}>
-              {isLogin ? "Login" : "Create Account"}
+            <div className="auth-badge">Hey! </div>
+            <h2 className="auth-title">
+              {isLogin ? "Welcome Back" : "Create Your Account"}
             </h2>
+            <p className="auth-subtitle">
+              {isLogin
+                ? "Sign in to continue your learning journey."
+                : "Join Gradiate and unlock personalized education matching."}
+            </p>
             {!isLogin && (
               <div className="form-group">
                 <label htmlFor="username">Username</label>
@@ -199,18 +207,11 @@ export default function AuthForm() {
             <button type="submit" className="btn btn-login" disabled={loading}>
               {loading ? "Please wait..." : isLogin ? "Login" : "Sign Up"}
             </button>
-            <div style={{ textAlign: "center", marginTop: "1rem" }}>
+            <div className="auth-actions">
               <button
                 onClick={() => setIsLogin(!isLogin)}
                 type="button"
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "#2563eb",
-                  cursor: "pointer",
-                  textDecoration: "underline",
-                  fontSize: "0.95rem",
-                }}
+                className="auth-link-btn"
               >
                 {isLogin
                   ? "Need an account? Sign up"
@@ -220,16 +221,7 @@ export default function AuthForm() {
                 <button
                   type="button"
                   onClick={resendVerificationEmail}
-                  style={{
-                    display: "block",
-                    margin: "0.75rem auto 0",
-                    background: "none",
-                    border: "none",
-                    color: "#2563eb",
-                    cursor: "pointer",
-                    textDecoration: "underline",
-                    fontSize: "0.95rem",
-                  }}
+                  className="auth-link-btn auth-link-btn-secondary"
                 >
                   Resend verification email
                 </button>
@@ -288,7 +280,157 @@ export default function AuthForm() {
         </div>
       </footer>
       <style>{`
+  .auth-shell {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .auth-shell::before {
+    content: "";
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.2) 0%, rgba(56, 189, 248, 0) 70%);
+    top: -70px;
+    right: -70px;
+    pointer-events: none;
+  }
+
+  .login-form {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .auth-badge {
+    align-self: center;
+    background: #e0f2fe;
+    color: #0f4c81;
+    border: 1px solid #bae6fd;
+    border-radius: 999px;
+    padding: 0.25rem 0.8rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  .auth-title {
+    text-align: center;
+    margin: 0.2rem 0 0;
+    font-size: 1.85rem;
+    line-height: 1.1;
+    color: #0f172a;
+  }
+
+  .auth-subtitle {
+    margin: 0;
+    text-align: center;
+    color: #475569;
+    font-size: 0.96rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .form-group label {
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: #1e3a5f;
+  }
+
+  .form-group input {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 0.72rem 0.85rem;
+    font-size: 0.95rem;
+    color: #0f172a;
+    background: #ffffff;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+  }
+
+  .form-group input:focus {
+    outline: none;
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.16);
+    transform: translateY(-1px);
+  }
+
+  .btn.btn-login {
+    margin-top: 0.35rem;
+    border: 0;
+    border-radius: 12px;
+    padding: 0.78rem 1rem;
+    background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    box-shadow: 0 10px 22px rgba(37, 99, 235, 0.35);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  }
+
+  .btn.btn-login:hover {
+    transform: translateY(-2px);
+    filter: saturate(1.06);
+    box-shadow: 0 14px 28px rgba(37, 99, 235, 0.3);
+  }
+
+  .btn.btn-login:disabled {
+    opacity: 0.8;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .auth-actions {
+    text-align: center;
+    margin-top: 0.35rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .auth-link-btn {
+    align-self: center;
+    background: none;
+    border: none;
+    color: #1d4ed8;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: color 0.18s ease, border-color 0.18s ease;
+  }
+
+  .auth-link-btn:hover {
+    color: #1e40af;
+    border-color: #93c5fd;
+  }
+
+  .auth-link-btn-secondary {
+    font-size: 0.88rem;
+    color: #2563eb;
+  }
+
   @media (max-width: 500px) {
+    .auth-title {
+      font-size: 1.55rem;
+    }
+
+    .auth-shell {
+      margin: 1.4rem auto;
+      padding: 1rem;
+      border-radius: 16px;
+    }
+
     .login-form input,
     .login-form button {
       font-size: 0.97rem !important;
