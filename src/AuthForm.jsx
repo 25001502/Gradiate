@@ -280,9 +280,54 @@ export default function AuthForm() {
         </div>
       </footer>
       <style>{`
+  @keyframes authCardIn {
+    0% {
+      opacity: 0;
+      transform: translateY(22px) scale(0.98);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes formItemIn {
+    0% {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes orbFloat {
+    0% {
+      transform: translate(0, 0) scale(1);
+    }
+    50% {
+      transform: translate(-6px, 6px) scale(1.05);
+    }
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+  }
+
+  @keyframes pulseGlow {
+    0%,
+    100% {
+      box-shadow: 0 10px 22px rgba(37, 99, 235, 0.35);
+    }
+    50% {
+      box-shadow: 0 14px 28px rgba(14, 165, 233, 0.42);
+    }
+  }
+
   .auth-shell {
     position: relative;
     overflow: hidden;
+    animation: authCardIn 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
 
   .auth-shell::before {
@@ -294,6 +339,19 @@ export default function AuthForm() {
     top: -70px;
     right: -70px;
     pointer-events: none;
+    animation: orbFloat 8s ease-in-out infinite;
+  }
+
+  .auth-shell::after {
+    content: "";
+    position: absolute;
+    width: 160px;
+    height: 160px;
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.18) 0%, rgba(37, 99, 235, 0) 70%);
+    bottom: -80px;
+    left: -60px;
+    pointer-events: none;
+    animation: orbFloat 10s ease-in-out infinite reverse;
   }
 
   .login-form {
@@ -303,6 +361,20 @@ export default function AuthForm() {
     flex-direction: column;
     gap: 0.85rem;
   }
+
+  .login-form > * {
+    opacity: 1;
+    animation: formItemIn 460ms ease-out both;
+  }
+
+  .login-form > *:nth-child(1) { animation-delay: 80ms; }
+  .login-form > *:nth-child(2) { animation-delay: 120ms; }
+  .login-form > *:nth-child(3) { animation-delay: 170ms; }
+  .login-form > *:nth-child(4) { animation-delay: 220ms; }
+  .login-form > *:nth-child(5) { animation-delay: 270ms; }
+  .login-form > *:nth-child(6) { animation-delay: 320ms; }
+  .login-form > *:nth-child(7) { animation-delay: 370ms; }
+  .login-form > *:nth-child(8) { animation-delay: 420ms; }
 
   .auth-badge {
     align-self: center;
@@ -364,23 +436,47 @@ export default function AuthForm() {
 
   .btn.btn-login {
     margin-top: 0.35rem;
+    width: 100%;
+    min-height: 46px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
     border: 0;
     border-radius: 12px;
     padding: 0.78rem 1rem;
     background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
-    color: #ffffff;
+    color: #ffffff !important;
     font-weight: 700;
     font-size: 1rem;
     letter-spacing: 0.01em;
     cursor: pointer;
     box-shadow: 0 10px 22px rgba(37, 99, 235, 0.35);
     transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    animation: pulseGlow 2.8s ease-in-out infinite;
+  }
+
+  .btn.btn-login::after {
+    content: "";
+    position: absolute;
+    top: -120%;
+    left: -30%;
+    width: 40%;
+    height: 340%;
+    background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+    transform: rotate(18deg);
+    transition: left 0.5s ease;
   }
 
   .btn.btn-login:hover {
     transform: translateY(-2px);
     filter: saturate(1.06);
     box-shadow: 0 14px 28px rgba(37, 99, 235, 0.3);
+  }
+
+  .btn.btn-login:hover::after {
+    left: 120%;
   }
 
   .btn.btn-login:disabled {
@@ -413,11 +509,33 @@ export default function AuthForm() {
   .auth-link-btn:hover {
     color: #1e40af;
     border-color: #93c5fd;
+    transform: translateY(-1px);
   }
 
   .auth-link-btn-secondary {
     font-size: 0.88rem;
     color: #2563eb;
+  }
+
+  .auth-link-btn {
+    transition: color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .auth-shell,
+    .auth-shell::before,
+    .auth-shell::after,
+    .login-form > *,
+    .btn.btn-login {
+      animation: none !important;
+    }
+
+    .btn.btn-login::after,
+    .auth-link-btn,
+    .form-group input,
+    .btn.btn-login {
+      transition: none !important;
+    }
   }
 
   @media (max-width: 500px) {
