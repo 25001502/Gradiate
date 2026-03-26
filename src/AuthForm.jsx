@@ -5,8 +5,6 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updateProfile,
-  signInWithPhoneNumber,
-  RecaptchaVerifier,
 } from "firebase/auth";
 
 import {
@@ -22,7 +20,6 @@ export default function AuthForm() {
   const verificationEndpoint =
     import.meta.env.VITE_SEND_VERIFICATION_ENDPOINT || "/api/send-verification";
 
-  const [authMode, setAuthMode] = useState("email"); // "email" or "phone"
   const [isLogin, setIsLogin] = useState(true);
 
   // Email/password state
@@ -30,13 +27,7 @@ export default function AuthForm() {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
 
-  // Phone/SMS state
-  const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState("");
-  const [step, setStep] = useState("phone"); // "phone" or "otp"
-  const [confirmationResult, setConfirmationResult] = useState(null);
-
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -60,16 +51,6 @@ export default function AuthForm() {
       }
       throw new Error(data.error || "Failed to send verification email.");
     }
-  };
-
-  // Reset phone step when switching modes
-  const handleAuthModeSwitch = (mode) => {
-    setAuthMode(mode);
-    setStep("phone");
-    setPhone("");
-    setOtp("");
-    setConfirmationResult(null);
-    setLoading(false);
   };
 
   // Email/password handlers
@@ -114,65 +95,6 @@ export default function AuthForm() {
     } catch (error) {
       toast.error(error.message);
     }
-  };
-
-  // Setup Recaptcha
-  const setupRecaptcha = () => {
-    if (window.recaptchaVerifier) {
-      window.recaptchaVerifier.clear();
-      window.recaptchaVerifier = null;
-    }
-
-    window.recaptchaVerifier = new RecaptchaVerifier(
-      "recaptcha-container",
-      {
-        size: "invisible",
-        callback: () => {
-          console.log("Recaptcha solved");
-        },
-      },
-      auth
-    );
-
-    window.recaptchaVerifier.render().catch(console.error);
-  };
-
-  // Phone/SMS handlers
-  const handlePhoneSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setupRecaptcha();
-    try {
-      const appVerifier = window.recaptchaVerifier;
-      const result = await signInWithPhoneNumber(auth, phone, appVerifier);
-      setConfirmationResult(result);
-      setStep("otp");
-      toast.success("OTP sent! Please check your SMS.");
-    } catch (error) {
-      toast.error(error.message);
-      if (window.recaptchaVerifier) window.recaptchaVerifier.clear();
-    }
-    setLoading(false);
-  };
-
-  const handleOtpSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      await confirmationResult.confirm(otp);
-      toast.success("Phone verified! You are now logged in.");
-      navigate("/application");
-    } catch (error) {
-      console.error(error);
-      toast.error("Invalid code. Please try again.");
-    }
-    setLoading(false);
-  };
-
-  const resendOtp = async () => {
-    setStep("phone");
-    setOtp("");
-    toast("You can now resend OTP.");
   };
 
   return (
@@ -231,47 +153,7 @@ export default function AuthForm() {
           boxShadow: "0 2px 8px #e0e7ef",
         }}
       >
-        {/* Auth mode switcher */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            marginBottom: 20,
-          }}
-        >
-          <button
-            onClick={() => handleAuthModeSwitch("email")}
-            style={{
-              background: authMode === "email" ? "#2563eb" : "#e0e7ef",
-              color: authMode === "email" ? "#fff" : "#222",
-              border: "none",
-              borderRadius: "6px 0 0 6px",
-              padding: "0.5rem 1.2rem",
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
-            Email
-          </button>
-          <button
-            onClick={() => handleAuthModeSwitch("phone")}
-            style={{
-              background: authMode === "phone" ? "#2563eb" : "#e0e7ef",
-              color: authMode === "phone" ? "#fff" : "#222",
-              border: "none",
-              borderRadius: "0 6px 6px 0",
-              padding: "0.5rem 1.2rem",
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
-            Phone
-          </button>
-        </div>
-
-        {/* Email/password form */}
-        {authMode === "email" ? (
-          <form className="login-form" onSubmit={handleEmailSubmit}>
+        <form className="login-form" onSubmit={handleEmailSubmit}>
             <h2 style={{ textAlign: "center", marginBottom: 16 }}>
               {isLogin ? "Login" : "Create Account"}
             </h2>
@@ -354,111 +236,6 @@ export default function AuthForm() {
               )}
             </div>
           </form>
-        ) : (
-          // Phone/SMS form
-          <div>
-            <h2 style={{ textAlign: "center", marginBottom: 100 }}>
-              Sign In / Sign Up with Phone
-            </h2>
-            {step === "phone" && (
-              <form onSubmit={handlePhoneSubmit}>
-                <label
-                  htmlFor="phone"
-                  style={{ display: "block", marginBottom: 8 }}
-                >
-                  Phone Number (with country code)
-                </label>
-                <input
-                  id="phone"
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+27 82 123 4567"
-                  required
-                  style={{
-                    width: "100%",
-                    padding: 8,
-                    marginBottom: 16,
-                    borderRadius: 4,
-                    border: "1px solid #ccc",
-                  }}
-                />
-                <div id="recaptcha-container" style={{ marginBottom: 16 }}></div>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  style={{
-                    width: "100%",
-                    padding: "0.7rem",
-                    background: "#2563eb",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: 4,
-                    fontWeight: 600,
-                    cursor: "pointer",
-                  }}
-                >
-                  {loading ? "Sending..." : "Send OTP"}
-                </button>
-              </form>
-            )}
-            {step === "otp" && (
-              <form onSubmit={handleOtpSubmit}>
-                <label
-                  htmlFor="otp"
-                  style={{ display: "block", marginBottom: 8 }}
-                >
-                  Enter OTP
-                </label>
-                <input
-                  id="otp"
-                  type="text"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  placeholder="Enter the code you received"
-                  required
-                  style={{
-                    width: "100%",
-                    padding: 8,
-                    marginBottom: 16,
-                    borderRadius: 4,
-                    border: "1px solid #ccc",
-                  }}
-                />
-                <button
-                  type="submit"
-                  disabled={loading}
-                  style={{
-                    width: "100%",
-                    padding: "0.7rem",
-                    background: "#2563eb",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: 4,
-                    fontWeight: 600,
-                    cursor: "pointer",
-                  }}
-                >
-                  {loading ? "Verifying..." : "Verify & Login"}
-                </button>
-                <button
-                  type="button"
-                  onClick={resendOtp}
-                  style={{
-                    marginTop: 10,
-                    background: "none",
-                    border: "none",
-                    color: "#2563eb",
-                    cursor: "pointer",
-                    textDecoration: "underline",
-                  }}
-                >
-                  Resend OTP
-                </button>
-              </form>
-            )}
-          </div>
-        )}
       </div>
 
       {/* FOOTER */}
