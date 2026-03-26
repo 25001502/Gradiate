@@ -142,6 +142,7 @@ export default function AuthForm() {
       </nav>
 
       {/* MAIN FORM */}
+      <div className="auth-3d-stage">
       <div
         className="auth-shell"
         style={{
@@ -156,9 +157,9 @@ export default function AuthForm() {
         }}
       >
         <form className="login-form" onSubmit={handleEmailSubmit}>
-            <div className="auth-badge">Hey! </div>
-            <h2 className="auth-title">
-              {isLogin ? "Welcome Back" : "Create Your Account"}
+            <div className="auth-badge auth-3d-pop">Hey! </div>
+            <h2 className="auth-title auth-3d-pop">
+              {isLogin ? <div className="loginhead">Welcome Back</div> : <div className="loginhead">Create Your Account</div>}
             </h2>
             <p className="auth-subtitle">
               {isLogin
@@ -204,7 +205,7 @@ export default function AuthForm() {
                 minLength={6}
               />
             </div>
-            <button type="submit" className="btn btn-login" disabled={loading}>
+            <button type="submit" className="btn btn-login auth-3d-pop" disabled={loading}>
               {loading ? "Please wait..." : isLogin ? "Login" : "Sign Up"}
             </button>
             <div className="auth-actions">
@@ -229,6 +230,7 @@ export default function AuthForm() {
             </div>
           </form>
       </div>
+          </div>
 
       {/* FOOTER */}
       <footer className="footer">
@@ -556,6 +558,50 @@ export default function AuthForm() {
     }
     .login-form label {
       font-size: 0.97rem !important;
+    }
+  }
+`}</style>
+
+      <style>{`
+  .auth-3d-stage {
+    perspective: 1200px;
+    perspective-origin: center top;
+  }
+
+  .auth-3d-stage .auth-shell {
+    transform-style: preserve-3d;
+    transform: rotateX(7deg) rotateY(-6deg);
+    transition: transform 420ms cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 420ms ease;
+    will-change: transform;
+  }
+
+  .auth-3d-stage:hover .auth-shell {
+    transform: rotateX(0deg) rotateY(0deg) translateY(-6px);
+    box-shadow: 0 26px 48px rgba(15, 23, 42, 0.2);
+  }
+
+  .auth-3d-stage .auth-shell::before,
+  .auth-3d-stage .auth-shell::after {
+    transform: translateZ(14px);
+  }
+
+  .auth-3d-pop {
+    transform: translateZ(24px);
+    will-change: transform;
+  }
+
+  @media (max-width: 700px) {
+    .auth-3d-stage .auth-shell,
+    .auth-3d-stage:hover .auth-shell {
+      transform: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .auth-3d-stage .auth-shell,
+    .auth-3d-stage:hover .auth-shell {
+      transform: none;
+      transition: none;
     }
   }
 `}</style>
