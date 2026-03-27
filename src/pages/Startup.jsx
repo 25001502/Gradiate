@@ -74,7 +74,7 @@ export default function Startup() {
       <section className="hero">
         <div className="container">
           <div className="hero-content">
-            <h1>Find Your Perfect Education Match</h1>
+            <h1 style={{fontWeight:"bold"}}>Find Your Perfect Education Match</h1>
             <p className="subtitle">
               Gradiate instantly connects students with bursaries and graduates
               with ideal programs based on their qualifications.
