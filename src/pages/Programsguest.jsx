@@ -63,7 +63,7 @@ const Programsguest = () => {
             <main className="programs-container">
                 <div className="container">
                     <div className="page-header">
-                        <h1>
+                        <h1 style={{fontWeight:"bold"}}>
                             <i className="fas fa-book"></i> Academic Programs
                         </h1>
                         <p id="header-description">
@@ -133,7 +133,7 @@ const Programsguest = () => {
                         <div className="guest-message">
                             <div className="message-content">
                                 <i className="fas fa-lock"></i>
-                                <h2>Unlock Personalized Program Recommendations</h2>
+                                <h2 style={{fontWeight:"bold"}}>Unlock Personalized Program Recommendations</h2>
                                 <p>
                                     Create an account or log in to view programs
                                     matched to your profile and save your favorites.
@@ -153,7 +153,7 @@ const Programsguest = () => {
                         {/* Recommended Programs Section */}
                         <section className="recommended-programs">
                             <div className="section-header">
-                                <h2>
+                                <h2 style={{fontWeight:"bold"}}> 
                                     <i className="fas fa-star"></i> Recommended For You
                                 </h2>
                                 <p>
@@ -170,19 +170,7 @@ const Programsguest = () => {
                             </div>
                         </section>
 
-                        {/* All Programs Section */}
-                        <section className="all-programs">
-                            <div className="section-header">
-                                <h2>
-                                    <i className="fas fa-list"></i> All Programs
-                                </h2>
-                                <p>Browse all available academic programs</p>
-                            </div>
-
-                            <div className="programs-grid" id="all-programs-grid">
-                                {/* Program cards will be populated by JavaScript */}
-                            </div>
-                        </section>
+                        
                     </div>
                 </div>
             </main>

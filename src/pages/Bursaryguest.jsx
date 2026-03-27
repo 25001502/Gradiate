@@ -63,8 +63,8 @@ const Bursaryguest = () => {
       <main className="bursaries-container">
         <div className="container">
           <div className="page-header">
-            <h1>
-              <i className="fas fa-graduation-cap"></i> Bursaries
+            <h1 style={{fontWeight:"bold"}}>
+              <i className="fas fa-graduation-cap" ></i> Bursaries
             </h1>
             <p id="header-description">
               Explore bursary opportunities you're eligible for and apply
@@ -110,7 +110,7 @@ const Bursaryguest = () => {
             <div className="guest-message">
               <div className="message-content">
                 <i className="fas fa-lock"></i>
-                <h2>Unlock Personalized Bursary Matches</h2>
+                <h2 style={{fontWeight:"bold"}}>Unlock Personalized Bursary Matches</h2>
                 <p>
                   Create an account or log in to view bursaries matched to your
                   profile and save your favorites.

@@ -95,7 +95,7 @@ const How = () => {
                 <section className="hero-section">
                     <div className="container">
                         <div className="hero-content">
-                            <h1>How Gradiate Works</h1>
+                            <h1 style={{fontWeight:"bold"}}>How Gradiate Works</h1>
                             <p className="lead">
                                 Your simple guide to finding the perfect bursary or
                                 graduate opportunity
@@ -122,7 +122,7 @@ const How = () => {
                 <section className="overview-section">
                     <div className="container">
                         <div className="section-header">
-                            <h2>Smart Matching htmlFor Your Future</h2>
+                            <h2 style={{fontWeight:"bold"}}>Smart Matching For Your Future</h2>
                             <p>
                                 Gradiate helps students and graduates connect with
                                 the best-matched bursaries, internships, and
@@ -168,7 +168,7 @@ const How = () => {
                 <section className="process-section student-process">
                     <div className="container">
                         <div className="section-header">
-                            <h2>
+                            <h2 style={{fontWeight:"bold"}}>
                                 <i className="fas fa-user-graduate"></i> For Students
                             </h2>
                             <p>
@@ -180,7 +180,7 @@ const How = () => {
                             <div className="process-step">
                                 <div className="step-number">1</div>
                                 <div className="step-content">
-                                    <h3>Create Your Account</h3>
+                                    <h3 style={{fontWeight:"bold"}}>Create Your Account</h3>
                                     <p>
                                         Sign up with your email or student number in
                                         just 2 minutes
@@ -196,7 +196,7 @@ const How = () => {
                             <div className="process-step">
                                 <div className="step-number">2</div>
                                 <div className="step-content">
-                                    <h3>Complete Your Profile</h3>
+                                    <h3 style={{fontWeight:"bold"}}>Complete Your Profile</h3>
                                     <p>
                                         Upload your report card or input your
                                         subjects and marks
@@ -212,7 +212,7 @@ const How = () => {
                             <div className="process-step">
                                 <div className="step-number">3</div>
                                 <div className="step-content">
-                                    <h3>Select Your Interests</h3>
+                                    <h3 style={{fontWeight:"bold"}}>Select Your Interests</h3>
                                     <p>
                                         Choose faculties or fields you're interested
                                         in studying
@@ -228,7 +228,7 @@ const How = () => {
                             <div className="process-step">
                                 <div className="step-number">4</div>
                                 <div className="step-content">
-                                    <h3>Get Matched</h3>
+                                    <h3 style={{fontWeight:"bold"}}>Get Matched</h3>
                                     <p>
                                         Instantly see bursaries you're eligible htmlFor
                                         with match percentages
@@ -244,7 +244,7 @@ const How = () => {
                             <div className="process-step">
                                 <div className="step-number">5</div>
                                 <div className="step-content">
-                                    <h3>Apply with One Click</h3>
+                                    <h3 style={{fontWeight:"bold"}}>Apply with One Click</h3>
                                     <p>
                                         Save time by applying through Gradiate
                                         directly
@@ -266,7 +266,7 @@ const How = () => {
                 <section className="process-section graduate-process">
                     <div className="container">
                         <div className="section-header">
-                            <h2>
+                            <h2 style={{fontWeight:"bold"}}>
                                 <i className="fas fa-user-tie"></i> For Graduates
                             </h2>
                             <p>
@@ -278,7 +278,7 @@ const How = () => {
                             <div className="process-step">
                                 <div className="step-number">1</div>
                                 <div className="step-content">
-                                    <h3>Create a Graduate Profile</h3>
+                                    <h3 style={{fontWeight:"bold"}}>Create a Graduate Profile</h3>
                                     <p>
                                         Add your qualifications, experiences, and
                                         career interests
@@ -294,7 +294,7 @@ const How = () => {
                             <div className="process-step">
                                 <div className="step-number">2</div>
                                 <div className="step-content">
-                                    <h3>Upload CV and Documents</h3>
+                                    <h3 style={{fontWeight:"bold"}}>Upload CV and Documents</h3>
                                     <p>
                                         Quick upload and parsing of your resume and
                                         transcripts
@@ -310,7 +310,7 @@ const How = () => {
                             <div className="process-step">
                                 <div className="step-number">3</div>
                                 <div className="step-content">
-                                    <h3>Smart Matching</h3>
+                                    <h3 style={{fontWeight:"bold"}}>Smart Matching</h3>
                                     <p>
                                         Get shown graduate programs, jobs, or
                                         internships based on your background
@@ -326,7 +326,7 @@ const How = () => {
                             <div className="process-step">
                                 <div className="step-number">4</div>
                                 <div className="step-content">
-                                    <h3>Apply or Get Notified</h3>
+                                    <h3 style={{fontWeight:"bold"}}>Apply or Get Notified</h3>
                                     <p>
                                         Set up alerts htmlFor new opportunities or apply
                                         instantly
@@ -348,7 +348,7 @@ const How = () => {
                 <section className="different-section">
                     <div className="container">
                         <div className="section-header">
-                            <h2>Why Choose Gradiate?</h2>
+                            <h2 style={{fontWeight:"bold"}}>Why Choose Gradiate?</h2>
                             <p>
                                 We're changing how students and graduates find
                                 opportunities
@@ -359,7 +359,7 @@ const How = () => {
                                 <div className="difference-icon">
                                     <FaRobot />
                                 </div>
-                                <h3>AI-Powered Matching</h3>
+                                <h3 style={{fontWeight:"bold"}}>AI-Powered Matching</h3>
                                 <p>
                                     Our smart algorithms analyze thousands of
                                     opportunities to find your best matches
@@ -369,7 +369,7 @@ const How = () => {
                                 <div className="difference-icon">
                                     <FaShieldAlt />
                                 </div>
-                                <h3>Verified Opportunities</h3>
+                                <h3 style={{fontWeight:"bold"}}>Verified Opportunities</h3>
                                 <p>
                                     Every bursary and program is vetted before being
                                     listed on our platform
@@ -379,7 +379,7 @@ const How = () => {
                                 <div className="difference-icon">
                                     <FaMousePointer />
                                 </div>
-                                <h3>One-Click Applications</h3>
+                                <h3 style={{fontWeight:"bold"}}>One-Click Applications</h3>
                                 <p>
                                     Apply to multiple opportunities with a single
                                     profile - no repetitive forms
@@ -389,7 +389,7 @@ const How = () => {
                                 <div className="difference-icon">
                                     <FaBell />
                                 </div>
-                                <h3>Personalized Alerts</h3>
+                                <h3 style={{fontWeight:"bold"}}>Personalized Alerts</h3>
                                 <p>
                                     Get notified when new opportunities matching
                                     your profile become available
@@ -403,7 +403,7 @@ const How = () => {
                 <section className="audience-section">
                     <div className="container">
                         <div className="section-header">
-                            <h2>Who Can Use Gradiate?</h2>
+                            <h2 style={{fontWeight:"bold"}}>Who Can Use Gradiate?</h2>
                             <p>
                                 We serve students and graduates at all stages of
                                 their educational journey
@@ -414,7 +414,7 @@ const How = () => {
                                 <div className="audience-icon">
                                     <FaSchool />
                                 </div>
-                                <h3>High School Learners</h3>
+                                <h3 style={{fontWeight:"bold"}}>High School Learners</h3>
                                 <p>
                                     Grade 11-12 students looking htmlFor bursaries and
                                     funding options
@@ -424,7 +424,7 @@ const How = () => {
                                 <div className="audience-icon">
                                     <FaUniversity />
                                 </div>
-                                <h3>University Students</h3>
+                                <h3 style={{fontWeight:"bold"}}>University Students</h3>
                                 <p>
                                     First-year and continuing students seeking
                                     financial support
@@ -434,7 +434,7 @@ const How = () => {
                                 <div className="audience-icon">
                                     <FaUserGraduate/>
                                 </div>
-                                <h3>Recent Graduates</h3>
+                                <h3 style={{fontWeight:"bold"}}>Recent Graduates</h3>
                                 <p>
                                     Those who've completed their studies and are
                                     entering the workforce
@@ -444,7 +444,7 @@ const How = () => {
                                 <div className="audience-icon">
                                     <FaBriefcase />
                                 </div>
-                                <h3>Career Changers</h3>
+                                <h3 style={{fontWeight:"bold"}}>Career Changers</h3>
                                 <p>
                                     Professionals looking to upskill or change
                                     career paths
@@ -452,7 +452,7 @@ const How = () => {
                             </div>
                         </div>
                         <div className="local-context">
-                            <h3>
+                            <h3 style={{fontWeight:"bold"}}>
                                 <FaMapMarkerAlt /> South African
                                 Focus
                             </h3>
@@ -479,7 +479,7 @@ const How = () => {
                                 </button>
                             </div>
                             <div className="video-caption">
-                                <h3>See Gradiate in Action</h3>
+                                <h3 style={{fontWeight:"bold"}}>See Gradiate in Action</h3>
                                 <p>
                                     Watch our 2-minute explainer video to see how
                                     easy it is to find your perfect opportunity
@@ -493,7 +493,7 @@ const How = () => {
                 <section className="faq-section">
                     <div className="container">
                         <div className="section-header">
-                            <h2>Frequently Asked Questions</h2>
+                            <h2 style={{fontWeight:"bold"}}>Frequently Asked Questions</h2>
                             <p>Quick answers to common questions about Gradiate</p>
                         </div>
                         <div className="faq-accordion">

@@ -78,7 +78,7 @@ const About = () => {
         <img src={heroAbout} alt="Diverse students studying together" />
         <div className="hero-image-overlay"></div>
         <div className="container hero-image-content">
-          <h1>Our Mission to Transform Education Access</h1>
+          <h1 style={{fontWeight:"bold"}}>Our Mission to Transform Education Access</h1>
           <p className="subtitle">
             Gradiate was founded to bridge the gap between students and
             educational opportunities, making higher education accessible to
@@ -92,7 +92,7 @@ const About = () => {
         <div className="container">
           <div className="about-grid">
             <div className="about-text">
-              <h2 className="section-title">Our Story</h2>
+              <h2 className="section-title" style={{fontWeight:"bold"}}>Our Story</h2>
               <p>
                 Gradiate was born in 2023 from a simple observation: too many
                 talented students were missing out on educational opportunities
@@ -107,7 +107,7 @@ const About = () => {
               </p>
             </div>
             <div className="about-text">
-              <h2 className="section-title">Our Approach</h2>
+              <h2 className="section-title" style={{fontWeight:"bold"}}>Our Approach</h2>
               <p>
                 We believe that every student deserves personalized guidance in
                 their educational journey. Unlike traditional resources that
@@ -136,7 +136,7 @@ const About = () => {
       {/* Team Section */}
       <section className="team">
         <div className="container">
-          <h2 className="section-title">Meet Our Leadership Team</h2>
+          <h2 className="section-title" style={{fontWeight:"bold"}}>Meet Our Leadership Team</h2>
           <p className="subtitle">
             A diverse group of passionate individuals dedicated to transforming
             education access.
@@ -145,7 +145,7 @@ const About = () => {
           <div className="team-grid">
             <div className="team-card">
               <img src={"https://firebasestorage.googleapis.com/v0/b/my-univen-project.firebasestorage.app/o/gemini-2.5-flash-image_make_me_look_profetional_for_a_portfolio_profile_picture_and_make_the_suit_black-0.jpg?alt=media&token=7a85f9f2-d8cc-47f1-be49-7684677b2522"} alt="Nengovhela Thandululo" />
-              <h3>Nengovhela Thandululo</h3>
+              <h3 style={{fontWeight:"bold"}}>Nengovhela Thandululo</h3>
               <p className="position">Founder & CEO</p>
               <p className="bio">
                 The Young man with a passion for education equity and helping the disadvantaged, and has a good background in software development.
@@ -161,7 +161,7 @@ const About = () => {
             </div>
             <div className="team-card">
               <img src={team1} alt="Nicoroy Zwane" />
-              <h3>Nicoroy Zwane</h3>
+              <h3 style={{fontWeight:"bold"}}>Nicoroy Zwane</h3>
               <p className="position">Website Designer</p>
               <p className="bio">
                 Experienced web designer who laid a hand focused on creating user-friendly interfaces. he also braught a wealth of experience in graphic design and branding including how Gradiate must stand up.
@@ -180,7 +180,7 @@ const About = () => {
       </section>
       <section className="values-section">
         <div className="container">
-          <h2>Our Core Values</h2>
+          <h2 style={{fontWeight:"bold"}}>Our Core Values</h2>
           <p className="subtitle">
             Everything we do at Gradiate is driven and guided by these core
             principles.
@@ -190,7 +190,7 @@ const About = () => {
               <div className="value-icon">
                 <FontAwesomeIcon icon={faGraduationCap} />
               </div>
-              <h3>Accessibility</h3>
+              <h3 style={{fontWeight:"bold"}}>Accessibility</h3>
               <p>
                 We're committed to breaking down barriers to education and
                 making opportunities available to all students, regardless of
@@ -201,7 +201,7 @@ const About = () => {
               <div className="value-icon">
                 <FontAwesomeIcon icon={faUsers} />
               </div>
-              <h3>Community</h3>
+              <h3 style={{fontWeight:"bold"}}>Community</h3>
               <p>
                 We foster connections between students, institutions, and
                 sponsors to create a supportive ecosystem where everyone can
@@ -213,7 +213,7 @@ const About = () => {
               <div className="value-icon">
                 <FontAwesomeIcon icon={faBalanceScale} />
               </div>
-              <h3>Equity</h3>
+              <h3 style={{fontWeight:"bold"}}>Equity</h3>
               <p>
                 We actively work to level the playing field by identifying and
                 addressing systemic barriers in education access.
@@ -224,7 +224,7 @@ const About = () => {
               <div className="value-icon">
                 <FontAwesomeIcon icon={faShieldAlt} />
               </div>
-              <h3>Integrity</h3>
+              <h3 style={{fontWeight:"bold"}}>Integrity</h3>
               <p>
                 We maintain the highest standards of honesty and transparency in
                 all our student-institution matching processes.
@@ -237,7 +237,7 @@ const About = () => {
       {/* Stats Section */}
       <section className="stats">
         <div className="container">
-          <h2>By The Numbers</h2>
+          <h2 style={{fontWeight:"bold"}}>By The Numbers</h2>
           <p className="subtitle">
             The impact we've made thus far together with our partners
           </p>
@@ -265,7 +265,7 @@ const About = () => {
       {/* Call to Action */}
       <section className="cta">
         <div className="container">
-          <h2>Ready to Find Your Perfect Match?</h2>
+          <h2 style={{fontWeight:"bold"}}>Ready to Find Your Perfect Match?</h2>
           <p>
             Join thousands of students and graduates who've found their ideal
             opportunities through Gradiate.

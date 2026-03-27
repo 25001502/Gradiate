@@ -89,13 +89,13 @@ export default function Startup() {
 
       <section className="features">
         <div className="container">
-          <h2>Why Choose Gradiate?</h2>
+          <h2 style={{fontWeight:"bold"}}>Why Choose Gradiate?</h2>
           <div className="features-grid">
             <div className="feature-card">
               <div className="feature-icon">
                 <FaBullseye />
               </div>
-              <h3>Personalized Matching</h3>
+              <h3 style={{fontWeight:"bold"}}>Personalized Matching</h3>
               <p>
                 We use your grades or qualifications to recommend bursaries and
                 programs you actually qualify for.
@@ -105,7 +105,7 @@ export default function Startup() {
               <div className="feature-icon">
                 <FaBolt />
               </div>
-              <h3>Fast and Free</h3>
+              <h3 style={{fontWeight:"bold"}}>Fast and Free</h3>
               <p>
                 Sign up in minutes and instantly access real opportunities
                 tailored to your goals.
@@ -115,7 +115,7 @@ export default function Startup() {
               <div className="feature-icon">
                 <FaRoad />
               </div>
-              <h3>One Platform, Many Paths</h3>
+              <h3 style={{fontWeight:"bold"}}>One Platform, Many Paths</h3>
               <p>
                 Gradiate bridges the gap between high school and higher
                 education, and between graduation and your first job.
@@ -125,7 +125,7 @@ export default function Startup() {
               <div className="feature-icon">
                 <FaHandsHelping />
               </div>
-              <h3>Support When You Need It</h3>
+              <h3 style={{fontWeight:"bold"}}>Support When You Need It</h3>
               <p>
                 Ask questions, get guidance, and stay on track with the help of
                 our support team.
@@ -137,13 +137,13 @@ export default function Startup() {
 
       <section className="target-groups">
         <div className="container">
-          <h2>Who Can Benefit?</h2>
+          <h2 style={{fontWeight:"bold"}}>Who Can Benefit?</h2>
           <div className="groups-grid">
             <div className="group-card">
               <div className="group-icon">
                 <FaUserGraduate />
               </div>
-              <h3>For Grade 12 Learners</h3>
+              <h3 style={{fontWeight:"bold"}}>For Grade 12 Learners</h3>
               <ul>
                 <li>
                   <FaCheck /> University programs you qualify for
@@ -166,7 +166,7 @@ export default function Startup() {
               <div className="group-icon">
                 <FaUserTie />
               </div>
-              <h3>For Graduates</h3>
+              <h3 style={{fontWeight:"bold"}}>For Graduates</h3>
               <ul>
                 <li>
                   <FaCheck /> Graduate internships
@@ -191,7 +191,7 @@ export default function Startup() {
 
       <section className="testimonials">
         <div className="container">
-          <h2>Success Stories</h2>
+          <h2 style={{fontWeight:"bold"}}>Success Stories</h2>
           <div className="testimonial-carousel">
             <div className="testimonial active">
               <div className="quote">
@@ -215,7 +215,7 @@ export default function Startup() {
                 <img src="images/testimonial2.jpg" alt="Sarah M." />
                 <div className="author-info">
                   <h4>Sarah M.</h4>
-                  <p>Computer Science Student</p>
+                  <p >Computer Science Student</p>
                 </div>
               </div>
             </div>
@@ -246,7 +246,7 @@ export default function Startup() {
 
       <section className="cta">
         <div className="container">
-          <h2>Ready to Find Your Perfect Match?</h2>
+          <h2 >Ready to Find Your Perfect Match?</h2>
           <p>
             Join thousands of students and graduates who've found their ideal
             opportunities through Gradiate.
