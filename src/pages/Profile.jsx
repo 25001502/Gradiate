@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import avDefault from "../images/default-avatar.jpg";
 import av1 from "../images/team1.jpg";
@@ -8,19 +8,106 @@ import {
   getAuth,
   updateProfile,
   signOut,
+  deleteUser,
   updatePassword,
   reload,
 } from "firebase/auth";
-import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  getFirestore,
+  setDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 import {
   FaPencilAlt,
-  FaGraduationCap,
   FaSignOutAlt,
   FaShieldAlt,
   FaUserCircle,
-  FaBook,
   FaHome,
 } from "react-icons/fa";
+
+const PASSWORD_RULES = [
+  { key: "length", label: "At least 8 characters", test: (value) => value.length >= 8 },
+  { key: "upper", label: "One uppercase letter", test: (value) => /[A-Z]/.test(value) },
+  { key: "lower", label: "One lowercase letter", test: (value) => /[a-z]/.test(value) },
+  { key: "number", label: "One number", test: (value) => /\d/.test(value) },
+  { key: "symbol", label: "One special character", test: (value) => /[^A-Za-z0-9]/.test(value) },
+];
+
+const getPasswordStrength = (password = "") => {
+  const checks = PASSWORD_RULES.map((rule) => ({
+    key: rule.key,
+    label: rule.label,
+    passed: rule.test(password),
+  }));
+  const passedCount = checks.filter((check) => check.passed).length;
+  const ratio = checks.length ? passedCount / checks.length : 0;
+
+  let label = "Very Weak";
+  let color = "#dc2626";
+  if (ratio >= 1) {
+    label = "Strong";
+    color = "#16a34a";
+  } else if (ratio >= 0.8) {
+    label = "Good";
+    color = "#65a30d";
+  } else if (ratio >= 0.6) {
+    label = "Fair";
+    color = "#d97706";
+  } else if (ratio >= 0.4) {
+    label = "Weak";
+    color = "#ea580c";
+  }
+
+  return {
+    checks,
+    score: passedCount,
+    ratio,
+    label,
+    color,
+    isValid: checks.every((check) => check.passed),
+  };
+};
+
+const formatSecurityDate = (value) => {
+  if (!value) {
+    return "Not available";
+  }
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return "Not available";
+  }
+  return parsed.toLocaleString("en-ZA", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+const getDeviceDescriptor = () => {
+  if (typeof navigator === "undefined") {
+    return { browser: "Unknown Browser", platform: "Unknown Device" };
+  }
+
+  const userAgent = navigator.userAgent || "";
+  let browser = "Unknown Browser";
+
+  if (userAgent.includes("Edg/")) browser = "Microsoft Edge";
+  else if (userAgent.includes("Chrome/")) browser = "Google Chrome";
+  else if (userAgent.includes("Firefox/")) browser = "Mozilla Firefox";
+  else if (userAgent.includes("Safari/") && !userAgent.includes("Chrome/")) browser = "Safari";
+
+  const platform = navigator.platform || "Unknown Device";
+  return { browser, platform };
+};
+
+const getSecurityActivityKey = (uid) => `gradiate_security_activity_${uid}`;
 
 const defaultProfileData = {
   academicStage: "tertiary",
@@ -124,7 +211,12 @@ const Profile = () => {
   const [securityLoading, setSecurityLoading] = useState(false);
   const [securityError, setSecurityError] = useState("");
   const [securitySuccess, setSecuritySuccess] = useState("");
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [activityLog, setActivityLog] = useState([]);
   const menuRef = useRef(null);
+  const deviceDescriptor = useMemo(() => getDeviceDescriptor(), []);
+  const passwordStrength = useMemo(() => getPasswordStrength(newPassword), [newPassword]);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
@@ -199,6 +291,29 @@ const Profile = () => {
     setSuccess("");
   };
 
+  const addSecurityActivity = (action, status = "info") => {
+    if (!user?.uid) {
+      return;
+    }
+
+    const entry = {
+      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      action,
+      status,
+      at: new Date().toISOString(),
+    };
+
+    setActivityLog((prev) => {
+      const next = [entry, ...prev].slice(0, 8);
+      try {
+        localStorage.setItem(getSecurityActivityKey(user.uid), JSON.stringify(next));
+      } catch (storageError) {
+        console.warn("Failed to persist security activity log", storageError);
+      }
+      return next;
+    });
+  };
+
   const handleFieldChange = (field, value) => {
     setProfileData((prev) => {
       const next = { ...prev, [field]: value };
@@ -221,12 +336,42 @@ const Profile = () => {
 
   const handleLogout = async () => {
     try {
+      addSecurityActivity("Signed out this device", "info");
       await signOut(auth);
       // navigate to login or home after logout
       navigate("/");
     } catch (err) {
       console.error("Logout failed", err);
       setError("Failed to logout.");
+    }
+  };
+
+  const handleSignOutAllSessions = async () => {
+    if (!user?.uid) return;
+
+    setSecurityLoading(true);
+    setSecurityError("");
+    setSecuritySuccess("");
+
+    try {
+      await setDoc(
+        doc(db, "users", user.uid),
+        {
+          globalSignOutAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
+
+      addSecurityActivity("Signed out all sessions", "success");
+      await signOut(auth);
+      navigate("/auth");
+    } catch (err) {
+      console.error(err);
+      setSecurityError("Failed to sign out all sessions.");
+      addSecurityActivity("Failed to sign out all sessions", "error");
+    } finally {
+      setSecurityLoading(false);
     }
   };
 
@@ -241,9 +386,11 @@ const Profile = () => {
       const isVerified = Boolean(auth.currentUser.emailVerified);
       setEmailVerified(isVerified);
       setSecuritySuccess(isVerified ? "Email is verified." : "Email is still not verified.");
+      addSecurityActivity(`Refreshed email verification status (${isVerified ? "verified" : "not verified"})`, "info");
     } catch (err) {
       console.error(err);
       setSecurityError("Failed to refresh verification status.");
+      addSecurityActivity("Failed to refresh verification status", "error");
     } finally {
       setSecurityLoading(false);
     }
@@ -277,9 +424,11 @@ const Profile = () => {
       }
 
       setSecuritySuccess("Verification email sent. Check your inbox.");
+      addSecurityActivity("Sent verification email", "success");
     } catch (err) {
       console.error(err);
       setSecurityError(err.message || "Could not send verification email.");
+      addSecurityActivity("Failed to send verification email", "error");
     } finally {
       setSecurityLoading(false);
     }
@@ -295,8 +444,10 @@ const Profile = () => {
       return;
     }
 
-    if (newPassword.length < 6) {
-      setSecurityError("Password must be at least 6 characters.");
+    if (!passwordStrength.isValid) {
+      setSecurityError(
+        "Password must be at least 8 characters and include uppercase, lowercase, number, and symbol."
+      );
       return;
     }
 
@@ -311,6 +462,7 @@ const Profile = () => {
       setNewPassword("");
       setConfirmPassword("");
       setSecuritySuccess("Password updated successfully.");
+      addSecurityActivity("Changed account password", "success");
     } catch (err) {
       console.error(err);
       const code = (err && err.code) || "";
@@ -319,8 +471,61 @@ const Profile = () => {
       } else {
         setSecurityError("Failed to change password.");
       }
+      addSecurityActivity("Failed to change account password", "error");
     } finally {
       setSecurityLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!auth.currentUser || !user?.uid) {
+      return;
+    }
+
+    setSecurityError("");
+    setSecuritySuccess("");
+
+    if (deleteConfirmText.trim().toUpperCase() !== "DELETE") {
+      setSecurityError('Type "DELETE" to confirm account deletion.');
+      return;
+    }
+
+    const lastSignInMs = new Date(auth.currentUser.metadata?.lastSignInTime || 0).getTime();
+    if (!lastSignInMs || Date.now() - lastSignInMs > 10 * 60 * 1000) {
+      setSecurityError("For safety, please log out and log in again before deleting your account.");
+      return;
+    }
+
+    setDeleteLoading(true);
+    try {
+      const userId = user.uid;
+
+      const bookmarkSnapshot = await getDocs(collection(db, "users", userId, "bookmarks"));
+      await Promise.all(bookmarkSnapshot.docs.map((bookmarkDoc) => deleteDoc(bookmarkDoc.ref)));
+
+      const practiceSnapshot = await getDocs(collection(db, "users", userId, "practiceSavedSubjects"));
+      await Promise.all(practiceSnapshot.docs.map((savedDoc) => deleteDoc(savedDoc.ref)));
+
+      await deleteDoc(doc(db, "users", userId));
+      try {
+        localStorage.removeItem(getSecurityActivityKey(userId));
+      } catch (storageError) {
+        console.warn("Failed to remove security activity storage", storageError);
+      }
+
+      await deleteUser(auth.currentUser);
+      navigate("/");
+    } catch (err) {
+      console.error(err);
+      const code = (err?.code || "").toLowerCase();
+      if (code.includes("requires-recent-login")) {
+        setSecurityError("Please log out and log in again before deleting your account.");
+      } else {
+        setSecurityError("Failed to delete account. Please try again.");
+      }
+      addSecurityActivity("Failed account deletion attempt", "error");
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -389,6 +594,22 @@ const Profile = () => {
     const timer = window.setTimeout(() => setSuccess(""), 3000);
     return () => window.clearTimeout(timer);
   }, [success]);
+
+  useEffect(() => {
+    if (!user?.uid) {
+      setActivityLog([]);
+      return;
+    }
+
+    try {
+      const raw = localStorage.getItem(getSecurityActivityKey(user.uid));
+      const parsed = raw ? JSON.parse(raw) : [];
+      setActivityLog(Array.isArray(parsed) ? parsed : []);
+    } catch (storageError) {
+      console.warn("Failed to load security activity log", storageError);
+      setActivityLog([]);
+    }
+  }, [user?.uid]);
 
   // close menu on outside click or ESC
   useEffect(() => {
@@ -586,7 +807,24 @@ const Profile = () => {
         </div>
 
         <div className="dashboard-tabs">
-          
+          <button
+            className={`dashboard-tab ${activeTab === "overview" ? "dashboard-tab--active" : ""}`}
+            onClick={() => setActiveTab("overview")}
+          >
+            Overview
+          </button>
+          <button
+            className={`dashboard-tab ${activeTab === "edit" ? "dashboard-tab--active" : ""}`}
+            onClick={() => setActiveTab("edit")}
+          >
+            Edit Profile
+          </button>
+          <button
+            className={`dashboard-tab ${activeTab === "security" ? "dashboard-tab--active" : ""}`}
+            onClick={() => setActiveTab("security")}
+          >
+            Security
+          </button>
         </div>
 
         {activeTab === "overview" && (
@@ -873,65 +1111,165 @@ const Profile = () => {
           <div className="uni-grid" style={{ gridTemplateColumns: "1fr" }}>
             <article className="uni-card">
               <div className="uni-card__body">
-                <h3 className="uni-card__name">Security Settings</h3>
-                <p className="uni-card__desc">
-                  Email status: {" "}
-                  <span style={emailVerified ? profileUi.verifiedText : profileUi.pendingText}>
-                    {emailVerified ? "Verified" : "Not verified"}
-                  </span>
-                </p>
+                <h3 className="uni-card__name">Security Center</h3>
 
-                <div className="uni-card__actions" style={{ marginBottom: 12 }}>
-                  {!emailVerified && (
+                <section style={profileUi.securitySectionCard}>
+                  <h4 style={profileUi.securitySectionTitle}>Account Activity</h4>
+                  <p className="uni-card__desc">Account created: {formatSecurityDate(user?.metadata?.creationTime)}</p>
+                  <p className="uni-card__desc">Last sign-in: {formatSecurityDate(user?.metadata?.lastSignInTime)}</p>
+
+                  <div style={profileUi.activityFeed}>
+                    {activityLog.length > 0 ? (
+                      activityLog.map((event) => (
+                        <div key={event.id} style={profileUi.activityRow}>
+                          <span style={profileUi.activityAction}>{event.action}</span>
+                          <span style={profileUi.activityTime}>{formatSecurityDate(event.at)}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="uni-card__desc" style={{ margin: 0 }}>
+                        No recent security actions yet.
+                      </p>
+                    )}
+                  </div>
+                </section>
+
+                <section style={profileUi.securitySectionCard}>
+                  <h4 style={profileUi.securitySectionTitle}>Sessions</h4>
+                  <p className="uni-card__desc">
+                    Current session: {deviceDescriptor.browser} on {deviceDescriptor.platform}
+                  </p>
+                  <div className="uni-card__actions" style={{ marginTop: 4 }}>
+                    <button className="uni-card__btn uni-card__btn--secondary" onClick={handleLogout}>
+                      Sign Out This Device
+                    </button>
                     <button
                       className="uni-card__btn uni-card__btn--secondary"
-                      onClick={sendVerificationLink}
+                      onClick={handleSignOutAllSessions}
                       disabled={securityLoading}
                       style={securityLoading ? profileUi.disabledButton : undefined}
                     >
-                      Send Verification Email
+                      Sign Out All Sessions
                     </button>
+                  </div>
+                </section>
+
+                <section style={profileUi.securitySectionCard}>
+                  <h4 style={profileUi.securitySectionTitle}>Password and Verification</h4>
+                  <p className="uni-card__desc">
+                    Email status: {" "}
+                    <span style={emailVerified ? profileUi.verifiedText : profileUi.pendingText}>
+                      {emailVerified ? "Verified" : "Not verified"}
+                    </span>
+                  </p>
+
+                  <div className="uni-card__actions" style={{ marginBottom: 12 }}>
+                    {!emailVerified && (
+                      <button
+                        className="uni-card__btn uni-card__btn--secondary"
+                        onClick={sendVerificationLink}
+                        disabled={securityLoading}
+                        style={securityLoading ? profileUi.disabledButton : undefined}
+                      >
+                        Send Verification Email
+                      </button>
+                    )}
+                    <button
+                      className="uni-card__btn uni-card__btn--secondary"
+                      onClick={refreshVerificationStatus}
+                      disabled={securityLoading}
+                      style={securityLoading ? profileUi.disabledButton : undefined}
+                    >
+                      Refresh Status
+                    </button>
+                  </div>
+
+                  <label style={profileUi.fieldWrap}>
+                    New Password
+                    <input
+                      style={profileUi.input}
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Enter new password"
+                    />
+                  </label>
+
+                  {newPassword && (
+                    <div style={profileUi.passwordStrengthWrap}>
+                      <div style={profileUi.passwordStrengthHeader}>
+                        <span style={profileUi.passwordStrengthLabel}>Strength</span>
+                        <strong style={{ color: passwordStrength.color }}>{passwordStrength.label}</strong>
+                      </div>
+                      <div style={profileUi.passwordStrengthTrack}>
+                        <div
+                          style={{
+                            ...profileUi.passwordStrengthFill,
+                            width: `${Math.round(passwordStrength.ratio * 100)}%`,
+                            background: passwordStrength.color,
+                          }}
+                        />
+                      </div>
+                      <div style={profileUi.passwordRulesGrid}>
+                        {passwordStrength.checks.map((check) => (
+                          <span key={check.key} style={check.passed ? profileUi.rulePass : profileUi.rulePending}>
+                            {check.label}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   )}
+
+                  <label style={{ ...profileUi.fieldWrap, marginTop: 10 }}>
+                    Confirm Password
+                    <input
+                      style={profileUi.input}
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Confirm new password"
+                    />
+                  </label>
+
                   <button
-                    className="uni-card__btn uni-card__btn--secondary"
-                    onClick={refreshVerificationStatus}
+                    className="uni-card__btn uni-card__btn--primary"
+                    onClick={handleChangePassword}
                     disabled={securityLoading}
-                    style={securityLoading ? profileUi.disabledButton : undefined}
+                    style={{ marginTop: 12, width: "fit-content", ...(securityLoading ? profileUi.disabledButton : {}) }}
                   >
-                    Refresh Status
+                    {securityLoading ? "Please wait..." : "Update Password"}
                   </button>
-                </div>
+                </section>
 
-                <label style={profileUi.fieldWrap}>
-                  New Password
-                  <input
-                    style={profileUi.input}
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Enter new password"
-                  />
-                </label>
-
-                <label style={{ ...profileUi.fieldWrap, marginTop: 10 }}>
-                  Confirm Password
-                  <input
-                    style={profileUi.input}
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirm new password"
-                  />
-                </label>
-
-                <button
-                  className="uni-card__btn uni-card__btn--primary"
-                  onClick={handleChangePassword}
-                  disabled={securityLoading}
-                  style={{ marginTop: 12, width: "fit-content", ...(securityLoading ? profileUi.disabledButton : {}) }}
-                >
-                  {securityLoading ? "Please wait..." : "Update Password"}
-                </button>
+                <section style={profileUi.dangerZoneCard}>
+                  <h4 style={profileUi.dangerZoneTitle}>Delete Account</h4>
+                  <p className="uni-card__desc" style={{ marginBottom: 10 }}>
+                    This permanently deletes your account and profile data. Type DELETE to confirm.
+                  </p>
+                  <label style={profileUi.fieldWrap}>
+                    Confirmation
+                    <input
+                      style={profileUi.input}
+                      value={deleteConfirmText}
+                      onChange={(e) => setDeleteConfirmText(e.target.value)}
+                      placeholder="Type DELETE"
+                    />
+                  </label>
+                  <button
+                    className="uni-card__btn"
+                    onClick={handleDeleteAccount}
+                    disabled={deleteLoading}
+                    style={{
+                      marginTop: 10,
+                      background: "#b91c1c",
+                      color: "#fff",
+                      border: "1px solid #991b1b",
+                      ...(deleteLoading ? profileUi.disabledButton : {}),
+                    }}
+                  >
+                    {deleteLoading ? "Deleting..." : "Delete Account"}
+                  </button>
+                </section>
 
                 {securitySuccess && <p style={profileUi.securitySuccess}>{securitySuccess}</p>}
                 {securityError && <p style={profileUi.securityError}>{securityError}</p>}
@@ -1045,6 +1383,105 @@ const profileUi = {
     border: "none",
     background: "transparent",
     cursor: "pointer",
+  },
+  securitySectionCard: {
+    border: "1px solid #e2e8f0",
+    borderRadius: 12,
+    padding: "12px 12px 10px",
+    marginTop: 12,
+    background: "#f8fbff",
+  },
+  securitySectionTitle: {
+    margin: "0 0 8px",
+    fontSize: 15,
+    color: "#1e293b",
+    fontWeight: 700,
+  },
+  activityFeed: {
+    marginTop: 8,
+    display: "grid",
+    gap: 8,
+  },
+  activityRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 10,
+    border: "1px solid #e2e8f0",
+    background: "#fff",
+    borderRadius: 10,
+    padding: "8px 10px",
+  },
+  activityAction: {
+    color: "#334155",
+    fontSize: 13,
+    fontWeight: 600,
+  },
+  activityTime: {
+    color: "#64748b",
+    fontSize: 12,
+    whiteSpace: "nowrap",
+  },
+  passwordStrengthWrap: {
+    marginTop: 10,
+    border: "1px solid #e2e8f0",
+    borderRadius: 10,
+    padding: "10px 11px",
+    background: "#fff",
+  },
+  passwordStrengthHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 7,
+  },
+  passwordStrengthLabel: {
+    color: "#475569",
+    fontSize: 12,
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.04em",
+  },
+  passwordStrengthTrack: {
+    width: "100%",
+    height: 8,
+    borderRadius: 999,
+    background: "#e2e8f0",
+    overflow: "hidden",
+  },
+  passwordStrengthFill: {
+    height: "100%",
+    borderRadius: 999,
+    transition: "width 220ms ease",
+  },
+  passwordRulesGrid: {
+    marginTop: 8,
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+    gap: 6,
+  },
+  rulePass: {
+    color: "#166534",
+    fontSize: 12,
+    fontWeight: 600,
+  },
+  rulePending: {
+    color: "#64748b",
+    fontSize: 12,
+    fontWeight: 500,
+  },
+  dangerZoneCard: {
+    border: "1px solid #fecaca",
+    borderRadius: 12,
+    padding: "12px 12px 10px",
+    marginTop: 12,
+    background: "#fef2f2",
+  },
+  dangerZoneTitle: {
+    margin: "0 0 8px",
+    fontSize: 15,
+    color: "#7f1d1d",
+    fontWeight: 700,
   },
   disabledButton: {
     opacity: 0.65,
