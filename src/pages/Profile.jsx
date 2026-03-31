@@ -542,21 +542,23 @@ const Profile = () => {
         </header>
 
         <div className="dashboard-shortcuts">
+
           <button className="dashboard-shortcut" onClick={() => setActiveTab("overview")}>
             <FaUserCircle /> Overview
           </button>
+
           <button className="dashboard-shortcut" onClick={() => setActiveTab("edit")}>
             <FaPencilAlt /> Edit Profile
           </button>
+
           <button className="dashboard-shortcut" onClick={() => setActiveTab("security")}>
             <FaShieldAlt /> Security
           </button>
+
           <button className="dashboard-shortcut" onClick={() => navigate("/application") }>
             <FaHome /> Home
           </button>
-          <button className="dashboard-shortcut" onClick={() => alert("Sorry! this feature is not yet available")}>
-            <FaGraduationCap /> Bursaries
-          </button>
+          
           <button className="dashboard-shortcut" onClick={handleLogout}>
             <FaSignOutAlt /> Logout
           </button>
@@ -584,24 +586,7 @@ const Profile = () => {
         </div>
 
         <div className="dashboard-tabs">
-          <button
-            className={`dashboard-tab ${activeTab === "overview" ? "dashboard-tab--active" : ""}`}
-            onClick={() => setActiveTab("overview")}
-          >
-            Overview
-          </button>
-          <button
-            className={`dashboard-tab ${activeTab === "edit" ? "dashboard-tab--active" : ""}`}
-            onClick={() => setActiveTab("edit")}
-          >
-            Edit Profile
-          </button>
-          <button
-            className={`dashboard-tab ${activeTab === "security" ? "dashboard-tab--active" : ""}`}
-            onClick={() => setActiveTab("security")}
-          >
-            Security
-          </button>
+          
         </div>
 
         {activeTab === "overview" && (

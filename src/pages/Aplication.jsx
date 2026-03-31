@@ -671,14 +671,7 @@ export default function Aplication() {
           >
             <FaBell /> {alertsEnabled ? "Reminders On" : "Enable Reminders"}
           </button>
-          {!isGuest && (
-            <button
-              className="dashboard-shortcut"
-              onClick={handleLogout}
-            >
-              <FaSignOutAlt /> Logout
-            </button>
-          )}
+          
         </div>
 
         {/* Stats */}
