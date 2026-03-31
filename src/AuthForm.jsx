@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  signOut,
   updateProfile,
 } from "firebase/auth";
 
@@ -167,6 +168,23 @@ export default function AuthForm() {
     }
   };
 
+  const handleGuestAccess = async () => {
+    if (loading) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Always clear an existing account session before entering guest mode.
+      await signOut(auth);
+      navigate("/application");
+    } catch (error) {
+      toast.error(error.message || "Unable to continue as guest right now.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
  
 
   return (
@@ -190,13 +208,14 @@ export default function AuthForm() {
           </a>
           <div className="nav-actions">
 
-            <a
+            <button
                 type="button"
-                onClick={() => navigate("/application")}
+                onClick={handleGuestAccess}
                 className="btn btn-primary"
+                disabled={loading}
               >
                 Guest
-              </a>
+              </button>
 
             <button
               className="burger"
