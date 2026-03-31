@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { auth } from "./firebase";
 import { useNavigate } from "react-router-dom";
 import {
@@ -12,9 +12,75 @@ import {
   FaInstagram,
   FaLinkedin,
   FaFacebookF,
+  FaEye,
+  FaEyeSlash,
 } from "react-icons/fa";
 
 import toast, { Toaster } from "react-hot-toast";
+
+const PASSWORD_RULES = [
+  {
+    key: "length",
+    label: "At least 8 characters",
+    test: (value) => value.length >= 8,
+  },
+  {
+    key: "upper",
+    label: "One uppercase letter",
+    test: (value) => /[A-Z]/.test(value),
+  },
+  {
+    key: "lower",
+    label: "One lowercase letter",
+    test: (value) => /[a-z]/.test(value),
+  },
+  {
+    key: "number",
+    label: "One number",
+    test: (value) => /\d/.test(value),
+  },
+  {
+    key: "symbol",
+    label: "One special character",
+    test: (value) => /[^A-Za-z0-9]/.test(value),
+  },
+];
+
+const getPasswordStrength = (password = "") => {
+  const checks = PASSWORD_RULES.map((rule) => ({
+    key: rule.key,
+    label: rule.label,
+    passed: rule.test(password),
+  }));
+
+  const passedCount = checks.filter((check) => check.passed).length;
+  const ratio = checks.length ? passedCount / checks.length : 0;
+
+  let label = "Very Weak";
+  let color = "#dc2626";
+
+  if (ratio >= 1) {
+    label = "Strong";
+    color = "#16a34a";
+  } else if (ratio >= 0.8) {
+    label = "Good";
+    color = "#65a30d";
+  } else if (ratio >= 0.6) {
+    label = "Fair";
+    color = "#d97706";
+  } else if (ratio >= 0.4) {
+    label = "Weak";
+    color = "#ea580c";
+  }
+
+  return {
+    checks,
+    ratio,
+    label,
+    color,
+    isValid: checks.every((check) => check.passed),
+  };
+};
 
 export default function AuthForm() {
   const verificationEndpoint =
@@ -27,8 +93,10 @@ export default function AuthForm() {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
 
-  const [loading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const passwordStrength = useMemo(() => getPasswordStrength(password), [password]);
   const navigate = useNavigate();
 
   const sendCustomVerificationEmail = async (targetEmail) => {
@@ -56,10 +124,25 @@ export default function AuthForm() {
   // Email/password handlers
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
+
+    if (loading) {
+      return;
+    }
+
     if (!isLogin && !username.trim()) {
       toast.error("Please enter a username.");
       return;
     }
+
+    if (!isLogin && !passwordStrength.isValid) {
+      toast.error(
+        "Password must have 8+ chars, uppercase, lowercase, number, and special character."
+      );
+      return;
+    }
+
+    setLoading(true);
+
     try {
       if (isLogin) {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -79,6 +162,8 @@ export default function AuthForm() {
       navigate("/application"); // ✅ fixed spelling
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -197,16 +282,27 @@ export default function AuthForm() {
             </div>
             <div className="form-group password-input">
               <label htmlFor="password">Password</label>
-              <input
-                id="password"
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="current-password"
-                required
-                minLength={6}
-              />
+              <div className="password-field-wrap">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete={isLogin ? "current-password" : "new-password"}
+                  required
+                  minLength={isLogin ? 6 : 8}
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  title={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
             </div>
             <button type="submit" className="btn btn-login auth-3d-pop" disabled={loading}>
               {loading ? "Please wait..." : isLogin ? "Login" : "Sign Up"}
@@ -440,6 +536,93 @@ export default function AuthForm() {
     transform: translateY(-1px);
   }
 
+  .form-group,
+  .form-group label,
+  .form-group input,
+  .password-field-wrap input {
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
+  }
+
+  .password-field-wrap {
+    position: relative;
+  }
+
+  .password-field-wrap input {
+    padding-right: 2.7rem;
+  }
+
+  .password-toggle {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    color: #475569;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .password-toggle:hover {
+    background: #eef2ff;
+    color: #1e40af;
+  }
+
+  .password-policy-card {
+    border: 1px solid #dbeafe;
+    border-radius: 12px;
+    background: #f8fbff;
+    padding: 0.72rem 0.8rem;
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .password-policy-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: #475569;
+    font-weight: 600;
+  }
+
+  .password-strength-track {
+    height: 8px;
+    border-radius: 999px;
+    background: #e2e8f0;
+    overflow: hidden;
+  }
+
+  .password-strength-fill {
+    height: 100%;
+    border-radius: inherit;
+    transition: width 0.2s ease;
+  }
+
+  .password-policy-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.32rem 0.6rem;
+  }
+
+  .password-policy-item {
+    color: #64748b;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .password-policy-item--ok {
+    color: #166534;
+    font-weight: 600;
+  }
+
   .btn.btn-login {
     margin-top: 0.35rem;
     width: 100%;
@@ -573,14 +756,13 @@ export default function AuthForm() {
   }
 
   .auth-3d-stage .auth-shell {
-    transform-style: preserve-3d;
-    transform: rotateX(7deg) rotateY(-6deg);
+    transform-style: flat;
+    transform: translateY(0);
     transition: transform 420ms cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 420ms ease;
-    will-change: transform;
   }
 
   .auth-3d-stage:hover .auth-shell {
-    transform: rotateX(0deg) rotateY(0deg) translateY(-6px);
+    transform: translateY(-6px);
     box-shadow: 0 26px 48px rgba(15, 23, 42, 0.2);
   }
 
@@ -590,8 +772,7 @@ export default function AuthForm() {
   }
 
   .auth-3d-pop {
-    transform: translateZ(24px);
-    will-change: transform;
+    transform: none;
   }
 
   @media (max-width: 700px) {
