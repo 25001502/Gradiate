@@ -144,7 +144,14 @@ export default function AuthForm() {
         }}
       >
         <form className="login-form" onSubmit={handleEmailSubmit}>
-            <div className="auth-badge auth-3d-pop">Hey! </div>
+            <div className="auth-badge auth-3d-pop">
+              <img
+                src="https://firebasestorage.googleapis.com/v0/b/my-univen-project.firebasestorage.app/o/ChatGPT%20Image%20Feb%2016%2C%202026%2C%2010_40_33%20AM.png?alt=media&token=99a62911-665e-4997-94cb-46f47f56d17e"
+                alt="Gradiate badge"
+                className="auth-badge__image"
+                referrerPolicy="no-referrer"
+              />
+            </div>
             <h2 className="auth-title auth-3d-pop">
               {isLogin ? <div className="loginhead">Welcome Back</div> : <div className="loginhead">Create Your Account</div>}
             </h2>
@@ -367,15 +374,19 @@ export default function AuthForm() {
 
   .auth-badge {
     align-self: center;
-    background: #e0f2fe;
-    color: #0f4c81;
+    background: #ffffff;
     border: 1px solid #bae6fd;
     border-radius: 999px;
-    padding: 0.25rem 0.8rem;
-    font-size: 0.78rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    font-weight: 700;
+    width: 76px;
+    height: 76px;
+    overflow: hidden;
+  }
+
+  .auth-badge__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
 
   .auth-title {
