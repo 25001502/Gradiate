@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import AuthForm from './AuthForm';
 import Application from './pages/Aplication';
 import Startup from './pages/Startup';
@@ -10,6 +10,7 @@ import About from './pages/About';
 import Practise from './pages/Practise';
 import Profile from './pages/Profile';
 import Bursary from './pages/Bursary';
+import { useAuth } from './context/AuthContext';
 
 function CanonicalTagManager() {
   const location = useLocation();
@@ -31,6 +32,16 @@ function CanonicalTagManager() {
   return null;
 }
 
+function ProtectedProfileRoute() {
+  const { user } = useAuth();
+
+  if (!user?.uid) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  return <Profile />;
+}
+
 
 function App() {
   return (
@@ -47,7 +58,7 @@ function App() {
         <Route path="/how-it-works" element={<How />} />
         <Route path="/about" element={<About />} />
         <Route path="/practice" element={<Practise />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/profile" element={<ProtectedProfileRoute />} />
         <Route path="/bursary" element={<Bursary />} />
 
         {/* Legacy paths kept for backward compatibility */}
@@ -58,7 +69,7 @@ function App() {
         <Route path="/How" element={<How />} />
         <Route path="/About" element={<About />} />
         <Route path="/Practise" element={<Practise />} />
-        <Route path="/Profile" element={<Profile />} />
+        <Route path="/Profile" element={<ProtectedProfileRoute />} />
         <Route path="/Bursary" element={<Bursary />} />
       </Routes>
     </Router>

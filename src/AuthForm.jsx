@@ -82,20 +82,7 @@ export default function AuthForm() {
     }
   };
 
-  const resendVerificationEmail = async () => {
-    const targetEmail = auth.currentUser?.email || email;
-    if (!targetEmail) {
-      toast.error("Enter your email first.");
-      return;
-    }
-
-    try {
-      await sendCustomVerificationEmail(targetEmail);
-      toast.success("Verification email sent.");
-    } catch (error) {
-      toast.error(error.message);
-    }
-  };
+ 
 
   return (
     <>
@@ -218,15 +205,15 @@ export default function AuthForm() {
                   ? "Need an account? Sign up"
                   : "Already have an account? Log in"}
               </button>
-              {isLogin && (
-                <button
-                  type="button"
-                  onClick={resendVerificationEmail}
-                  className="auth-link-btn auth-link-btn-secondary"
-                >
-                  Resend verification email
-                </button>
-              )}
+             
+              <button
+                type="button"
+                onClick={() => navigate("/application")}
+                className="auth-link-btn auth-link-btn-secondary"
+              >
+                Continue as Guest
+              </button>
+              
             </div>
           </form>
       </div>

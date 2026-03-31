@@ -227,6 +227,7 @@ export default function Aplication() {
   const [alertsEnabled, setAlertsEnabled] = useState(false);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const isGuest = !user?.uid;
 
   const handleLogout = async () => {
     try {
@@ -360,8 +361,26 @@ export default function Aplication() {
     };
   }, [loadBookmarksFromFirestore, saveBookmarkToFirestore, user?.uid]);
 
+  useEffect(() => {
+    if (!isGuest) {
+      return;
+    }
+
+    setBookmarks([]);
+    setBookmarkMeta({});
+    setSavedFolderFilter("all");
+    if (activeTab === "saved") {
+      setActiveTab("all");
+    }
+  }, [activeTab, isGuest]);
+
   // Derived data
   const toggleBookmark = (id) => {
+    if (isGuest) {
+      navigate("/auth");
+      return;
+    }
+
     setBookmarks((prev) => {
       const isRemoving = prev.includes(id);
       const next = isRemoving
@@ -398,6 +417,11 @@ export default function Aplication() {
   };
 
   const updateBookmarkMeta = (id, partialMeta) => {
+    if (isGuest) {
+      navigate("/auth");
+      return;
+    }
+
     setBookmarkMeta((prevMeta) => ({
       ...prevMeta,
       [id]: {
@@ -424,6 +448,11 @@ export default function Aplication() {
   };
 
   const sendDeadlineReminders = async () => {
+    if (isGuest) {
+      navigate("/auth");
+      return;
+    }
+
     if (!("Notification" in window)) {
       return;
     }
@@ -553,9 +582,13 @@ export default function Aplication() {
           </div>
           {menuOpen && (
             <div className="burger-menu">
-              <a onClick={() => navigate("/Profile")}>
-                {user?.displayName || user?.email || "Guest"}
-              </a>
+              {isGuest ? (
+                <a onClick={() => navigate("/auth")}>Sign In / Create Account</a>
+              ) : (
+                <a onClick={() => navigate("/Profile")}>
+                  {user?.displayName || user?.email || "Guest"}
+                </a>
+              )}
               <a onClick={() => navigate("/Practise")}>Practise</a>
               <a
                 onClick={() => navigate("/Bursary")}
@@ -563,14 +596,16 @@ export default function Aplication() {
               >
                 Bursaries
               </a>
-              <a
-                onClick={async () => {
-                  setMenuOpen(false);
-                  await handleLogout();
-                }}
-              >
-                Logout
-              </a>
+              {!isGuest && (
+                <a
+                  onClick={async () => {
+                    setMenuOpen(false);
+                    await handleLogout();
+                  }}
+                >
+                  Logout
+                </a>
+              )}
             </div>
           )}
         </div>
@@ -606,9 +641,9 @@ export default function Aplication() {
         <div className="dashboard-shortcuts">
           <button
             className="dashboard-shortcut"
-            onClick={() => navigate("/Profile")}
+            onClick={() => navigate(isGuest ? "/auth" : "/Profile")}
           >
-            <FaUserCircle /> My Profile
+            <FaUserCircle /> {isGuest ? "Sign In / Create Account" : "My Profile"}
           </button>
           <button
             className="dashboard-shortcut"
@@ -625,18 +660,25 @@ export default function Aplication() {
           <button
             className="dashboard-shortcut"
             onClick={() => {
+              if (isGuest) {
+                navigate("/auth");
+                return;
+              }
+
               setAlertsEnabled((prev) => !prev);
               sendDeadlineReminders();
             }}
           >
             <FaBell /> {alertsEnabled ? "Reminders On" : "Enable Reminders"}
           </button>
-          <button
-            className="dashboard-shortcut"
-            onClick={handleLogout}
-          >
-            <FaSignOutAlt /> Logout
-          </button>
+          {!isGuest && (
+            <button
+              className="dashboard-shortcut"
+              onClick={handleLogout}
+            >
+              <FaSignOutAlt /> Logout
+            </button>
+          )}
         </div>
 
         {/* Stats */}
@@ -670,15 +712,17 @@ export default function Aplication() {
           >
             All Universities
           </button>
-          <button
-            className={`dashboard-tab ${activeTab === "saved" ? "dashboard-tab--active" : ""}`}
-            onClick={() => setActiveTab("saved")}
-          >
-            Saved ({bookmarks.length})
-          </button>
+          {!isGuest && (
+            <button
+              className={`dashboard-tab ${activeTab === "saved" ? "dashboard-tab--active" : ""}`}
+              onClick={() => setActiveTab("saved")}
+            >
+              Saved ({bookmarks.length})
+            </button>
+          )}
         </div>
 
-        {activeTab === "saved" && savedFolders.length > 0 && (
+        {!isGuest && activeTab === "saved" && savedFolders.length > 0 && (
           <div className="dashboard-tabs" style={{ marginTop: 8 }}>
             <button
               className={`dashboard-tab ${savedFolderFilter === "all" ? "dashboard-tab--active" : ""}`}
@@ -809,20 +853,24 @@ export default function Aplication() {
                       alt={`${uni.name} logo`}
                     />
                     <button
-                      className={`uni-card__bookmark ${bookmarks.includes(uni.id) ? "uni-card__bookmark--active" : ""}`}
+                      className={`uni-card__bookmark ${!isGuest && bookmarks.includes(uni.id) ? "uni-card__bookmark--active" : ""}`}
                       onClick={() => toggleBookmark(uni.id)}
                       aria-label={
-                        bookmarks.includes(uni.id)
+                        isGuest
+                          ? "Sign in to save university"
+                          : bookmarks.includes(uni.id)
                           ? "Remove bookmark"
                           : "Add bookmark"
                       }
                       title={
-                        bookmarks.includes(uni.id)
+                        isGuest
+                          ? "Sign in to save universities"
+                          : bookmarks.includes(uni.id)
                           ? "Remove from saved"
                           : "Save for later"
                       }
                     >
-                      {bookmarks.includes(uni.id) ? (
+                      {!isGuest && bookmarks.includes(uni.id) ? (
                         <FaBookmark />
                       ) : (
                         <FaRegBookmark />
@@ -875,7 +923,7 @@ export default function Aplication() {
                       </button>
                     </div>
 
-                    {bookmarks.includes(uni.id) && activeTab === "saved" && (
+                    {!isGuest && bookmarks.includes(uni.id) && activeTab === "saved" && (
                       <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
                         <label style={{ fontSize: "0.82rem", color: "#334155", fontWeight: 600 }}>
                           Folder

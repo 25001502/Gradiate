@@ -175,6 +175,7 @@ export default function Practise() {
   });
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const isGuest = !user?.uid;
 
   const handleLogout = async () => {
     try {
@@ -271,7 +272,23 @@ export default function Practise() {
     };
   }, [loadSavedSubjectsFromFirestore, saveSubjectToFirestore, user?.uid]);
 
+  useEffect(() => {
+    if (!isGuest) {
+      return;
+    }
+
+    setSavedSubjects([]);
+    if (activeTab === "saved") {
+      setActiveTab("all");
+    }
+  }, [activeTab, isGuest]);
+
   const toggleSubjectSave = (subjectName) => {
+    if (isGuest) {
+      navigate("/auth");
+      return;
+    }
+
     setSavedSubjects((prev) => {
       const isRemoving = prev.includes(subjectName);
       const next = isRemoving
@@ -385,9 +402,13 @@ export default function Practise() {
           </div>
           {menuOpen && (
             <div className="burger-menu">
-              <a onClick={() => navigate("/profile")}>
-                {user?.displayName || user?.email || "Guest"}
-              </a>
+              {isGuest ? (
+                <a onClick={() => navigate("/auth")}>Sign In / Create Account</a>
+              ) : (
+                <a onClick={() => navigate("/profile")}>
+                  {user?.displayName || user?.email || "Guest"}
+                </a>
+              )}
               <a onClick={() => navigate("/application")}>Application</a>
               <a
                 onClick={() =>
@@ -397,14 +418,16 @@ export default function Practise() {
               >
                 Bursaries
               </a>
-              <a
-                onClick={async () => {
-                  setMenuOpen(false);
-                  await handleLogout();
-                }}
-              >
-                Logout
-              </a>
+              {!isGuest && (
+                <a
+                  onClick={async () => {
+                    setMenuOpen(false);
+                    await handleLogout();
+                  }}
+                >
+                  Logout
+                </a>
+              )}
             </div>
           )}
         </div>
@@ -419,9 +442,9 @@ export default function Practise() {
           onSearchChange={setSearch}
           shortcuts={[
             {
-              label: "My Profile",
+              label: isGuest ? "Sign In / Create Account" : "My Profile",
               icon: <FaUserCircle />,
-              onClick: () => navigate("/profile"),
+              onClick: () => navigate(isGuest ? "/auth" : "/profile"),
             },
             {
               label: "Application",
@@ -433,11 +456,15 @@ export default function Practise() {
               icon: <FaGraduationCap />,
               onClick: () => alert("Sorry! this feature is not yet available"),
             },
-            {
-              label: "Logout",
-              icon: <FaUserCircle />,
-              onClick: handleLogout,
-            },
+            ...(!isGuest
+              ? [
+                  {
+                    label: "Logout",
+                    icon: <FaUserCircle />,
+                    onClick: handleLogout,
+                  },
+                ]
+              : []),
           ]}
           stats={[
             {
@@ -458,7 +485,7 @@ export default function Practise() {
           ]}
           tabs={[
             { key: "all", label: "All Subjects" },
-            { key: "saved", label: `Saved (${savedSubjects.length})` },
+            ...(!isGuest ? [{ key: "saved", label: `Saved (${savedSubjects.length})` }] : []),
           ]}
           activeTab={activeTab}
           onTabChange={setActiveTab}
@@ -522,12 +549,24 @@ export default function Practise() {
                       <SubjectIcon aria-hidden="true" />
                     </div>
                     <button
-                      className={`uni-card__bookmark ${isSaved ? "uni-card__bookmark--active" : ""}`}
+                      className={`uni-card__bookmark ${!isGuest && isSaved ? "uni-card__bookmark--active" : ""}`}
                       onClick={() => toggleSubjectSave(subject.name)}
-                      aria-label={isSaved ? "Remove bookmark" : "Add bookmark"}
-                      title={isSaved ? "Remove from saved" : "Save for later"}
+                      aria-label={
+                        isGuest
+                          ? "Sign in to save subjects"
+                          : isSaved
+                            ? "Remove bookmark"
+                            : "Add bookmark"
+                      }
+                      title={
+                        isGuest
+                          ? "Sign in to save subjects"
+                          : isSaved
+                            ? "Remove from saved"
+                            : "Save for later"
+                      }
                     >
-                      {isSaved ? <FaBookmark /> : <FaRegBookmark />}
+                      {!isGuest && isSaved ? <FaBookmark /> : <FaRegBookmark />}
                     </button>
                   </div>
 
