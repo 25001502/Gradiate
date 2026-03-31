@@ -389,7 +389,10 @@ export default function AuthForm() {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center;
+    transform: scale(1.85);
     display: block;
+    margin-top: 6px;
   }
 
   .auth-title {
