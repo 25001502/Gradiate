@@ -26,6 +26,7 @@ import {
   FaBell,
   FaBalanceScale,
   FaClock,
+  FaSignOutAlt,
 } from "react-icons/fa";
 
 // ── University data ──────────────────────────────────────────────────────────
@@ -97,12 +98,17 @@ const UNIVERSITIES = [
 const BOOKMARK_FOLDERS = ["General", "Dream", "Safe", "Applied"];
 
 const UNIVERSITY_DEADLINES = {
-  univen: "2026-09-30",
-  ul: "2026-08-31",
-  uj: "2026-09-15",
-  wits: "2026-07-31",
-  tut: "2026-10-15",
+  univen: "2026-09-26",
+  ul: "2026-08-30",
+  uj: "2026-10-31",
+  wits: "2026-09-30",
+  tut: "2026-09-30",
   uct: "2026-07-31",
+};
+
+const UNIVERSITY_OPENING_DATES = {
+  univen: "05-02",
+  wits: "03-01",
 };
 
 function daysUntil(dateString) {
@@ -113,21 +119,94 @@ function daysUntil(dateString) {
   return Math.ceil((end - start) / (1000 * 60 * 60 * 24));
 }
 
-function getAvailabilityStatus(dateString) {
-  const days = daysUntil(dateString);
-  if (days < 0) {
-    return { label: "Closed", color: "#991b1b", background: "#fee2e2", days };
+function getOpeningDateString(universityId, deadlineString) {
+  const deadline = new Date(deadlineString);
+  if (Number.isNaN(deadline.getTime())) {
+    return null;
   }
-  if (days <= 14) {
-    return { label: "Closing Soon", color: "#9a3412", background: "#ffedd5", days };
-  }
-  return { label: "Application Open", color: "#166534", background: "#dcfce7", days };
+
+  const openingMonthDay = UNIVERSITY_OPENING_DATES[universityId] || "04-01";
+  return `${deadline.getFullYear()}-${openingMonthDay}`;
 }
 
-function getDaysLeftLabel(days) {
+function getAvailabilityStatus(deadlineString, universityId) {
+  const daysToDeadline = daysUntil(deadlineString);
+
+  if (daysToDeadline < 0) {
+    return {
+      label: "Closed",
+      color: "#991b1b",
+      background: "#fee2e2",
+      days: daysToDeadline,
+      phase: "closed",
+    };
+  }
+
+  const openingDateString = getOpeningDateString(universityId, deadlineString);
+  const openingDate = openingDateString ? new Date(openingDateString) : null;
+  const deadlineDate = new Date(deadlineString);
+  const hasValidOpeningWindow =
+    openingDate && !Number.isNaN(openingDate.getTime()) && openingDate < deadlineDate;
+
+  if (hasValidOpeningWindow) {
+    const daysToOpen = daysUntil(openingDateString);
+    if (daysToOpen > 0) {
+      return {
+        label: "Opening Soon",
+        color: "#1d4ed8",
+        background: "#dbeafe",
+        days: daysToOpen,
+        phase: "opening",
+      };
+    }
+  }
+
+  if (daysToDeadline <= 14) {
+    return {
+      label: "Closing Soon",
+      color: "#9a3412",
+      background: "#ffedd5",
+      days: daysToDeadline,
+      phase: "deadline",
+    };
+  }
+
+  return {
+    label: "Application Open",
+    color: "#166534",
+    background: "#dcfce7",
+    days: daysToDeadline,
+    phase: "deadline",
+  };
+}
+
+function getDaysLeftLabel(days, phase = "deadline") {
   if (days < 0) return "Closed";
+  if (phase === "opening") {
+    if (days === 1) return "Opens in 1 day";
+    return `Opens in ${days} days`;
+  }
   if (days === 1) return "1 day left";
   return `${days} days left`;
+}
+
+function formatDateLabel(dateInput) {
+  if (!dateInput) {
+    return "N/A";
+  }
+
+  const parsedDate =
+    typeof dateInput?.toDate === "function" ? dateInput.toDate() : new Date(dateInput);
+
+  if (!(parsedDate instanceof Date) || Number.isNaN(parsedDate.getTime())) {
+    return String(dateInput);
+  }
+
+  return parsedDate.toLocaleDateString("en-ZA", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
@@ -147,7 +226,16 @@ export default function Aplication() {
   const [compareIds, setCompareIds] = useState([]);
   const [alertsEnabled, setAlertsEnabled] = useState(false);
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/");
+    } catch (error) {
+      console.error("Failed to logout", error);
+    }
+  };
 
   const buildBookmarkPayload = useCallback((universityId, overrides = {}) => {
     const uni = UNIVERSITIES.find((item) => item.id === universityId);
@@ -261,7 +349,7 @@ export default function Aplication() {
           localStorage.setItem("gradiate_bookmarks", JSON.stringify(mergedBookmarks));
         }
       } catch (error) {
-        console.error("Failed to sync bookmarks from Firestore:", error);
+        console.error("Failed to sync bookmarks", error);
       }
     };
 
@@ -285,7 +373,7 @@ export default function Aplication() {
           ? removeBookmarkFromFirestore(id)
           : saveBookmarkToFirestore(id);
         persistPromise.catch((error) => {
-          console.error("Failed to update bookmark in Firestore:", error);
+          console.error("Failed to update bookmark", error);
         });
       }
 
@@ -475,6 +563,14 @@ export default function Aplication() {
               >
                 Bursaries
               </a>
+              <a
+                onClick={async () => {
+                  setMenuOpen(false);
+                  await handleLogout();
+                }}
+              >
+                Logout
+              </a>
             </div>
           )}
         </div>
@@ -485,7 +581,7 @@ export default function Aplication() {
         {/* Welcome */}
         <header className="dashboard-welcome">
           <h1 className="dashboard-welcome__greeting">
-            Welcome back, <span>{user?.displayName || "Student"}</span> 👋
+            Welcome back, <span>{user?.displayName || "Student"}</span>
           </h1>
           <p className="dashboard-welcome__sub">
             Explore universities and find your perfect academic match.
@@ -534,6 +630,12 @@ export default function Aplication() {
             }}
           >
             <FaBell /> {alertsEnabled ? "Reminders On" : "Enable Reminders"}
+          </button>
+          <button
+            className="dashboard-shortcut"
+            onClick={handleLogout}
+          >
+            <FaSignOutAlt /> Logout
           </button>
         </div>
 
@@ -619,11 +721,12 @@ export default function Aplication() {
                 <tbody>
                   {compareUnis.map((uni) => {
                     const deadline = bookmarkMeta[uni.id]?.deadline || UNIVERSITY_DEADLINES[uni.id];
-                    const status = deadline ? getAvailabilityStatus(deadline) : null;
+                    const openingDate = deadline ? getOpeningDateString(uni.id, deadline) : null;
+                    const status = deadline ? getAvailabilityStatus(deadline, uni.id) : null;
                     const statusClass =
                       status?.label === "Application Open"
                         ? "dashboard-compare__status--open"
-                        : status?.label === "Closing Soon"
+                        : status?.label === "Closing Soon" || status?.label === "Opening Soon"
                           ? "dashboard-compare__status--soon"
                           : status?.label === "Closed"
                             ? "dashboard-compare__status--closed"
@@ -633,11 +736,14 @@ export default function Aplication() {
                       <tr key={`compare-${uni.id}`}>
                         <td data-label="University">{uni.name}</td>
                         <td data-label="Province">{uni.location.split(", ").pop()}</td>
-                        <td data-label="Deadline">{deadline || "N/A"}</td>
+                        <td data-label="Deadline">{formatDateLabel(deadline)}</td>
                         <td data-label="Status">
                           <span className={`dashboard-compare__status ${statusClass}`}>
                             {status?.label || "Unknown"}
                           </span>
+                          <div style={{ marginTop: 6, fontSize: "0.75rem", color: "#475569" }}>
+                            Opens {formatDateLabel(openingDate)}
+                          </div>
                         </td>
                       </tr>
                     );
@@ -688,7 +794,8 @@ export default function Aplication() {
           <div className="uni-grid" key={activeTab}>
             {filteredUnis.map((uni) => {
               const deadline = bookmarkMeta[uni.id]?.deadline || UNIVERSITY_DEADLINES[uni.id];
-              const status = deadline ? getAvailabilityStatus(deadline) : null;
+              const openingDate = deadline ? getOpeningDateString(uni.id, deadline) : null;
+              const status = deadline ? getAvailabilityStatus(deadline, uni.id) : null;
               const noteValue = bookmarkMeta[uni.id]?.notes || "";
               const folderValue = bookmarkMeta[uni.id]?.folder || "General";
               const compareSelected = compareIds.includes(uni.id);
@@ -741,10 +848,13 @@ export default function Aplication() {
                         </span>
                         <span className="uni-card__status-pill uni-card__status-pill--days">
                           <FaClock className="uni-card__status-icon" />
-                          {getDaysLeftLabel(status.days)}
+                          {getDaysLeftLabel(status.days, status.phase)}
                         </span>
                       </div>
                     )}
+                    <p style={{ fontSize: "0.8rem", color: "#475569", marginTop: 8 }}>
+                      Opens {formatDateLabel(openingDate)} | Closes {formatDateLabel(deadline)}
+                    </p>
                     <p className="uni-card__desc">{uni.description}</p>
                     <div className="uni-card__actions" style={{ gap: 8, display: "flex", flexWrap: "wrap" }}>
                       <button
@@ -810,7 +920,7 @@ export default function Aplication() {
           </div>
         ) : (
           <div className="dashboard-empty">
-            <div className="dashboard-empty__icon">🔍</div>
+            <div className="dashboard-empty__icon" aria-hidden="true"><FaSearch /></div>
             <p className="dashboard-empty__text">
               {activeTab === "saved"
                 ? "You haven't saved any universities yet. Tap the bookmark icon to save."

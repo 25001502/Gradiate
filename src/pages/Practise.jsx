@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import db from "../firebase";
@@ -133,6 +133,19 @@ const subjects = [
   },
 ];
 
+const PAPER_DEFAULTS = {
+  grade: "Grade 12",
+  curriculum: "CAPS",
+};
+
+const subjectsWithMetadata = subjects.map((subject) => ({
+  ...subject,
+  papers: subject.papers.map((paper) => ({
+    ...PAPER_DEFAULTS,
+    ...paper,
+  })),
+}));
+
 const subjectLogoMap = {
   Mathematics: { icon: FaCalculator, background: "#eff6ff", color: "#1d4ed8" },
   "Physical Sciences": { icon: FaFlask, background: "#ecfeff", color: "#0f766e" },
@@ -149,6 +162,8 @@ const subjectLogoMap = {
 export default function Practise() {
   const [openIndex, setOpenIndex] = useState(null);
   const [search, setSearch] = useState("");
+  const [gradeFilter, setGradeFilter] = useState("all");
+  const [curriculumFilter, setCurriculumFilter] = useState("all");
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("all"); // "all" | "saved"
   const [savedSubjects, setSavedSubjects] = useState(() => {
@@ -159,12 +174,21 @@ export default function Practise() {
     }
   });
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/");
+    } catch (error) {
+      console.error("Failed to logout", error);
+    }
+  };
 
   const subjectToKey = (subjectName) =>
     subjectName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
-  const saveSubjectToFirestore = async (subjectName) => {
+  const saveSubjectToFirestore = useCallback(async (subjectName) => {
     if (!user?.uid) {
       return;
     }
@@ -179,18 +203,18 @@ export default function Practise() {
       },
       { merge: true }
     );
-  };
+  }, [user?.uid]);
 
-  const removeSubjectFromFirestore = async (subjectName) => {
+  const removeSubjectFromFirestore = useCallback(async (subjectName) => {
     if (!user?.uid) {
       return;
     }
 
     const subjectKey = subjectToKey(subjectName);
     await deleteDoc(doc(db, "users", user.uid, "practiceSavedSubjects", subjectKey));
-  };
+  }, [user?.uid]);
 
-  const loadSavedSubjectsFromFirestore = async () => {
+  const loadSavedSubjectsFromFirestore = useCallback(async () => {
     if (!user?.uid) {
       return [];
     }
@@ -199,7 +223,7 @@ export default function Practise() {
     return snapshot.docs
       .map((savedDoc) => savedDoc.data()?.name)
       .filter((name) => typeof name === "string");
-  };
+  }, [user?.uid]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -245,7 +269,7 @@ export default function Practise() {
     return () => {
       isCancelled = true;
     };
-  }, [user?.uid]);
+  }, [loadSavedSubjectsFromFirestore, saveSubjectToFirestore, user?.uid]);
 
   const toggleSubjectSave = (subjectName) => {
     setSavedSubjects((prev) => {
@@ -269,32 +293,64 @@ export default function Practise() {
   };
 
   const totalPapers = useMemo(
-    () => subjects.reduce((sum, subject) => sum + subject.papers.length, 0),
+    () => subjectsWithMetadata.reduce((sum, subject) => sum + subject.papers.length, 0),
+    []
+  );
+
+  const availableGrades = useMemo(
+    () => [...new Set(subjectsWithMetadata.flatMap((subject) => subject.papers.map((paper) => paper.grade)))],
+    []
+  );
+
+  const availableCurriculums = useMemo(
+    () => [
+      ...new Set(
+        subjectsWithMetadata.flatMap((subject) => subject.papers.map((paper) => paper.curriculum))
+      ),
+    ],
     []
   );
 
   const filteredSubjects = useMemo(() => {
-    let list = subjects;
+    const query = search.trim().toLowerCase();
 
-    if (activeTab === "saved") {
-      list = list.filter((subject) => savedSubjects.includes(subject.name));
-    }
+    return subjectsWithMetadata
+      .filter((subject) => (activeTab === "saved" ? savedSubjects.includes(subject.name) : true))
+      .map((subject) => {
+        let papers = subject.papers;
 
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      list = list.filter(
-        (subject) =>
-          subject.name.toLowerCase().includes(q) ||
-          subject.papers.some(
-            (paper) =>
-              String(paper.year).includes(q) ||
-              paper.type.toLowerCase().includes(q)
-          )
-      );
-    }
+        if (gradeFilter !== "all") {
+          papers = papers.filter((paper) => paper.grade === gradeFilter);
+        }
 
-    return list;
-  }, [activeTab, savedSubjects, search]);
+        if (curriculumFilter !== "all") {
+          papers = papers.filter((paper) => paper.curriculum === curriculumFilter);
+        }
+
+        if (query) {
+          const matchesSubjectName = subject.name.toLowerCase().includes(query);
+          if (!matchesSubjectName) {
+            papers = papers.filter(
+              (paper) =>
+                String(paper.year).includes(query) ||
+                paper.type.toLowerCase().includes(query) ||
+                paper.grade.toLowerCase().includes(query) ||
+                paper.curriculum.toLowerCase().includes(query)
+            );
+          }
+        }
+
+        if (!papers.length) {
+          return null;
+        }
+
+        return {
+          ...subject,
+          papers,
+        };
+      })
+      .filter(Boolean);
+  }, [activeTab, curriculumFilter, gradeFilter, savedSubjects, search]);
 
   const handleToggle = (idx) => {
     setOpenIndex(openIndex === idx ? null : idx);
@@ -341,6 +397,14 @@ export default function Practise() {
               >
                 Bursaries
               </a>
+              <a
+                onClick={async () => {
+                  setMenuOpen(false);
+                  await handleLogout();
+                }}
+              >
+                Logout
+              </a>
             </div>
           )}
         </div>
@@ -349,8 +413,8 @@ export default function Practise() {
       <div className="dashboard-page">
         <DashboardSection
           title="Past Paper Hub"
-          subtitle="Find Grade 12 NSC papers by subject, year, and paper type."
-          searchPlaceholder="Search subjects, year, or paper type..."
+          subtitle="Find Grade 12 papers by subject, year, paper type, and curriculum."
+          searchPlaceholder="Search subjects, year, paper type, grade, or curriculum..."
           searchValue={search}
           onSearchChange={setSearch}
           shortcuts={[
@@ -369,11 +433,16 @@ export default function Practise() {
               icon: <FaGraduationCap />,
               onClick: () => alert("Sorry! this feature is not yet available"),
             },
+            {
+              label: "Logout",
+              icon: <FaUserCircle />,
+              onClick: handleLogout,
+            },
           ]}
           stats={[
             {
               label: "Subjects",
-              value: subjects.length,
+              value: subjectsWithMetadata.length,
               valueClass: "dashboard-stat__value--blue",
             },
             {
@@ -394,6 +463,36 @@ export default function Practise() {
           activeTab={activeTab}
           onTabChange={setActiveTab}
         />
+
+        <div className="dashboard-tabs" style={{ marginTop: 8, gap: 8, flexWrap: "wrap" }}>
+          <span className="dashboard-stat__label" style={{ margin: 0 }}>
+            Filters
+          </span>
+          <select
+            value={gradeFilter}
+            onChange={(e) => setGradeFilter(e.target.value)}
+            style={{ border: "1px solid #cbd5e1", borderRadius: 10, padding: "8px 10px" }}
+          >
+            <option value="all">All Grades</option>
+            {availableGrades.map((grade) => (
+              <option key={grade} value={grade}>
+                {grade}
+              </option>
+            ))}
+          </select>
+          <select
+            value={curriculumFilter}
+            onChange={(e) => setCurriculumFilter(e.target.value)}
+            style={{ border: "1px solid #cbd5e1", borderRadius: 10, padding: "8px 10px" }}
+          >
+            <option value="all">All Curricula</option>
+            {availableCurriculums.map((curriculum) => (
+              <option key={curriculum} value={curriculum}>
+                {curriculum}
+              </option>
+            ))}
+          </select>
+        </div>
 
         {filteredSubjects.length > 0 ? (
           <div className="uni-grid" key={activeTab}>
@@ -434,7 +533,9 @@ export default function Practise() {
 
                   <div className="uni-card__body">
                     <h3 className="uni-card__name">{subject.name}</h3>
-                    <p className="uni-card__location">{subject.papers.length} papers available</p>
+                    <p className="uni-card__location">
+                      {subject.papers.length} papers available | {subject.papers[0]?.grade || "Grade N/A"} | {subject.papers[0]?.curriculum || "Curriculum N/A"}
+                    </p>
                     <p className="uni-card__desc">
                       Tap open to view downloadable papers by year and paper type.
                     </p>
@@ -464,7 +565,9 @@ export default function Practise() {
                             }}
                             onClick={(e) => e.stopPropagation()}
                           >
-                            <span>{paper.year} {paper.type}</span>
+                            <span>
+                              {paper.year} {paper.type} | {paper.grade} | {paper.curriculum}
+                            </span>
                             <FaExternalLinkAlt style={{ fontSize: "0.75rem" }} />
                           </a>
                         ))}
@@ -477,7 +580,7 @@ export default function Practise() {
           </div>
         ) : (
           <div className="dashboard-empty">
-            <div className="dashboard-empty__icon">🔍</div>
+            <div className="dashboard-empty__icon" aria-hidden="true"><FaBook /></div>
             <p className="dashboard-empty__text">
               {activeTab === "saved"
                 ? "You have not saved any subjects yet. Tap the bookmark icon to save."
