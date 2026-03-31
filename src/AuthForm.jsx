@@ -104,6 +104,15 @@ export default function AuthForm() {
             Grad<span style={{ color: "#3498db" }}>iate</span>
           </a>
           <div className="nav-actions">
+
+            <a
+                type="button"
+                onClick={() => navigate("/application")}
+                className="btn btn-primary"
+              >
+                Guest
+              </a>
+
             <button
               className="burger"
               onClick={() => setMenuOpen((open) => !open)}
@@ -213,13 +222,7 @@ export default function AuthForm() {
                   : "Already have an account? Log in"}
               </button>
              
-              <button
-                type="button"
-                onClick={() => navigate("/application")}
-                className="auth-link-btn auth-link-btn-secondary"
-              >
-                Continue as Guest
-              </button>
+              
               
             </div>
           </form>
