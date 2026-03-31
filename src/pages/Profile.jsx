@@ -4,7 +4,6 @@ import avDefault from "../images/default-avatar.jpg";
 import av1 from "../images/team1.jpg";
 import av2 from "../images/team2.jpg";
 import av3 from "../images/team3.jpg";
-import image from "../images/dashboard-hero.jpg";
 import {
   getAuth,
   updateProfile,
@@ -13,6 +12,15 @@ import {
   reload,
 } from "firebase/auth";
 import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import {
+  FaPencilAlt,
+  FaGraduationCap,
+  FaSignOutAlt,
+  FaShieldAlt,
+  FaUserCircle,
+  FaBook,
+  FaHome,
+} from "react-icons/fa";
 
 const defaultProfileData = {
   academicStage: "tertiary",
@@ -103,11 +111,10 @@ const Profile = () => {
   const [savedAvatarUrl, setSavedAvatarUrl] = useState("");
   const [savedAvatarKey, setSavedAvatarKey] = useState("");
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
-  const [editing, setEditing] = useState(false);
+  const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState("");
-  const [isMobile, setIsMobile] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileData, setProfileData] = useState(defaultProfileData);
   const [savedProfileData, setSavedProfileData] = useState(defaultProfileData);
@@ -345,7 +352,7 @@ const Profile = () => {
       setShowAvatarPicker(false);
       setError(null);
       setSuccess("Profile saved successfully.");
-      setEditing(false);
+      setActiveTab("overview");
     } catch (err) {
       console.error(err);
       // If Firestore write blocked, try to at least update Auth profile with photoURL
@@ -363,7 +370,7 @@ const Profile = () => {
             setSavedAvatarUrl(avatarUrl);
             setSavedProfileData(profileData);
             setSuccess("Profile photo updated. Other details need Firestore access.");
-            setEditing(false);
+            setActiveTab("overview");
 
             return;
           }
@@ -382,13 +389,6 @@ const Profile = () => {
     const timer = window.setTimeout(() => setSuccess(""), 3000);
     return () => window.clearTimeout(timer);
   }, [success]);
-
-  useEffect(() => {
-    const onResize = () => setIsMobile(window.innerWidth <= 640);
-    onResize();
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
 
   // close menu on outside click or ESC
   useEffect(() => {
@@ -450,6 +450,11 @@ const Profile = () => {
       <div style={{ padding: 20, textAlign: "center" }}>No user logged in.</div>
     );
 
+  const stageLabel = profileData.academicStage === "highSchool" ? "High School" : "Tertiary";
+  const skillsCount = profileData.skills
+    ? profileData.skills.split(",").filter((skill) => skill.trim()).length
+    : 0;
+
   return (
     <>
       <nav className="navbar-responsive">
@@ -495,13 +500,21 @@ const Profile = () => {
               >
                 Practise
               </a>
+              <a
+                onClick={() => {
+                  setMenuOpen(false);
+                  setActiveTab("overview");
+                }}
+                className="active"
+              >
+                Profile
+              </a>
 
               <a
                 onClick={() => {
                   setMenuOpen(false);
                   alert("Sorry! this feature is not yet available")
                 }}
-                className="active"
               >
                 Bursaries
               </a>
@@ -518,123 +531,169 @@ const Profile = () => {
         </div>
       </nav>
 
-      <div
-        className="core"
-        style={{
-          // Keep text readable while letting the background image stay prominent.
-          backgroundImage: `linear-gradient(160deg, rgba(10, 25, 47, 0.42), rgba(240, 246, 255, 0.78)), url(${image})`,
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: isMobile ? "center top" : "center center",
-          backgroundSize: "cover",
-          backgroundAttachment: isMobile ? "scroll" : "fixed",
-          minHeight: "100vh",
-        }}
-      >
-        <div style={newStyles.page}>
-          <div style={newStyles.profileCard}>
-            <div
-              style={{
-                ...newStyles.coverWrapper,
-                ...(isMobile ? newStyles.coverWrapperMobile : {}),
-              }}
-            >
-              <div style={newStyles.headerBadge}>Available for opportunities</div>
-              <div style={newStyles.avatarWrap}>
-                <img
-                  src={avatarUrl || avDefault}
-                  alt="Avatar"
-                  style={newStyles.avatar}
-                />
-                <button
-                  onClick={() => setEditing(true)}
-                  aria-label="Edit profile"
-                  title="Edit profile"
-                  style={newStyles.editIconBtn}
-                >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z"
-                      fill="#111827"
-                    />
-                    <path
-                      d="M20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"
-                      fill="#111827"
-                    />
-                  </svg>
+      <div className="dashboard-page">
+        <header className="dashboard-welcome">
+          <h1 className="dashboard-welcome__greeting">
+            Profile Hub for <span>{user.displayName || "Student"}</span>
+          </h1>
+          <p className="dashboard-welcome__sub">
+            Keep your profile, academic details, and security settings in one familiar dashboard flow.
+          </p>
+        </header>
+
+        <div className="dashboard-shortcuts">
+          <button className="dashboard-shortcut" onClick={() => setActiveTab("overview")}>
+            <FaUserCircle /> Overview
+          </button>
+          <button className="dashboard-shortcut" onClick={() => setActiveTab("edit")}>
+            <FaPencilAlt /> Edit Profile
+          </button>
+          <button className="dashboard-shortcut" onClick={() => setActiveTab("security")}>
+            <FaShieldAlt /> Security
+          </button>
+          <button className="dashboard-shortcut" onClick={() => navigate("/application") }>
+            <FaHome /> Home
+          </button>
+          <button className="dashboard-shortcut" onClick={() => alert("Sorry! this feature is not yet available")}>
+            <FaGraduationCap /> Bursaries
+          </button>
+          <button className="dashboard-shortcut" onClick={handleLogout}>
+            <FaSignOutAlt /> Logout
+          </button>
+        </div>
+
+        <div className="dashboard-stats">
+          <div className="dashboard-stat">
+            <p className="dashboard-stat__value dashboard-stat__value--blue">{profileCompletion}%</p>
+            <p className="dashboard-stat__label">Profile Completion</p>
+          </div>
+          <div className="dashboard-stat">
+            <p className="dashboard-stat__value dashboard-stat__value--green">{skillsCount}</p>
+            <p className="dashboard-stat__label">Skills Tagged</p>
+          </div>
+          <div className="dashboard-stat">
+            <p className="dashboard-stat__value dashboard-stat__value--purple">{stageLabel}</p>
+            <p className="dashboard-stat__label">Academic Stage</p>
+          </div>
+          <div className="dashboard-stat">
+            <p className="dashboard-stat__value" style={{ color: emailVerified ? "#10b981" : "#f59e0b" }}>
+              {emailVerified ? "Verified" : "Pending"}
+            </p>
+            <p className="dashboard-stat__label">Email Status</p>
+          </div>
+        </div>
+
+        <div className="dashboard-tabs">
+          <button
+            className={`dashboard-tab ${activeTab === "overview" ? "dashboard-tab--active" : ""}`}
+            onClick={() => setActiveTab("overview")}
+          >
+            Overview
+          </button>
+          <button
+            className={`dashboard-tab ${activeTab === "edit" ? "dashboard-tab--active" : ""}`}
+            onClick={() => setActiveTab("edit")}
+          >
+            Edit Profile
+          </button>
+          <button
+            className={`dashboard-tab ${activeTab === "security" ? "dashboard-tab--active" : ""}`}
+            onClick={() => setActiveTab("security")}
+          >
+            Security
+          </button>
+        </div>
+
+        {activeTab === "overview" && (
+          <div className="uni-grid">
+            <article className="uni-card">
+              <div className="uni-card__header" style={profileUi.heroHeader}>
+                <div style={profileUi.heroIdentityWrap}>
+                  <img src={avatarUrl || avDefault} alt="Avatar" style={profileUi.heroAvatar} />
+                  <div>
+                    <h3 className="uni-card__name" style={{ marginBottom: 4 }}>{user.displayName || "User"}</h3>
+                    <p className="uni-card__location" style={{ marginBottom: 0 }}>{profileData.location || "Add your location"}</p>
+                    <p style={profileUi.metaLine}>{user.email || "No email"}</p>
+                  </div>
+                </div>
+                <button className="uni-card__btn uni-card__btn--secondary" onClick={() => setActiveTab("edit")}>
+                  Edit
                 </button>
               </div>
-            </div>
-
-            <div
-              style={{
-                ...newStyles.infoRow,
-                ...(isMobile ? newStyles.infoRowMobile : {}),
-              }}
-            >
-              <div style={newStyles.identityBlock}>
-                <h2 style={{ margin: 0 }}>{user.displayName || "User"}</h2>
-                {/* <p style={{ color: "#555", marginTop: 6 }}>{user.email}</p> */}
-                <p style={{ color: "#666", marginTop: 4 }}>
-                  {profileData.location || "Add your location"}
+              <div className="uni-card__body">
+                <p className="uni-card__desc">
+                  {profileData.bio || "Add your short bio so opportunities can match your goals better."}
                 </p>
-                <p style={{ color: "#475569", marginTop: 4, fontSize: 13 }}>
-                  Stage: {profileData.academicStage === "highSchool" ? "High School" : "Tertiary"}
-                </p>
+                <div style={profileUi.progressRow}>
+                  <span style={profileUi.progressLabel}>Completion</span>
+                  <span style={profileUi.progressLabel}>{profileCompletion}%</span>
+                </div>
+                <div style={profileUi.progressTrack}>
+                  <div style={{ ...profileUi.progressFill, width: `${profileCompletion}%` }} />
+                </div>
+                <div className="uni-card__status-row" style={{ marginTop: 12 }}>
+                  <span className="uni-card__status-pill uni-card__status-pill--days">Stage: {stageLabel}</span>
+                  <span
+                    className="uni-card__status-pill"
+                    style={emailVerified ? profileUi.verifiedPill : profileUi.pendingPill}
+                  >
+                    {emailVerified ? "Email Verified" : "Email Not Verified"}
+                  </span>
+                </div>
               </div>
+            </article>
 
-              <div style={newStyles.infoActions}>
-                {!editing && (
-                  <button style={newStyles.primaryBtn} onClick={() => setEditing(true)}>
-                    Edit Profile
-                  </button>
+            <article className="uni-card">
+              <div className="uni-card__body">
+                <h3 className="uni-card__name">Contact</h3>
+                <p className="uni-card__desc">Phone: {profileData.phone || "Not added"}</p>
+                <p className="uni-card__desc">Location: {profileData.location || "Not added"}</p>
+              </div>
+            </article>
+
+            <article className="uni-card">
+              <div className="uni-card__body">
+                <h3 className="uni-card__name">Academic Profile</h3>
+                {profileData.academicStage === "highSchool" ? (
+                  <>
+                    <p className="uni-card__desc">School: {profileData.highSchoolName || "Not added"}</p>
+                    <p className="uni-card__desc">Grade: {profileData.highSchoolGrade || "Not added"}</p>
+                    <p className="uni-card__desc">Status: {profileData.highSchoolStatus || "Not added"}</p>
+                    <p className="uni-card__desc">Matric Year: {profileData.matricYear || "Not added"}</p>
+                    <p className="uni-card__desc">Subjects: {profileData.highSchoolSubjects || "Not added"}</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="uni-card__desc">Institution: {profileData.institution || "Not added"}</p>
+                    <p className="uni-card__desc">Qualification: {profileData.qualification || "Not added"}</p>
+                    <p className="uni-card__desc">Graduation Year: {profileData.gradYear || "Not added"}</p>
+                  </>
                 )}
               </div>
-            </div>
+            </article>
 
-            <div style={newStyles.progressWrap}>
-              <div style={newStyles.progressTitleRow}>
-                <strong>Profile Completion</strong>
-                <span>{profileCompletion}%</span>
+            <article className="uni-card">
+              <div className="uni-card__body">
+                <h3 className="uni-card__name">Career Goals</h3>
+                <p className="uni-card__desc">{profileData.careerGoal || "Add your preferred roles and opportunities."}</p>
+                <p className="uni-card__desc">Skills: {profileData.skills || "No skills added"}</p>
               </div>
-              <div style={newStyles.progressTrack}>
-                <div
-                  style={{
-                    ...newStyles.progressFill,
-                    width: `${profileCompletion}%`,
-                  }}
-                />
-              </div>
-            </div>
+            </article>
+          </div>
+        )}
 
-            <div style={newStyles.statsRow}>
-              <div style={newStyles.stat}>
-                <p style={newStyles.statValue}>{profileCompletion}%</p>
-                <p style={newStyles.statLabel}>Strength</p>
-              </div>
-              <div style={newStyles.stat}>
-                <p style={newStyles.statValue}>{profileData.skills ? profileData.skills.split(",").filter((s) => s.trim()).length : 0}</p>
-                <p style={newStyles.statLabel}>Skills Tagged</p>
-              </div>
-              <div style={newStyles.stat}>
-                <p style={newStyles.statValue}>{profileData.careerGoal ? "Ready" : "Draft"}</p>
-                <p style={newStyles.statLabel}>Career Status</p>
-              </div>
-            </div>
+        {activeTab === "edit" && (
+          <div className="uni-grid" style={{ gridTemplateColumns: "1fr" }}>
+            <article className="uni-card">
+              <div className="uni-card__body">
+                <h3 className="uni-card__name">Edit Profile</h3>
+                <p className="uni-card__desc">Update your details so recommendations stay accurate across the platform.</p>
 
-            {editing && (
-              <div style={newStyles.editorSection}>
-                <h3 style={newStyles.sectionTitle}>Edit Profile</h3>
-                <div style={newStyles.editorGrid}>
-                  <label style={newStyles.fieldWrap}>
+                <div style={profileUi.formGrid}>
+                  <label style={profileUi.fieldWrap}>
                     Academic Stage
                     <select
-                      style={newStyles.input}
+                      style={profileUi.input}
                       value={profileData.academicStage}
                       onChange={(e) => handleFieldChange("academicStage", e.target.value)}
                     >
@@ -642,57 +701,58 @@ const Profile = () => {
                       <option value="highSchool">High School</option>
                     </select>
                   </label>
-                  <label style={newStyles.fieldWrap}>
+                  <label style={profileUi.fieldWrap}>
                     Phone Number
                     <input
-                      style={newStyles.input}
+                      style={profileUi.input}
                       value={profileData.phone}
                       onChange={(e) => handleFieldChange("phone", e.target.value)}
                       placeholder="+27 71 234 5678"
                     />
                   </label>
-                  <label style={newStyles.fieldWrap}>
+                  <label style={profileUi.fieldWrap}>
                     Location
                     <input
-                      style={newStyles.input}
+                      style={profileUi.input}
                       value={profileData.location}
                       onChange={(e) => handleFieldChange("location", e.target.value)}
                       placeholder="Johannesburg, South Africa"
                     />
                   </label>
+
                   {profileData.academicStage !== "highSchool" && (
                     <>
-                      <label style={newStyles.fieldWrap}>
+                      <label style={profileUi.fieldWrap}>
                         Institution
                         <input
-                          style={newStyles.input}
+                          style={profileUi.input}
                           value={profileData.institution}
                           onChange={(e) => handleFieldChange("institution", e.target.value)}
                           placeholder="University / College"
                         />
                       </label>
-                      <label style={newStyles.fieldWrap}>
+                      <label style={profileUi.fieldWrap}>
                         Qualification / Major
                         <input
-                          style={newStyles.input}
+                          style={profileUi.input}
                           value={profileData.qualification}
                           onChange={(e) => handleFieldChange("qualification", e.target.value)}
                           placeholder="BSc Computer Science"
                         />
                       </label>
-                      <label style={newStyles.fieldWrap}>
+                      <label style={profileUi.fieldWrap}>
                         Graduation Year
                         <input
-                          style={newStyles.input}
+                          style={profileUi.input}
                           value={profileData.gradYear}
                           onChange={(e) => handleFieldChange("gradYear", e.target.value)}
                           placeholder="2027"
                         />
                       </label>
-                      <label style={newStyles.fieldWrap}>
+                      <label style={profileUi.fieldWrap}>
                         Skills (comma separated)
                         <input
-                          style={newStyles.input}
+                          style={profileUi.input}
                           value={profileData.skills}
                           onChange={(e) => handleFieldChange("skills", e.target.value)}
                           placeholder="React, Communication, Java"
@@ -700,39 +760,40 @@ const Profile = () => {
                       </label>
                     </>
                   )}
+
                   {profileData.academicStage === "highSchool" && (
                     <>
-                      <label style={newStyles.fieldWrap}>
+                      <label style={profileUi.fieldWrap}>
                         High School Name
                         <input
-                          style={newStyles.input}
+                          style={profileUi.input}
                           value={profileData.highSchoolName}
                           onChange={(e) => handleFieldChange("highSchoolName", e.target.value)}
                           placeholder="Name of your high school"
                         />
                       </label>
-                      <label style={newStyles.fieldWrap}>
+                      <label style={profileUi.fieldWrap}>
                         Current Grade / Level
                         <input
-                          style={newStyles.input}
+                          style={profileUi.input}
                           value={profileData.highSchoolGrade}
                           onChange={(e) => handleFieldChange("highSchoolGrade", e.target.value)}
                           placeholder="Grade 11 / Grade 12"
                         />
                       </label>
-                      <label style={newStyles.fieldWrap}>
+                      <label style={profileUi.fieldWrap}>
                         High School Status
                         <input
-                          style={newStyles.input}
+                          style={profileUi.input}
                           value={profileData.highSchoolStatus}
                           onChange={(e) => handleFieldChange("highSchoolStatus", e.target.value)}
                           placeholder="Currently enrolled / Completed"
                         />
                       </label>
-                      <label style={newStyles.fieldWrap}>
+                      <label style={profileUi.fieldWrap}>
                         Expected Matric Year
                         <input
-                          style={newStyles.input}
+                          style={profileUi.input}
                           value={profileData.matricYear}
                           onChange={(e) => handleFieldChange("matricYear", e.target.value)}
                           placeholder="2026"
@@ -742,10 +803,10 @@ const Profile = () => {
                   )}
                 </div>
 
-                <label style={{ ...newStyles.fieldWrap, marginTop: 14 }}>
+                <label style={{ ...profileUi.fieldWrap, marginTop: 14 }}>
                   Career Goal
                   <input
-                    style={newStyles.input}
+                    style={profileUi.input}
                     value={profileData.careerGoal}
                     onChange={(e) => handleFieldChange("careerGoal", e.target.value)}
                     placeholder="Graduate internship in software engineering"
@@ -753,10 +814,10 @@ const Profile = () => {
                 </label>
 
                 {profileData.academicStage === "highSchool" && (
-                  <label style={{ ...newStyles.fieldWrap, marginTop: 14 }}>
+                  <label style={{ ...profileUi.fieldWrap, marginTop: 14 }}>
                     High School Subjects (comma separated)
                     <input
-                      style={newStyles.input}
+                      style={profileUi.input}
                       value={profileData.highSchoolSubjects}
                       onChange={(e) => handleFieldChange("highSchoolSubjects", e.target.value)}
                       placeholder="Mathematics, Physical Sciences, English"
@@ -764,32 +825,24 @@ const Profile = () => {
                   </label>
                 )}
 
-                <label style={{ ...newStyles.fieldWrap, marginTop: 14 }}>
+                <label style={{ ...profileUi.fieldWrap, marginTop: 14 }}>
                   Bio
                   <textarea
-                    style={newStyles.textArea}
+                    style={profileUi.textArea}
                     value={profileData.bio}
                     onChange={(e) => handleFieldChange("bio", e.target.value)}
                     placeholder="Write a short introduction about yourself"
                   />
                 </label>
 
-                <div style={newStyles.avatarPickerWrap}>
-                  <button
-                    style={newStyles.fileLabel}
-                    onClick={() => setShowAvatarPicker((s) => !s)}
-                    type="button"
-                  >
+                <div style={profileUi.avatarPickerWrap}>
+                  <button className="uni-card__btn" onClick={() => setShowAvatarPicker((s) => !s)} type="button">
                     Choose Avatar
                   </button>
                   {showAvatarPicker && (
-                    <div style={newStyles.avatarGrid}>
+                    <div style={profileUi.avatarGrid}>
                       {avatarOptions.map((a, idx) => (
-                        <button
-                          key={a.key}
-                          onClick={() => selectAvatar(a)}
-                          style={newStyles.avatarOptionBtn}
-                        >
+                        <button key={a.key} onClick={() => selectAvatar(a)} style={profileUi.avatarOptionBtn}>
                           <img
                             src={a.url}
                             alt={`avatar-${idx}`}
@@ -798,10 +851,7 @@ const Profile = () => {
                               height: 54,
                               borderRadius: "50%",
                               objectFit: "cover",
-                              border:
-                                a.key === avatarKey
-                                  ? "2px solid #2563eb"
-                                  : "2px solid transparent",
+                              border: a.key === avatarKey ? "2px solid #2563eb" : "2px solid transparent",
                             }}
                           />
                         </button>
@@ -810,283 +860,164 @@ const Profile = () => {
                   )}
                 </div>
 
-                <div style={newStyles.actionRow}>
-                  <button style={newStyles.primaryBtn} onClick={saveProfile}>
+                <div className="uni-card__actions" style={{ marginTop: 16 }}>
+                  <button className="uni-card__btn uni-card__btn--primary" onClick={saveProfile}>
                     Save Changes
                   </button>
                   <button
-                    style={newStyles.ghostBtn}
+                    className="uni-card__btn uni-card__btn--secondary"
                     onClick={() => {
                       setAvatarKey(savedAvatarKey);
                       setAvatarUrl(savedAvatarUrl);
                       setProfileData(savedProfileData);
-                      setEditing(false);
                       setShowAvatarPicker(false);
                       setError(null);
                       setSuccess("");
+                      setActiveTab("overview");
                     }}
                   >
                     Cancel
                   </button>
                 </div>
               </div>
-            )}
+            </article>
+          </div>
+        )}
 
-            <div style={newStyles.contentGrid}>
-              <div style={newStyles.contentCard}>
-                <h3 style={newStyles.sectionTitle}>About Me</h3>
-                <p style={newStyles.valueText}>{profileData.bio || "Add your short bio to help sponsors know you."}</p>
-              </div>
-              <div style={newStyles.contentCard}>
-                <h3 style={newStyles.sectionTitle}>Contact</h3>
-                <p style={newStyles.valueText}>Phone: {profileData.phone || "Not added"}</p>
-                <p style={newStyles.valueText}>Location: {profileData.location || "Not added"}</p>
-              </div>
-              <div style={newStyles.contentCard}>
-                <h3 style={newStyles.sectionTitle}>Academic Profile</h3>
-                {profileData.academicStage === "highSchool" ? (
-                  <>
-                    <p style={newStyles.valueText}>School: {profileData.highSchoolName || "Not added"}</p>
-                    <p style={newStyles.valueText}>Current Grade: {profileData.highSchoolGrade || "Not added"}</p>
-                    <p style={newStyles.valueText}>Status: {profileData.highSchoolStatus || "Not added"}</p>
-                    <p style={newStyles.valueText}>Expected Matric Year: {profileData.matricYear || "Not added"}</p>
-                    <p style={newStyles.valueText}>Subjects: {profileData.highSchoolSubjects || "Not added"}</p>
-                  </>
-                ) : (
-                  <>
-                    <p style={newStyles.valueText}>Institution: {profileData.institution || "Not added"}</p>
-                    <p style={newStyles.valueText}>Qualification: {profileData.qualification || "Not added"}</p>
-                    <p style={newStyles.valueText}>Graduation Year: {profileData.gradYear || "Not added"}</p>
-                  </>
-                )}
-              </div>
-              <div style={newStyles.contentCard}>
-                <h3 style={newStyles.sectionTitle}>Career Goals</h3>
-                <p style={newStyles.valueText}>{profileData.careerGoal || "Add your preferred roles and opportunities."}</p>
-                <p style={newStyles.valueText}>
-                  Skills: {profileData.skills || "No skills added"}
+        {activeTab === "security" && (
+          <div className="uni-grid" style={{ gridTemplateColumns: "1fr" }}>
+            <article className="uni-card">
+              <div className="uni-card__body">
+                <h3 className="uni-card__name">Security Settings</h3>
+                <p className="uni-card__desc">
+                  Email status: {" "}
+                  <span style={emailVerified ? profileUi.verifiedText : profileUi.pendingText}>
+                    {emailVerified ? "Verified" : "Not verified"}
+                  </span>
                 </p>
-              </div>
-              <div style={newStyles.contentCard}>
-                <h3 style={newStyles.sectionTitle}>Security Settings</h3>
-                <div style={newStyles.securityRow}>
-                  <p style={newStyles.valueText}>
-                    Email status:{" "}
-                    <span
-                      style={{
-                        ...newStyles.verificationBadge,
-                        ...(emailVerified
-                          ? newStyles.verificationBadgeOk
-                          : newStyles.verificationBadgeWarn),
-                      }}
-                    >
-                      {emailVerified ? "Verified" : "Not verified"}
-                    </span>
-                  </p>
 
-                  <div style={newStyles.securityActions}>
-                    {!emailVerified && (
-                      <button
-                        style={newStyles.ghostBtn}
-                        onClick={sendVerificationLink}
-                        disabled={securityLoading}
-                      >
-                        Send Verification Email
-                      </button>
-                    )}
+                <div className="uni-card__actions" style={{ marginBottom: 12 }}>
+                  {!emailVerified && (
                     <button
-                      style={newStyles.ghostBtn}
-                      onClick={refreshVerificationStatus}
+                      className="uni-card__btn uni-card__btn--secondary"
+                      onClick={sendVerificationLink}
                       disabled={securityLoading}
+                      style={securityLoading ? profileUi.disabledButton : undefined}
                     >
-                      Refresh Status
+                      Send Verification Email
                     </button>
-                  </div>
-                </div>
-
-                <div style={newStyles.passwordBox}>
-                  <p style={{ ...newStyles.valueText, marginBottom: 8 }}>Change Password</p>
-                  <label style={newStyles.fieldWrap}>
-                    New Password
-                    <input
-                      style={newStyles.input}
-                      type="password"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="Enter new password"
-                    />
-                  </label>
-
-                  <label style={{ ...newStyles.fieldWrap, marginTop: 10 }}>
-                    Confirm Password
-                    <input
-                      style={newStyles.input}
-                      type="password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="Confirm new password"
-                    />
-                  </label>
-
+                  )}
                   <button
-                    style={{ ...newStyles.primaryBtn, marginTop: 12, width: "fit-content" }}
-                    onClick={handleChangePassword}
+                    className="uni-card__btn uni-card__btn--secondary"
+                    onClick={refreshVerificationStatus}
                     disabled={securityLoading}
+                    style={securityLoading ? profileUi.disabledButton : undefined}
                   >
-                    {securityLoading ? "Please wait..." : "Update Password"}
+                    Refresh Status
                   </button>
                 </div>
 
-                {securitySuccess && <p style={newStyles.securitySuccess}>{securitySuccess}</p>}
-                {securityError && <p style={newStyles.securityError}>{securityError}</p>}
-              </div>
-            </div>
+                <label style={profileUi.fieldWrap}>
+                  New Password
+                  <input
+                    style={profileUi.input}
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Enter new password"
+                  />
+                </label>
 
-            {success && <div style={newStyles.success}>{success}</div>}
-            {error && <div style={newStyles.error}>{error}</div>}
+                <label style={{ ...profileUi.fieldWrap, marginTop: 10 }}>
+                  Confirm Password
+                  <input
+                    style={profileUi.input}
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirm new password"
+                  />
+                </label>
+
+                <button
+                  className="uni-card__btn uni-card__btn--primary"
+                  onClick={handleChangePassword}
+                  disabled={securityLoading}
+                  style={{ marginTop: 12, width: "fit-content", ...(securityLoading ? profileUi.disabledButton : {}) }}
+                >
+                  {securityLoading ? "Please wait..." : "Update Password"}
+                </button>
+
+                {securitySuccess && <p style={profileUi.securitySuccess}>{securitySuccess}</p>}
+                {securityError && <p style={profileUi.securityError}>{securityError}</p>}
+              </div>
+            </article>
           </div>
-        </div>
+        )}
+
+        {success && <div style={profileUi.success}>{success}</div>}
+        {error && <div style={profileUi.error}>{error}</div>}
       </div>
     </>
   );
 };
 
-const newStyles = {
-  page: { display: "flex", justifyContent: "center", padding: "24px" },
-  profileCard: {
-    width: "100%",
-    maxWidth: 920,
-    background: "#fff",
-    borderRadius: 12,
-    overflow: "hidden",
-    boxShadow: "0 6px 20px rgba(0,0,0,0.08)",
+const profileUi = {
+  heroHeader: {
+    justifyContent: "space-between",
+    minHeight: "unset",
+    padding: "1rem 1.2rem 0.9rem",
   },
-  coverWrapper: {
-    position: "relative",
-    height: 180,
-    background: "linear-gradient(120deg, #d9ecff 0%, #eff5ff 45%, #e2f0ff 100%)",
-    borderBottom: "1px solid #e5e7eb",
+  heroIdentityWrap: {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
   },
-  headerBadge: {
-    position: "absolute",
-    top: 16,
-    right: 16,
-    background: "#eff6ff",
-    color: "#1d4ed8",
-    fontWeight: 600,
-    padding: "6px 10px",
-    borderRadius: 999,
-    fontSize: 12,
-    border: "1px solid #bfdbfe",
-  },
-  avatarWrap: {
-    position: "absolute",
-    left: "50%",
-    transform: "translateX(-50%)",
-    bottom: -48,
-    borderRadius: 999,
-    padding: 5,
-    background: "#fff",
-    border: "3px solid #dbeafe",
-  },
-  avatar: {
-    width: 96,
-    height: 96,
+  heroAvatar: {
+    width: 72,
+    height: 72,
     borderRadius: "50%",
     objectFit: "cover",
-    display: "block",
+    border: "2px solid #dbeafe",
   },
-  infoRow: {
-    display: "flex",
-    gap: 20,
-    alignItems: "flex-start",
-    padding: "72px 28px 18px",
+  metaLine: {
+    margin: 0,
+    color: "#64748b",
+    fontSize: "0.78rem",
   },
-  identityBlock: {
-    maxWidth: "80%",
-  },
-  infoActions: {
-    marginLeft: "auto",
-    minWidth: 130,
-    display: "flex",
-    justifyContent: "flex-end",
-  },
-  coverWrapperMobile: { height: 120 },
-  infoRowMobile: {
-    flexDirection: "column",
-    alignItems: "center",
-    padding: "48px 18px 18px",
-  },
-  editIconBtn: {
-    position: "absolute",
-    right: -6,
-    bottom: -6,
-    width: 36,
-    height: 36,
-    borderRadius: "50%",
-    background: "#fff",
-    border: "1px solid #e5e7eb",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    cursor: "pointer",
-    boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
-  },
-  progressWrap: {
-    padding: "8px 28px 4px",
-  },
-  progressTitleRow: {
+  progressRow: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    fontSize: 14,
     marginBottom: 8,
-    color: "#374151",
+  },
+  progressLabel: {
+    fontSize: "0.8rem",
+    color: "#475569",
+    fontWeight: 600,
   },
   progressTrack: {
     width: "100%",
     height: 10,
     borderRadius: 999,
-    background: "#e5e7eb",
+    background: "#e2e8f0",
     overflow: "hidden",
   },
   progressFill: {
     height: "100%",
-    background: "linear-gradient(90deg, #2563eb 0%, #38bdf8 100%)",
+    background: "linear-gradient(90deg, #3b82f6 0%, #2563eb 100%)",
     borderRadius: 999,
     transition: "width 220ms ease",
   },
-  statsRow: {
-    display: "flex",
-    gap: 12,
-    padding: "12px 28px 20px",
-    borderTop: "1px solid #f1f1f1",
-    borderBottom: "1px solid #f1f1f1",
+  verifiedPill: {
+    background: "#dcfce7",
+    color: "#166534",
   },
-  stat: {
-    flex: 1,
-    textAlign: "center",
-    padding: "10px 12px",
-    borderRadius: 10,
-    background: "#f8fafc",
+  pendingPill: {
+    background: "#ffedd5",
+    color: "#9a3412",
   },
-  statValue: {
-    margin: 0,
-    fontSize: 20,
-    fontWeight: 700,
-    color: "#0f172a",
-  },
-  statLabel: {
-    margin: "5px 0 0",
-    color: "#64748b",
-    fontSize: 13,
-  },
-  editorSection: {
-    padding: "20px 28px",
-    borderBottom: "1px solid #f1f1f1",
-    background: "#fcfdff",
-  },
-  editorGrid: {
+  formGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
     gap: 12,
@@ -1096,15 +1027,24 @@ const newStyles = {
     flexDirection: "column",
     gap: 6,
     fontSize: 14,
-    color: "#1f2937",
+    color: "#334155",
   },
   input: {
     width: "100%",
     padding: "10px 12px",
-    border: "1px solid #d1d5db",
-    borderRadius: 8,
+    border: "1px solid #cbd5e1",
+    borderRadius: 10,
     fontSize: 14,
     outline: "none",
+  },
+  textArea: {
+    minHeight: 96,
+    width: "100%",
+    padding: 10,
+    borderRadius: 10,
+    border: "1px solid #cbd5e1",
+    fontSize: 14,
+    resize: "vertical",
   },
   avatarPickerWrap: {
     marginTop: 14,
@@ -1113,7 +1053,7 @@ const newStyles = {
     display: "grid",
     gridTemplateColumns: "repeat(4, 54px)",
     gap: 8,
-    marginTop: 8,
+    marginTop: 10,
   },
   avatarOptionBtn: {
     padding: 0,
@@ -1121,120 +1061,50 @@ const newStyles = {
     background: "transparent",
     cursor: "pointer",
   },
-  actionRow: {
-    display: "flex",
-    gap: 10,
-    marginTop: 16,
+  disabledButton: {
+    opacity: 0.65,
+    cursor: "not-allowed",
   },
-  contentGrid: {
-    padding: "20px 28px 28px",
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-    gap: 14,
-  },
-  contentCard: {
-    border: "1px solid #e5e7eb",
-    borderRadius: 12,
-    padding: "14px 14px 12px",
-    background: "#ffffff",
-  },
-  securityRow: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 8,
-  },
-  securityActions: {
-    display: "flex",
-    gap: 8,
-    flexWrap: "wrap",
-  },
-  verificationBadge: {
-    display: "inline-block",
-    marginLeft: 6,
-    padding: "2px 8px",
-    borderRadius: 999,
-    fontSize: 12,
+  verifiedText: {
+    color: "#166534",
     fontWeight: 700,
   },
-  verificationBadgeOk: {
-    color: "#166534",
-    background: "#dcfce7",
-  },
-  verificationBadgeWarn: {
-    color: "#92400e",
-    background: "#fef3c7",
-  },
-  passwordBox: {
-    marginTop: 12,
-    padding: 12,
-    borderRadius: 10,
-    border: "1px solid #e5e7eb",
-    background: "#f9fafb",
+  pendingText: {
+    color: "#9a3412",
+    fontWeight: 700,
   },
   securitySuccess: {
-    margin: "12px 0 0",
+    marginTop: 12,
     color: "#166534",
     fontWeight: 600,
     fontSize: 14,
   },
   securityError: {
-    margin: "12px 0 0",
+    marginTop: 12,
     color: "#b91c1c",
     fontWeight: 600,
     fontSize: 14,
   },
-  sectionTitle: {
-    margin: "0 0 8px",
-    color: "#111827",
-    fontSize: 16,
-  },
-  valueText: {
-    margin: "0 0 6px",
-    color: "#4b5563",
-    lineHeight: 1.45,
-    fontSize: 14,
-  },
-  primaryBtn: {
-    background: "#2563eb",
-    color: "#fff",
-    border: "none",
-    padding: "8px 14px",
-    borderRadius: 8,
-    cursor: "pointer",
-  },
-  ghostBtn: {
-    background: "#fff",
-    border: "1px solid #ccc",
-    padding: "8px 14px",
-    borderRadius: 8,
-    cursor: "pointer",
-  },
-  fileLabel: {
-    background: "#f3f4f6",
-    padding: "8px 12px",
-    borderRadius: 8,
-    border: "1px solid #d1d5db",
-    cursor: "pointer",
-    fontSize: "0.9rem",
-  },
-  textArea: {
-    minHeight: 88,
-    width: "100%",
-    padding: 10,
-    borderRadius: 8,
-    border: "1px solid #d1d5db",
-    fontSize: 14,
-    resize: "vertical",
-  },
   success: {
-    color: "#166534",
+    maxWidth: 1200,
+    margin: "14px auto 0",
     background: "#ecfdf3",
-    borderTop: "1px solid #bbf7d0",
+    color: "#166534",
+    border: "1px solid #bbf7d0",
+    borderRadius: 12,
     padding: 12,
-    textAlign: "center",
     fontWeight: 600,
   },
-  error: { color: "#b91c1c", padding: 12, textAlign: "center" },
+  error: {
+    maxWidth: 1200,
+    margin: "14px auto 0",
+    background: "#fef2f2",
+    color: "#b91c1c",
+    border: "1px solid #fecaca",
+    borderRadius: 12,
+    padding: 12,
+    fontWeight: 600,
+  },
 };
 
 export default Profile;
