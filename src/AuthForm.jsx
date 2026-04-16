@@ -281,6 +281,8 @@ export default function AuthForm() {
                 alt="Gradiate badge"
                 className="auth-badge__image"
                 referrerPolicy="no-referrer"
+                fetchPriority="high"
+                loading="eager"
               />
             </div>
             <h2 className="auth-title auth-3d-pop">
