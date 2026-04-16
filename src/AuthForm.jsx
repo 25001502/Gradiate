@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { auth } from "./firebase";
+import db from "./firebase";
 import { useNavigate } from "react-router-dom";
 import {
   createUserWithEmailAndPassword,
@@ -7,6 +8,8 @@ import {
   signOut,
   updateProfile,
 } from "firebase/auth";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { getAvatarUrl, DEFAULT_AVATAR_STYLE } from "./utils/avatarUtils";
 
 import {
   FaTwitter,
@@ -156,6 +159,21 @@ export default function AuthForm() {
       } else {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         await updateProfile(userCredential.user, { displayName: username });
+        // Save default generated avatar seed to Firestore (no Storage upload needed)
+        const newUid = userCredential.user.uid;
+        await setDoc(
+          doc(db, "users", newUid),
+          {
+            uid: newUid,
+            displayName: username,
+            email,
+            avatarSeed: newUid,
+            avatarStyle: DEFAULT_AVATAR_STYLE,
+            photoURL: getAvatarUrl(newUid, DEFAULT_AVATAR_STYLE),
+            createdAt: serverTimestamp(),
+          },
+          { merge: true }
+        );
         await sendCustomVerificationEmail(userCredential.user.email);
         toast.success("Verification email sent! Please verify before logging in.");
         return;

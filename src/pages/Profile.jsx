@@ -1,9 +1,7 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { getAvatarUrl, AVATAR_STYLES, DEFAULT_AVATAR_STYLE } from "../utils/avatarUtils";
 import avDefault from "../images/default-avatar.jpg";
-import av1 from "../images/team1.jpg";
-import av2 from "../images/team2.jpg";
-import av3 from "../images/team3.jpg";
 import {
   getAuth,
   updateProfile,
@@ -165,9 +163,6 @@ const tertiaryFieldNames = ["institution", "qualification", "gradYear", "skills"
 
 const avatarMap = {
   default: avDefault,
-  team1: av1,
-  team2: av2,
-  team3: av3,
 };
 
 const resolveAvatarFromKey = (key) => {
@@ -197,6 +192,10 @@ const Profile = () => {
   const [avatarKey, setAvatarKey] = useState("");
   const [savedAvatarUrl, setSavedAvatarUrl] = useState("");
   const [savedAvatarKey, setSavedAvatarKey] = useState("");
+  const [avatarSeed, setAvatarSeed] = useState("");
+  const [avatarStyle, setAvatarStyle] = useState(DEFAULT_AVATAR_STYLE);
+  const [savedAvatarSeed, setSavedAvatarSeed] = useState("");
+  const [savedAvatarStyle, setSavedAvatarStyle] = useState(DEFAULT_AVATAR_STYLE);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(true);
@@ -239,18 +238,35 @@ const Profile = () => {
             const data = docSnap.data();
             const resolvedAvatarKey =
               data.avatarKey || inferAvatarKeyFromUrl(data.photoURL || currentUser.photoURL || "");
-            const resolvedAvatar =
+            // Generated avatar takes priority; fall back to legacy avatarKey/photoURL
+            const seed = data.avatarSeed || currentUser.uid;
+            const style = data.avatarStyle || DEFAULT_AVATAR_STYLE;
+            const resolvedAvatar = getAvatarUrl(seed, style) ||
               resolveAvatarFromKey(resolvedAvatarKey) || data.photoURL || currentUser.photoURL || "";
             const resolvedProfile = normalizeProfileData(data);
             setAvatarKey(resolvedAvatarKey);
             setAvatarUrl(resolvedAvatar);
             setSavedAvatarKey(resolvedAvatarKey);
             setSavedAvatarUrl(resolvedAvatar);
+            setAvatarSeed(seed);
+            setAvatarStyle(style);
+            setSavedAvatarSeed(seed);
+            setSavedAvatarStyle(style);
             setProfileData(resolvedProfile);
             setSavedProfileData(resolvedProfile);
           } else {
+            // No Firestore doc yet — generate avatar from UID
+            const seed = currentUser.uid;
+            const style = DEFAULT_AVATAR_STYLE;
+            const generatedUrl = getAvatarUrl(seed, style);
             setAvatarKey(inferredFallbackKey);
             setSavedAvatarKey(inferredFallbackKey);
+            setAvatarSeed(seed);
+            setAvatarStyle(style);
+            setSavedAvatarSeed(seed);
+            setSavedAvatarStyle(style);
+            setAvatarUrl(generatedUrl);
+            setSavedAvatarUrl(generatedUrl);
             setProfileData(defaultProfileData);
             setSavedProfileData(defaultProfileData);
           }
@@ -261,6 +277,10 @@ const Profile = () => {
           setAvatarUrl("");
           setSavedAvatarKey("");
           setSavedAvatarUrl("");
+          setAvatarSeed("");
+          setAvatarStyle(DEFAULT_AVATAR_STYLE);
+          setSavedAvatarSeed("");
+          setSavedAvatarStyle(DEFAULT_AVATAR_STYLE);
           setProfileData(defaultProfileData);
           setSavedProfileData(defaultProfileData);
         }
@@ -275,20 +295,25 @@ const Profile = () => {
     return () => unsubscribe();
   }, [auth, db]);
 
-  // Allow selecting from a set of bundled avatars instead of uploading to Storage
-  const avatarOptions = [
-    { key: "default", url: avDefault },
-    { key: "team1", url: av1 },
-    { key: "team2", url: av2 },
-    { key: "team3", url: av3 },
-  ];
+  // Allow selecting from generated DiceBear styles (same seed, different style = different look)
+  const avatarOptions = AVATAR_STYLES.map((s) => ({
+    key: s.key,
+    label: s.label,
+    url: getAvatarUrl(avatarSeed || user?.uid || "default", s.key),
+  }));
 
   const selectAvatar = (option) => {
-    setAvatarKey(option.key);
-    setAvatarUrl(option.url);
+    setAvatarStyle(option.key);
+    setAvatarUrl(getAvatarUrl(avatarSeed || user?.uid || "default", option.key));
     setShowAvatarPicker(false);
     setError(null);
     setSuccess("");
+  };
+
+  const shuffleAvatarSeed = () => {
+    const newSeed = `${user?.uid || "user"}-${Date.now()}`;
+    setAvatarSeed(newSeed);
+    setAvatarUrl(getAvatarUrl(newSeed, avatarStyle));
   };
 
   const addSecurityActivity = (action, status = "info") => {
@@ -541,6 +566,8 @@ const Profile = () => {
           displayName: user.displayName || "",
           photoURL: avatarUrl,
           avatarKey,
+          avatarSeed,
+          avatarStyle,
           ...profileData,
           updatedAt: serverTimestamp(),
         },
@@ -553,6 +580,8 @@ const Profile = () => {
 
       setSavedAvatarKey(avatarKey);
       setSavedAvatarUrl(avatarUrl);
+      setSavedAvatarSeed(avatarSeed);
+      setSavedAvatarStyle(avatarStyle);
       setSavedProfileData(profileData);
       setShowAvatarPicker(false);
       setError(null);
@@ -573,6 +602,8 @@ const Profile = () => {
             await updateProfile(auth.currentUser, { photoURL: avatarUrl });
             setSavedAvatarKey(avatarKey);
             setSavedAvatarUrl(avatarUrl);
+            setSavedAvatarSeed(avatarSeed);
+            setSavedAvatarStyle(avatarStyle);
             setSavedProfileData(profileData);
             setSuccess("Profile photo updated. Other details need Firestore access.");
             setActiveTab("overview");
@@ -1057,24 +1088,38 @@ const Profile = () => {
                 </label>
 
                 <div style={profileUi.avatarPickerWrap}>
-                  <button className="uni-card__btn" onClick={() => setShowAvatarPicker((s) => !s)} type="button">
-                    Choose Avatar
-                  </button>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+                    <button className="uni-card__btn" onClick={() => setShowAvatarPicker((s) => !s)} type="button">
+                      Choose Avatar Style
+                    </button>
+                    <button
+                      className="uni-card__btn"
+                      onClick={shuffleAvatarSeed}
+                      type="button"
+                      title="Shuffle to get a different look within the same style"
+                    >
+                      🔀 Shuffle Look
+                    </button>
+                  </div>
                   {showAvatarPicker && (
                     <div style={profileUi.avatarGrid}>
-                      {avatarOptions.map((a, idx) => (
+                      {avatarOptions.map((a) => (
                         <button key={a.key} onClick={() => selectAvatar(a)} style={profileUi.avatarOptionBtn}>
                           <img
                             src={a.url}
-                            alt={`avatar-${idx}`}
+                            alt={a.label}
                             style={{
-                              width: 54,
-                              height: 54,
+                              width: 60,
+                              height: 60,
                               borderRadius: "50%",
-                              objectFit: "cover",
-                              border: a.key === avatarKey ? "2px solid #2563eb" : "2px solid transparent",
+                              objectFit: "contain",
+                              background: "#f1f5f9",
+                              border: a.key === avatarStyle ? "2px solid #2563eb" : "2px solid transparent",
                             }}
                           />
+                          <p style={{ margin: "4px 0 0", fontSize: "0.7rem", color: "#64748b", textAlign: "center" }}>
+                            {a.label}
+                          </p>
                         </button>
                       ))}
                     </div>
@@ -1090,6 +1135,8 @@ const Profile = () => {
                     onClick={() => {
                       setAvatarKey(savedAvatarKey);
                       setAvatarUrl(savedAvatarUrl);
+                      setAvatarSeed(savedAvatarSeed);
+                      setAvatarStyle(savedAvatarStyle);
                       setProfileData(savedProfileData);
                       setShowAvatarPicker(false);
                       setError(null);
@@ -1372,9 +1419,9 @@ const profileUi = {
   },
   avatarGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(4, 54px)",
-    gap: 8,
-    marginTop: 10,
+    gridTemplateColumns: "repeat(auto-fill, minmax(74px, 1fr))",
+    gap: 10,
+    marginTop: 12,
   },
   avatarOptionBtn: {
     padding: 0,
