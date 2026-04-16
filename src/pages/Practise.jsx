@@ -32,6 +32,7 @@ import {
   FaCoins,
   FaLanguage,
   FaBriefcase,
+  FaUniversity,
 } from "react-icons/fa";
 
 const subjects = [
@@ -448,23 +449,15 @@ export default function Practise() {
             },
             {
               label: "Application",
-              icon: <FaPencilAlt />,
+              icon: <FaUniversity />,
               onClick: () => navigate("/application"),
             },
             {
               label: "Bursaries",
               icon: <FaGraduationCap />,
-              onClick: () => alert("Sorry! this feature is not yet available"),
+              onClick: () => navigate("/Bursary"),
             },
-            ...(!isGuest
-              ? [
-                  {
-                    label: "Logout",
-                    icon: <FaUserCircle />,
-                    onClick: handleLogout,
-                  },
-                ]
-              : []),
+            
           ]}
           stats={[
             {

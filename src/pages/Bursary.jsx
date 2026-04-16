@@ -515,7 +515,7 @@ export default function Bursary() {
             <FaUserCircle /> {isGuest ? "Sign In / Create Account" : "My Profile"}
           </button>
           <button className="dashboard-shortcut" onClick={() => navigate("/Aplication")}>
-            <FaPencilAlt /> Application
+            <FaUniversity /> Application
           </button>
           <button className="dashboard-shortcut" onClick={() => navigate("/Practise")}>
             <FaPencilAlt /> Past Papers
