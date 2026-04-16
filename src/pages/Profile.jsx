@@ -839,9 +839,7 @@ const Profile = () => {
                     <p style={profileUi.metaLine}>{user.email || "No email"}</p>
                   </div>
                 </div>
-                <button className="uni-card__btn uni-card__btn--secondary" onClick={() => setActiveTab("edit")}>
-                  Edit
-                </button>
+                
               </div>
               <div className="uni-card__body">
                 <p className="uni-card__desc">
