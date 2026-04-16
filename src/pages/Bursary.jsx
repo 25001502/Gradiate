@@ -22,928 +22,120 @@ import {
   FaUserCircle,
   FaPencilAlt,
   FaGraduationCap,
-  FaMoneyBillWave,
-  FaCalendarAlt,
+  FaClock,
+  FaBalanceScale,
   FaMapMarkerAlt,
   FaUniversity,
   FaFilter,
 } from "react-icons/fa";
 
-// ── South African bursary data ──────────────────────────────────────────────
+const makeBursary = (
+  id,
+  name,
+  provider,
+  fields,
+  province,
+  deadline,
+  applyUrl,
+  tags,
+  covers,
+  description
+) => ({
+  id,
+  name,
+  provider,
+  fields,
+  province,
+  deadline,
+  applyUrl,
+  tags,
+  covers,
+  description,
+});
+
 const BURSARIES = [
-  // ── Government / Public Sector ──
-  {
-    id: "nsfas",
-    name: "NSFAS Bursary",
-    provider: "National Student Financial Aid Scheme",
-    fields: ["All Fields"],
-    province: "All Provinces",
-    deadline: "Usually November each year",
-    description:
-      "Government-funded financial aid covering tuition, accommodation, meals, books and living allowances for students from households earning under R350,000 per year.",
-    applyUrl: "https://www.nsfas.org.za/content/how-to-apply.html",
-    tags: ["government", "undergraduate"],
-    covers: "Tuition, Accommodation, Living Allowance, Books",
-  },
-  {
-    id: "funza-lushaka",
-    name: "Funza Lushaka Bursary",
-    provider: "Department of Basic Education",
-    fields: ["Education", "Teaching"],
-    province: "All Provinces",
-    deadline: "Usually January each year",
-    description:
-      "Full-cost bursary for students pursuing a teaching qualification. Recipients are required to teach at a public school for the same number of years they received the bursary.",
-    applyUrl: "https://www.funzalushaka.doe.gov.za/",
-    tags: ["government", "teaching", "undergraduate"],
-    covers: "Tuition, Accommodation, Books, Living Allowance",
-  },
-  {
-    id: "dhet-bursary",
-    name: "DHET Bursary",
-    provider: "Department of Higher Education and Training",
-    fields: ["All Fields"],
-    province: "All Provinces",
-    deadline: "Varies annually",
-    description:
-      "Bursaries administered by the Department of Higher Education for students at public universities and TVET colleges, focusing on scarce skills areas.",
-    applyUrl: "https://www.dhet.gov.za/",
-    tags: ["government", "undergraduate"],
-    covers: "Tuition, Accommodation",
-  },
-  {
-    id: "dept-agriculture",
-    name: "Department of Agriculture Bursary",
-    provider: "Department of Agriculture, Land Reform and Rural Development",
-    fields: ["Agriculture", "Environmental Science", "Veterinary Science"],
-    province: "All Provinces",
-    deadline: "Usually September each year",
-    description:
-      "Bursaries for South African citizens studying agriculture-related fields. Applicants must be willing to work for the department after completing their studies.",
-    applyUrl: "https://www.dalrrd.gov.za/",
-    tags: ["government", "agriculture"],
-    covers: "Tuition, Accommodation, Books",
-  },
-  {
-    id: "dept-water",
-    name: "Department of Water and Sanitation Bursary",
-    provider: "Department of Water and Sanitation",
-    fields: ["Engineering", "Environmental Science", "Hydrology", "Chemistry"],
-    province: "All Provinces",
-    deadline: "Usually September each year",
-    description:
-      "Aimed at students in water-related fields of study including civil engineering, chemistry, hydrology, environmental science and water resource management.",
-    applyUrl: "https://www.dws.gov.za/",
-    tags: ["government", "engineering", "science"],
-    covers: "Tuition, Accommodation, Books, Stipend",
-  },
-  {
-    id: "saps-bursary",
-    name: "SAPS Bursary",
-    provider: "South African Police Service",
-    fields: ["Policing", "Forensic Science", "Law", "IT"],
-    province: "All Provinces",
-    deadline: "Varies annually",
-    description:
-      "Bursaries for students interested in careers with the South African Police Service, covering fields such as forensic science, policing, IT, and law.",
-    applyUrl: "https://www.saps.gov.za/careers/bursaries.php",
-    tags: ["government", "law enforcement"],
-    covers: "Tuition, Accommodation",
-  },
-  {
-    id: "dept-transport",
-    name: "Department of Transport Bursary",
-    provider: "Department of Transport",
-    fields: ["Engineering", "Transport Management", "Logistics", "Maritime Studies"],
-    province: "All Provinces",
-    deadline: "Usually August – September",
-    description:
-      "Supports students in transport-related fields including civil engineering, logistics, maritime studies, and transport economics.",
-    applyUrl: "https://www.transport.gov.za/",
-    tags: ["government", "engineering", "transport"],
-    covers: "Tuition, Accommodation, Books",
-  },
-  {
-    id: "dept-energy",
-    name: "Department of Mineral Resources and Energy Bursary",
-    provider: "Department of Mineral Resources and Energy",
-    fields: ["Mining Engineering", "Geology", "Energy Studies", "Chemical Engineering"],
-    province: "All Provinces",
-    deadline: "Varies annually",
-    description:
-      "Bursaries for students pursuing qualifications in mining, geology, energy, and related fields to address the skills shortage in the minerals and energy sector.",
-    applyUrl: "https://www.dmr.gov.za/",
-    tags: ["government", "mining", "energy"],
-    covers: "Tuition, Accommodation, Books, Stipend",
-  },
-  {
-    id: "gcis-bursary",
-    name: "GCIS Bursary",
-    provider: "Government Communication and Information System",
-    fields: ["Communication", "Journalism", "Media Studies", "IT"],
-    province: "All Provinces",
-    deadline: "Varies annually",
-    description:
-      "Bursary opportunities for students pursuing communication, journalism, media, and information technology-related studies.",
-    applyUrl: "https://www.gcis.gov.za/",
-    tags: ["government", "media", "communications"],
-    covers: "Tuition, Accommodation",
-  },
-  {
-    id: "dept-public-works",
-    name: "Department of Public Works Bursary",
-    provider: "Department of Public Works and Infrastructure",
-    fields: ["Engineering", "Architecture", "Quantity Surveying", "Construction"],
-    province: "All Provinces",
-    deadline: "Varies annually",
-    description:
-      "Bursaries for students studying built environment disciplines including architecture, civil engineering, quantity surveying, and construction management.",
-    applyUrl: "https://www.publicworks.gov.za/",
-    tags: ["government", "engineering", "construction"],
-    covers: "Tuition, Accommodation, Books",
-  },
-  {
-    id: "rand-water",
-    name: "Rand Water Bursary",
-    provider: "Rand Water",
-    fields: ["Engineering", "Chemistry", "Environmental Science", "IT"],
-    province: "Gauteng",
-    deadline: "Usually September each year",
-    description:
-      "Bursaries for students pursuing studies in fields related to water supply and management, including engineering, chemistry, and environmental sciences.",
-    applyUrl: "https://www.randwater.co.za/",
-    tags: ["public entity", "engineering", "science"],
-    covers: "Tuition, Accommodation, Books, Stipend",
-  },
-  {
-    id: "umgeni-water",
-    name: "Umgeni Water Bursary",
-    provider: "Umgeni Water",
-    fields: ["Engineering", "Chemistry", "Environmental Science"],
-    province: "KwaZulu-Natal",
-    deadline: "Usually September each year",
-    description:
-      "Supports students in KwaZulu-Natal studying water-related disciplines. Recipients are required to complete vacation work with Umgeni Water.",
-    applyUrl: "https://www.umgeni.co.za/",
-    tags: ["public entity", "engineering"],
-    covers: "Tuition, Accommodation, Books",
-  },
-  {
-    id: "idc-bursary",
-    name: "IDC Bursary",
-    provider: "Industrial Development Corporation",
-    fields: ["Engineering", "Finance", "Economics", "IT"],
-    province: "All Provinces",
-    deadline: "Varies annually",
-    description:
-      "The IDC provides bursaries to South African citizens studying towards qualifications in scarce-skills fields aligned to the organisation's mandate.",
-    applyUrl: "https://www.idc.co.za/",
-    tags: ["public entity", "finance", "engineering"],
-    covers: "Tuition, Accommodation, Books",
-  },
-  {
-    id: "dbsa-bursary",
-    name: "DBSA Bursary",
-    provider: "Development Bank of Southern Africa",
-    fields: ["Economics", "Finance", "Engineering", "Environmental Science"],
-    province: "All Provinces",
-    deadline: "Varies annually",
-    description:
-      "Bursaries for academically talented students in fields supporting development financing across Southern Africa.",
-    applyUrl: "https://www.dbsa.org/",
-    tags: ["public entity", "finance", "development"],
-    covers: "Tuition, Accommodation",
-  },
-  // ── Mining / Resources ──
-  {
-    id: "sasol-bursary",
-    name: "Sasol Bursary",
-    provider: "Sasol Limited",
-    fields: ["Chemical Engineering", "Mechanical Engineering", "Electrical Engineering", "Chemistry", "IT"],
-    province: "All Provinces",
-    deadline: "Usually March – June each year",
-    description:
-      "One of South Africa's most comprehensive bursary programmes covering tuition, accommodation, meals, books and a personal allowance for STEM students.",
-    applyUrl: "https://www.sasol.com/careers/students-and-graduates",
-    tags: ["corporate", "energy", "engineering"],
-    covers: "Tuition, Accommodation, Books, Meals, Personal Allowance",
-  },
-  {
-    id: "anglo-american",
-    name: "Anglo American Bursary",
-    provider: "Anglo American",
-    fields: ["Mining Engineering", "Geology", "Metallurgy", "Mechanical Engineering", "Electrical Engineering"],
-    province: "All Provinces",
-    deadline: "Usually March – April",
-    description:
-      "Bursaries for students in mining-related disciplines, covering full tuition and living costs. Vacation work opportunities included.",
-    applyUrl: "https://www.angloamerican.com/careers/students-and-graduates",
-    tags: ["corporate", "mining"],
-    covers: "Tuition, Accommodation, Books, Stipend",
-  },
-  {
-    id: "de-beers",
-    name: "De Beers Bursary",
-    provider: "De Beers Group",
-    fields: ["Mining Engineering", "Geology", "Mechanical Engineering", "Electrical Engineering"],
-    province: "All Provinces",
-    deadline: "Usually March each year",
-    description:
-      "Bursaries for South African students in mining and engineering fields. Includes vacation work placement at De Beers operations.",
-    applyUrl: "https://www.debeersgroup.com/careers",
-    tags: ["corporate", "mining"],
-    covers: "Tuition, Accommodation, Books",
-  },
-  {
-    id: "harmony-gold",
-    name: "Harmony Gold Bursary",
-    provider: "Harmony Gold Mining Company",
-    fields: ["Mining Engineering", "Geology", "Metallurgy", "Electrical Engineering"],
-    province: "Free State, Gauteng",
-    deadline: "Usually March – April",
-    description:
-      "Bursaries for students pursuing mining-related qualifications. Includes practical work experience during vacations.",
-    applyUrl: "https://www.harmony.co.za/careers/bursary-programme",
-    tags: ["corporate", "mining"],
-    covers: "Tuition, Accommodation, Books",
-  },
-  {
-    id: "sibanye-stillwater",
-    name: "Sibanye-Stillwater Bursary",
-    provider: "Sibanye-Stillwater",
-    fields: ["Mining Engineering", "Metallurgy", "Chemical Engineering", "Geology"],
-    province: "All Provinces",
-    deadline: "Usually March each year",
-    description:
-      "Comprehensive bursaries for students in the mining, metallurgy, and geological fields with vacation work opportunities.",
-    applyUrl: "https://www.sibanyestillwater.com/careers/",
-    tags: ["corporate", "mining"],
-    covers: "Tuition, Accommodation, Books, Stipend",
-  },
-  {
-    id: "anglogold-ashanti",
-    name: "AngloGold Ashanti Bursary",
-    provider: "AngloGold Ashanti",
-    fields: ["Mining Engineering", "Geology", "Metallurgy", "Mechanical Engineering"],
-    province: "All Provinces",
-    deadline: "Usually March – April",
-    description:
-      "Bursaries for university students pursuing qualifications relevant to the gold mining industry.",
-    applyUrl: "https://www.anglogoldashanti.com/careers/",
-    tags: ["corporate", "mining"],
-    covers: "Tuition, Accommodation, Books",
-  },
-  {
-    id: "implats",
-    name: "Impala Platinum (Implats) Bursary",
-    provider: "Impala Platinum Holdings",
-    fields: ["Mining Engineering", "Chemical Engineering", "Metallurgy", "Geology"],
-    province: "Limpopo, North West, Gauteng",
-    deadline: "Usually March each year",
-    description:
-      "Full bursaries for students in platinum mining-related studies, with vacation work at Implats operations.",
-    applyUrl: "https://www.implats.co.za/bursaries.php",
-    tags: ["corporate", "mining"],
-    covers: "Tuition, Accommodation, Books, Stipend",
-  },
-  {
-    id: "kumba-iron-ore",
-    name: "Kumba Iron Ore Bursary",
-    provider: "Kumba Iron Ore (Anglo American)",
-    fields: ["Mining Engineering", "Mechanical Engineering", "Electrical Engineering", "Geology"],
-    province: "Northern Cape, Gauteng",
-    deadline: "Usually March – April",
-    description:
-      "Bursaries for students pursuing mining and engineering qualifications, with vacation work at Sishen or Kolomela mines.",
-    applyUrl: "https://www.angloamericankumba.com/careers",
-    tags: ["corporate", "mining"],
-    covers: "Tuition, Accommodation, Books",
-  },
-  {
-    id: "samancor",
-    name: "Samancor Chrome Bursary",
-    provider: "Samancor Chrome",
-    fields: ["Mining Engineering", "Metallurgy", "Chemical Engineering", "Mechanical Engineering"],
-    province: "Mpumalanga, Limpopo, North West",
-    deadline: "Usually March each year",
-    description:
-      "Full bursaries for students studying mining and metallurgy-related disciplines with vacation work opportunities.",
-    applyUrl: "https://www.samancorcr.com/",
-    tags: ["corporate", "mining"],
-    covers: "Tuition, Accommodation, Books",
-  },
-  {
-    id: "arcelormittal",
-    name: "ArcelorMittal SA Bursary",
-    provider: "ArcelorMittal South Africa",
-    fields: ["Metallurgy", "Mechanical Engineering", "Electrical Engineering", "Chemical Engineering"],
-    province: "Gauteng, Mpumalanga, KwaZulu-Natal",
-    deadline: "Usually September each year",
-    description:
-      "Bursaries for students pursuing engineering and metallurgical qualifications relevant to the steel manufacturing industry.",
-    applyUrl: "https://southafrica.arcelormittal.com/",
-    tags: ["corporate", "manufacturing", "engineering"],
-    covers: "Tuition, Accommodation, Books",
-  },
-  // ── Energy / Utilities ──
-  {
-    id: "eskom-bursary",
-    name: "Eskom Bursary",
-    provider: "Eskom Holdings",
-    fields: ["Electrical Engineering", "Mechanical Engineering", "Civil Engineering", "IT", "Finance"],
-    province: "All Provinces",
-    deadline: "Usually August – October",
-    description:
-      "Full bursaries for students in engineering, IT, and finance disciplines with compulsory vacation work at Eskom facilities.",
-    applyUrl: "https://www.eskom.co.za/careers/bursary/",
-    tags: ["public entity", "energy", "engineering"],
-    covers: "Tuition, Accommodation, Books, Stipend",
-  },
-  {
-    id: "transnet-bursary",
-    name: "Transnet Bursary",
-    provider: "Transnet SOC Ltd",
-    fields: ["Engineering", "IT", "Logistics", "Supply Chain", "Finance"],
-    province: "All Provinces",
-    deadline: "Usually August – September",
-    description:
-      "Comprehensive bursary programme for students in engineering, IT, logistics, and finance with vacation work at Transnet.",
-    applyUrl: "https://www.transnet.net/Careers/Pages/Bursaries.aspx",
-    tags: ["public entity", "transport", "engineering"],
-    covers: "Tuition, Accommodation, Books, Stipend",
-  },
-  // ── Banking / Financial Services ──
-  {
-    id: "allan-gray",
-    name: "Allan Gray Orbis Foundation Scholarship",
-    provider: "Allan Gray Orbis Foundation",
-    fields: ["Commerce", "Finance", "Entrepreneurship", "Accounting", "Business"],
-    province: "All Provinces",
-    deadline: "Usually March each year",
-    description:
-      "Prestigious scholarship for high-performing learners with entrepreneurial potential. Covers full cost of study at select South African universities plus entrepreneurship development.",
-    applyUrl: "https://www.allangrayorbis.org/",
-    tags: ["foundation", "finance", "entrepreneurship"],
-    covers: "Tuition, Accommodation, Books, Living Allowance, Mentorship",
-  },
-  {
-    id: "standard-bank",
-    name: "Standard Bank Bursary",
-    provider: "Standard Bank Group",
-    fields: ["Finance", "Accounting", "IT", "Data Science", "Actuarial Science", "Engineering"],
-    province: "All Provinces",
-    deadline: "Usually March – April",
-    description:
-      "Bursaries for top-performing students in finance, IT, and STEM fields with vacation work experience at Standard Bank.",
-    applyUrl: "https://www.standardbank.com/sbg/standard-bank-group/careers/early-careers",
-    tags: ["corporate", "banking", "finance"],
-    covers: "Tuition, Accommodation, Books",
-  },
-  {
-    id: "absa-bursary",
-    name: "Absa Bursary",
-    provider: "Absa Group",
-    fields: ["Finance", "Accounting", "IT", "Actuarial Science", "Data Science"],
-    province: "All Provinces",
-    deadline: "Usually March – April",
-    description:
-      "Bursaries for outstanding students studying towards qualifications in banking and financial services-related fields.",
-    applyUrl: "https://www.absa.co.za/about-us/careers/students-and-graduates/",
-    tags: ["corporate", "banking", "finance"],
-    covers: "Tuition, Accommodation, Books",
-  },
-  {
-    id: "fnb-fund",
-    name: "FNB Fund Bursary",
-    provider: "First National Bank",
-    fields: ["IT", "Finance", "Accounting", "Data Analytics"],
-    province: "All Provinces",
-    deadline: "Usually March each year",
-    description:
-      "FNB offers bursaries to academically excelling students in IT, finance, and analytics fields, with internship opportunities.",
-    applyUrl: "https://www.fnb.co.za/about-fnb/careers/students-graduates.html",
-    tags: ["corporate", "banking", "IT"],
-    covers: "Tuition, Accommodation",
-  },
-  {
-    id: "nedbank-bursary",
-    name: "Nedbank Bursary",
-    provider: "Nedbank Group",
-    fields: ["Finance", "Accounting", "IT", "Actuarial Science", "Mathematics"],
-    province: "All Provinces",
-    deadline: "Usually March each year",
-    description:
-      "Nedbank provides bursaries for academically strong students in finance, technology, and quantitative fields with vacation work.",
-    applyUrl: "https://www.nedbank.co.za/content/nedbank/desktop/gt/en/careers.html",
-    tags: ["corporate", "banking", "finance"],
-    covers: "Tuition, Accommodation, Books",
-  },
-  {
-    id: "capitec-bursary",
-    name: "Capitec Bursary",
-    provider: "Capitec Bank",
-    fields: ["IT", "Finance", "Actuarial Science", "Data Science"],
-    province: "All Provinces",
-    deadline: "Varies annually",
-    description:
-      "Bursaries for innovative students in technology and finance-related fields with opportunities for graduate employment.",
-    applyUrl: "https://www.capitecbank.co.za/about-us/careers/",
-    tags: ["corporate", "banking", "IT"],
-    covers: "Tuition, Accommodation",
-  },
-  {
-    id: "investec-bursary",
-    name: "Investec Bursary",
-    provider: "Investec",
-    fields: ["Finance", "Accounting", "IT", "Actuarial Science", "Economics"],
-    province: "Gauteng, Western Cape",
-    deadline: "Usually March each year",
-    description:
-      "Bursaries for high-achieving students in finance and technology disciplines, with structured vacation work at Investec.",
-    applyUrl: "https://www.investec.com/en_za/welcome-to-investec/careers/graduates.html",
-    tags: ["corporate", "banking", "finance"],
-    covers: "Tuition, Accommodation, Books",
-  },
-  {
-    id: "old-mutual",
-    name: "Old Mutual Bursary",
-    provider: "Old Mutual",
-    fields: ["Actuarial Science", "Finance", "Accounting", "IT", "Data Science", "Mathematics"],
-    province: "All Provinces",
-    deadline: "Usually March – April",
-    description:
-      "Comprehensive bursary programme for students pursuing qualifications in financial services, IT, and data fields.",
-    applyUrl: "https://www.oldmutual.co.za/careers/",
-    tags: ["corporate", "insurance", "finance"],
-    covers: "Tuition, Accommodation, Books, Stipend",
-  },
-  {
-    id: "sanlam-bursary",
-    name: "Sanlam Bursary",
-    provider: "Sanlam",
-    fields: ["Actuarial Science", "Finance", "Accounting", "IT", "Mathematics"],
-    province: "All Provinces",
-    deadline: "Varies annually",
-    description:
-      "Sanlam offers bursaries for talented students in actuarial, financial, and technology-related studies.",
-    applyUrl: "https://www.sanlam.co.za/careers/Pages/default.aspx",
-    tags: ["corporate", "insurance", "finance"],
-    covers: "Tuition, Accommodation, Books",
-  },
-  {
-    id: "liberty-bursary",
-    name: "Liberty Bursary",
-    provider: "Liberty Group",
-    fields: ["Actuarial Science", "Finance", "IT", "Mathematics"],
-    province: "Gauteng",
-    deadline: "Varies annually",
-    description:
-      "Bursaries for students in actuarial, mathematical, and financial fields with work-integrated learning opportunities.",
-    applyUrl: "https://www.liberty.co.za/careers",
-    tags: ["corporate", "insurance", "finance"],
-    covers: "Tuition, Accommodation",
-  },
-  {
-    id: "momentum-bursary",
-    name: "Momentum Bursary",
-    provider: "Momentum Metropolitan",
-    fields: ["Actuarial Science", "Finance", "IT", "Accounting"],
-    province: "All Provinces",
-    deadline: "Varies annually",
-    description:
-      "Bursaries aimed at students pursuing actuarial science, finance, and IT qualifications with mentorship support.",
-    applyUrl: "https://www.momentum.co.za/momentum/careers",
-    tags: ["corporate", "insurance", "finance"],
-    covers: "Tuition, Accommodation",
-  },
-  {
-    id: "discovery-bursary",
-    name: "Discovery Bursary",
-    provider: "Discovery Limited",
-    fields: ["Actuarial Science", "Data Science", "IT", "Finance", "Health Sciences"],
-    province: "Gauteng",
-    deadline: "Usually March each year",
-    description:
-      "Bursaries for top students in actuarial science, data, and health sciences with graduate programme pathway.",
-    applyUrl: "https://www.discovery.co.za/corporate/careers-graduates",
-    tags: ["corporate", "insurance", "health"],
-    covers: "Tuition, Accommodation, Books",
-  },
-  // ── Accounting / Professional Services ──
-  {
-    id: "thuthuka-bursary",
-    name: "Thuthuka Bursary Fund",
-    provider: "SAICA (South African Institute of Chartered Accountants)",
-    fields: ["Accounting", "Finance"],
-    province: "All Provinces",
-    deadline: "Usually September each year",
-    description:
-      "One of the top accounting bursaries in SA covering tuition, accommodation, and mentoring for students pursuing CA(SA) qualification.",
-    applyUrl: "https://www.thuthukabursaryfund.co.za/",
-    tags: ["professional body", "accounting"],
-    covers: "Tuition, Accommodation, Books, Mentorship",
-  },
-  {
-    id: "deloitte-bursary",
-    name: "Deloitte Bursary",
-    provider: "Deloitte South Africa",
-    fields: ["Accounting", "Finance", "IT", "Audit"],
-    province: "All Provinces",
-    deadline: "Varies annually",
-    description:
-      "Bursaries for students pursuing CTA/PGDA and CA(SA) qualifications with work experience at one of the Big Four firms.",
-    applyUrl: "https://www2.deloitte.com/za/en/careers/students.html",
-    tags: ["corporate", "big four", "accounting"],
-    covers: "Tuition, Accommodation, Books",
-  },
-  {
-    id: "pwc-bursary",
-    name: "PwC Bursary",
-    provider: "PricewaterhouseCoopers",
-    fields: ["Accounting", "Finance", "IT", "Audit"],
-    province: "All Provinces",
-    deadline: "Varies annually",
-    description:
-      "PwC offers bursaries to academically strong accounting students with vacation work and articles placement.",
-    applyUrl: "https://www.pwc.co.za/en/careers/student-careers.html",
-    tags: ["corporate", "big four", "accounting"],
-    covers: "Tuition, Accommodation, Books",
-  },
-  {
-    id: "kpmg-bursary",
-    name: "KPMG Bursary",
-    provider: "KPMG South Africa",
-    fields: ["Accounting", "Finance", "Audit"],
-    province: "All Provinces",
-    deadline: "Varies annually",
-    description:
-      "KPMG provides bursaries for aspiring chartered accountants with vacation work and graduate employment opportunities.",
-    applyUrl: "https://home.kpmg/za/en/home/careers/students-and-graduates.html",
-    tags: ["corporate", "big four", "accounting"],
-    covers: "Tuition, Accommodation, Books",
-  },
-  {
-    id: "ey-bursary",
-    name: "EY Bursary",
-    provider: "Ernst & Young South Africa",
-    fields: ["Accounting", "Finance", "Audit", "IT"],
-    province: "All Provinces",
-    deadline: "Varies annually",
-    description:
-      "EY offers bursaries for top-performing accounting students with vacation work and a pathway to an articles traineeship.",
-    applyUrl: "https://www.ey.com/en_za/careers/students",
-    tags: ["corporate", "big four", "accounting"],
-    covers: "Tuition, Accommodation, Books",
-  },
-  // ── Telecom / Tech ──
-  {
-    id: "vodacom-bursary",
-    name: "Vodacom Bursary",
-    provider: "Vodacom",
-    fields: ["IT", "Engineering", "Data Science", "Computer Science"],
-    province: "All Provinces",
-    deadline: "Usually March each year",
-    description:
-      "Bursaries for students in technology and engineering fields with vacation work at Vodacom. Aimed at building digital talent.",
-    applyUrl: "https://www.vodacom.co.za/vodacom/careers/",
-    tags: ["corporate", "telecom", "IT"],
-    covers: "Tuition, Accommodation, Books",
-  },
-  {
-    id: "mtn-bursary",
-    name: "MTN SA Foundation Bursary",
-    provider: "MTN Foundation",
-    fields: ["IT", "Engineering", "Computer Science", "Mathematics"],
-    province: "All Provinces",
-    deadline: "Usually March each year",
-    description:
-      "MTN Foundation provides bursaries for deserving students in STEM fields with a focus on bridging the digital divide.",
-    applyUrl: "https://www.mtn.co.za/Pages/MTN-SA-Foundation.aspx",
-    tags: ["corporate", "telecom", "IT"],
-    covers: "Tuition, Accommodation, Books",
-  },
-  {
-    id: "telkom-bursary",
-    name: "Telkom Bursary",
-    provider: "Telkom SA SOC",
-    fields: ["IT", "Engineering", "Computer Science", "Finance"],
-    province: "All Provinces",
-    deadline: "Varies annually",
-    description:
-      "Bursaries for students in IT, engineering, and commerce fields with vacation work placements at Telkom.",
-    applyUrl: "https://www.telkom.co.za/about-us/careers/",
-    tags: ["corporate", "telecom", "IT"],
-    covers: "Tuition, Accommodation, Books",
-  },
-  {
-    id: "multichoice-bursary",
-    name: "MultiChoice Bursary",
-    provider: "MultiChoice Group",
-    fields: ["IT", "Engineering", "Media", "Data Science", "Finance"],
-    province: "Gauteng",
-    deadline: "Varies annually",
-    description:
-      "Bursaries for students pursuing qualifications relevant to the media, entertainment, and technology industries.",
-    applyUrl: "https://www.multichoice.com/careers/",
-    tags: ["corporate", "media", "IT"],
-    covers: "Tuition, Accommodation",
-  },
-  // ── Retail / FMCG ──
-  {
-    id: "shoprite-bursary",
-    name: "Shoprite Bursary",
-    provider: "Shoprite Holdings",
-    fields: ["Retail Management", "IT", "Finance", "Supply Chain", "Food Technology"],
-    province: "All Provinces",
-    deadline: "Varies annually",
-    description:
-      "Bursaries for students in retail, supply chain, IT, and food technology fields with graduate programme opportunities.",
-    applyUrl: "https://www.shopriteholdings.co.za/careers.html",
-    tags: ["corporate", "retail"],
-    covers: "Tuition, Accommodation",
-  },
-  {
-    id: "pick-n-pay",
-    name: "Pick n Pay Bursary",
-    provider: "Pick n Pay",
-    fields: ["Retail Management", "IT", "Finance", "Supply Chain"],
-    province: "All Provinces",
-    deadline: "Varies annually",
-    description:
-      "Pick n Pay provides bursaries and graduate programmes for students in retail-related fields.",
-    applyUrl: "https://www.pnp.co.za/careers",
-    tags: ["corporate", "retail"],
-    covers: "Tuition, Accommodation",
-  },
-  {
-    id: "woolworths-bursary",
-    name: "Woolworths SA Bursary",
-    provider: "Woolworths Holdings",
-    fields: ["Retail Management", "Fashion Design", "IT", "Finance", "Food Science"],
-    province: "Western Cape, Gauteng",
-    deadline: "Varies annually",
-    description:
-      "Bursaries for students in fashion, food science, IT, and finance with internship opportunities at Woolworths.",
-    applyUrl: "https://www.woolworths.co.za/corporate/careers",
-    tags: ["corporate", "retail", "fashion"],
-    covers: "Tuition, Accommodation",
-  },
-  {
-    id: "tiger-brands",
-    name: "Tiger Brands Bursary",
-    provider: "Tiger Brands Limited",
-    fields: ["Food Science", "Engineering", "Supply Chain", "Finance"],
-    province: "Gauteng",
-    deadline: "Varies annually",
-    description:
-      "Bursaries for students in food science, engineering, and supply chain fields relevant to FMCG manufacturing.",
-    applyUrl: "https://www.tigerbrands.com/careers",
-    tags: ["corporate", "FMCG", "manufacturing"],
-    covers: "Tuition, Accommodation, Books",
-  },
-  {
-    id: "sab-bursary",
-    name: "SAB (AB InBev) Bursary",
-    provider: "South African Breweries (AB InBev)",
-    fields: ["Engineering", "Finance", "Supply Chain", "Marketing"],
-    province: "All Provinces",
-    deadline: "Usually March each year",
-    description:
-      "Bursaries for students in engineering, finance, supply chain, and marketing with vacation work at SAB facilities.",
-    applyUrl: "https://www.ab-inbev.com/careers/students-and-graduates/",
-    tags: ["corporate", "FMCG", "manufacturing"],
-    covers: "Tuition, Accommodation, Books",
-  },
-  // ── Automotive ──
-  {
-    id: "toyota-sa",
-    name: "Toyota SA Bursary",
-    provider: "Toyota South Africa",
-    fields: ["Mechanical Engineering", "Electrical Engineering", "Industrial Engineering", "IT"],
-    province: "KwaZulu-Natal, Gauteng",
-    deadline: "Varies annually",
-    description:
-      "Bursaries for students in engineering and IT fields with vacation work at Toyota's manufacturing plants.",
-    applyUrl: "https://www.toyota.co.za/careers",
-    tags: ["corporate", "automotive", "engineering"],
-    covers: "Tuition, Accommodation, Books",
-  },
-  {
-    id: "bmw-sa",
-    name: "BMW SA Bursary",
-    provider: "BMW Group South Africa",
-    fields: ["Mechanical Engineering", "Electrical Engineering", "Mechatronics", "IT"],
-    province: "Gauteng",
-    deadline: "Varies annually",
-    description:
-      "Bursaries for engineering and technology students with work-integrated learning at BMW's Rosslyn plant.",
-    applyUrl: "https://www.bmw.co.za/en/topics/offers-and-services/careers.html",
-    tags: ["corporate", "automotive", "engineering"],
-    covers: "Tuition, Accommodation, Books",
-  },
-  {
-    id: "mercedes-sa",
-    name: "Mercedes-Benz SA Bursary",
-    provider: "Mercedes-Benz South Africa",
-    fields: ["Mechanical Engineering", "Electrical Engineering", "Industrial Engineering"],
-    province: "Eastern Cape, Gauteng",
-    deadline: "Varies annually",
-    description:
-      "Bursaries for engineering students with vacation work at the Mercedes-Benz East London manufacturing plant.",
-    applyUrl: "https://www.mercedes-benz.co.za/passengercars/being-an-owner/careers.html",
-    tags: ["corporate", "automotive", "engineering"],
-    covers: "Tuition, Accommodation, Books",
-  },
-  // ── Forestry / Paper ──
-  {
-    id: "sappi-bursary",
-    name: "Sappi Bursary",
-    provider: "Sappi Limited",
-    fields: ["Chemical Engineering", "Mechanical Engineering", "Forestry", "Pulp & Paper Technology"],
-    province: "KwaZulu-Natal, Mpumalanga, Gauteng",
-    deadline: "Usually August – September",
-    description:
-      "Bursaries for students in engineering and forestry disciplines relevant to the pulp and paper manufacturing industry.",
-    applyUrl: "https://www.sappi.com/careers",
-    tags: ["corporate", "forestry", "engineering"],
-    covers: "Tuition, Accommodation, Books, Stipend",
-  },
-  {
-    id: "mondi-bursary",
-    name: "Mondi Bursary",
-    provider: "Mondi Group",
-    fields: ["Chemical Engineering", "Mechanical Engineering", "Electrical Engineering", "Forestry"],
-    province: "KwaZulu-Natal, Mpumalanga",
-    deadline: "Varies annually",
-    description:
-      "Bursaries for students in engineering and forestry fields with vacation work at Mondi's operations.",
-    applyUrl: "https://www.mondigroup.com/en/careers/",
-    tags: ["corporate", "forestry", "engineering"],
-    covers: "Tuition, Accommodation, Books",
-  },
-  // ── Healthcare ──
-  {
-    id: "netcare-bursary",
-    name: "Netcare Bursary",
-    provider: "Netcare Limited",
-    fields: ["Nursing", "Pharmacy", "Health Sciences"],
-    province: "All Provinces",
-    deadline: "Varies annually",
-    description:
-      "Bursaries for students in nursing and health science fields with practical placements at Netcare hospitals.",
-    applyUrl: "https://www.netcare.co.za/Netcare-Nursing",
-    tags: ["corporate", "healthcare"],
-    covers: "Tuition, Accommodation",
-  },
-  {
-    id: "life-healthcare",
-    name: "Life Healthcare Bursary",
-    provider: "Life Healthcare Group",
-    fields: ["Nursing", "Health Sciences", "Pharmacy"],
-    province: "All Provinces",
-    deadline: "Varies annually",
-    description:
-      "Bursaries for aspiring nurses and healthcare professionals with practical training at Life Healthcare facilities.",
-    applyUrl: "https://www.lifehealthcare.co.za/careers/",
-    tags: ["corporate", "healthcare"],
-    covers: "Tuition, Accommodation",
-  },
-  {
-    id: "mediclinic-bursary",
-    name: "Mediclinic Bursary",
-    provider: "Mediclinic International",
-    fields: ["Nursing", "Pharmacy", "Health Sciences"],
-    province: "All Provinces",
-    deadline: "Varies annually",
-    description:
-      "Bursaries for nursing and healthcare students with clinical training at Mediclinic hospitals across South Africa.",
-    applyUrl: "https://www.mediclinic.co.za/en/corporate/careers.html",
-    tags: ["corporate", "healthcare"],
-    covers: "Tuition, Accommodation",
-  },
-  // ── Construction / Infrastructure ──
-  {
-    id: "murray-roberts",
-    name: "Murray & Roberts Bursary",
-    provider: "Murray & Roberts Holdings",
-    fields: ["Civil Engineering", "Mechanical Engineering", "Electrical Engineering", "Quantity Surveying"],
-    province: "Gauteng",
-    deadline: "Varies annually",
-    description:
-      "Bursaries for engineering and built environment students with vacation work at Murray & Roberts projects.",
-    applyUrl: "https://www.murrob.com/careers",
-    tags: ["corporate", "construction", "engineering"],
-    covers: "Tuition, Accommodation, Books",
-  },
-  // ── Services / Other ──
-  {
-    id: "clicks-bursary",
-    name: "Clicks Group Bursary",
-    provider: "Clicks Group",
-    fields: ["Pharmacy", "Retail Management", "IT"],
-    province: "All Provinces",
-    deadline: "Varies annually",
-    description:
-      "Bursaries for pharmacy students with graduate pharmacist internships at Clicks stores nationwide.",
-    applyUrl: "https://clicks.co.za/careers",
-    tags: ["corporate", "pharmacy", "retail"],
-    covers: "Tuition, Accommodation",
-  },
-  {
-    id: "bidvest-bursary",
-    name: "Bidvest Bursary",
-    provider: "The Bidvest Group",
-    fields: ["Finance", "Engineering", "IT", "Supply Chain"],
-    province: "All Provinces",
-    deadline: "Varies annually",
-    description:
-      "Bursaries for students in financial, engineering, and logistics disciplines aligned with Bidvest's diversified business.",
-    applyUrl: "https://www.bidvest.co.za/careers.php",
-    tags: ["corporate", "services"],
-    covers: "Tuition, Accommodation",
-  },
-  // ── SETAs ──
-  {
-    id: "merseta",
-    name: "merSETA Bursary",
-    provider: "Manufacturing, Engineering and Related Services SETA",
-    fields: ["Engineering", "Manufacturing", "Mechatronics"],
-    province: "All Provinces",
-    deadline: "Varies annually",
-    description:
-      "Bursaries for students in engineering and manufacturing disciplines to develop scarce skills in the sector.",
-    applyUrl: "https://www.merseta.org.za/",
-    tags: ["SETA", "engineering", "manufacturing"],
-    covers: "Tuition, Stipend",
-  },
-  {
-    id: "bankseta",
-    name: "BankSETA Bursary",
-    provider: "Banking Sector Education and Training Authority",
-    fields: ["Finance", "Accounting", "IT", "Risk Management"],
-    province: "All Provinces",
-    deadline: "Varies annually",
-    description:
-      "Bursaries for students pursuing qualifications in banking, finance, and IT to address scarce skills in the banking sector.",
-    applyUrl: "https://www.bankseta.org.za/",
-    tags: ["SETA", "banking", "finance"],
-    covers: "Tuition, Stipend",
-  },
-  {
-    id: "ewseta",
-    name: "EWSETA Bursary",
-    provider: "Energy and Water Sector Education and Training Authority",
-    fields: ["Engineering", "Environmental Science", "Energy Studies"],
-    province: "All Provinces",
-    deadline: "Varies annually",
-    description:
-      "Bursaries for students in energy and water-related fields of study to build capacity in these critical sectors.",
-    applyUrl: "https://www.ewseta.org.za/",
-    tags: ["SETA", "energy", "engineering"],
-    covers: "Tuition, Stipend",
-  },
-  {
-    id: "chieta",
-    name: "CHIETA Bursary",
-    provider: "Chemical Industries Education and Training Authority",
-    fields: ["Chemical Engineering", "Chemistry", "Biotechnology"],
-    province: "All Provinces",
-    deadline: "Varies annually",
-    description:
-      "Bursaries for students in chemical engineering and chemistry fields to develop skills for the chemical industry.",
-    applyUrl: "https://www.chieta.org.za/",
-    tags: ["SETA", "chemical", "engineering"],
-    covers: "Tuition, Stipend",
-  },
-  {
-    id: "mict-seta",
-    name: "MICT SETA Bursary",
-    provider: "Media, Information and Communication Technologies SETA",
-    fields: ["IT", "Media", "Film", "Telecommunications"],
-    province: "All Provinces",
-    deadline: "Varies annually",
-    description:
-      "Bursaries for students in IT, media, film, and telecommunications fields to build capacity in the digital economy.",
-    applyUrl: "https://www.mict.org.za/",
-    tags: ["SETA", "IT", "media"],
-    covers: "Tuition, Stipend",
-  },
-  {
-    id: "hwseta",
-    name: "HWSETA Bursary",
-    provider: "Health and Welfare Sector Education and Training Authority",
-    fields: ["Nursing", "Social Work", "Psychology", "Public Health"],
-    province: "All Provinces",
-    deadline: "Varies annually",
-    description:
-      "Bursaries for students in health and social development fields to address scarce skills in hospitals and social services.",
-    applyUrl: "https://www.hwseta.org.za/",
-    tags: ["SETA", "healthcare", "social work"],
-    covers: "Tuition, Stipend",
-  },
+  makeBursary("nsfas", "NSFAS Bursary", "National Student Financial Aid Scheme", ["All Fields"], "All Provinces", "Usually November each year", "https://www.nsfas.org.za/content/how-to-apply.html", ["government", "undergraduate"], "Tuition, Accommodation, Books, Living Allowance", "Government-funded aid for qualifying students at public universities and TVET colleges."),
+  makeBursary("funza-lushaka", "Funza Lushaka Bursary", "Department of Basic Education", ["Education", "Teaching"], "All Provinces", "Usually January each year", "https://www.funzalushaka.doe.gov.za/", ["government", "teaching"], "Tuition, Accommodation, Books, Stipend", "Teaching bursary with work-back service at public schools after graduation."),
+  makeBursary("dhet", "DHET Bursary", "Department of Higher Education and Training", ["All Fields"], "All Provinces", "Varies annually", "https://www.dhet.gov.za/", ["government"], "Tuition, Accommodation", "DHET-backed support focused on scarce skills and access to higher education."),
+  makeBursary("dalrrd", "Department of Agriculture Bursary", "DALRRD", ["Agriculture", "Veterinary Science", "Environmental Science"], "All Provinces", "Usually September each year", "https://www.dalrrd.gov.za/", ["government", "agriculture"], "Tuition, Accommodation, Books", "Supports agriculture and rural-development qualifications."),
+  makeBursary("dws", "Department of Water and Sanitation Bursary", "Department of Water and Sanitation", ["Engineering", "Hydrology", "Chemistry"], "All Provinces", "Usually September each year", "https://www.dws.gov.za/", ["government", "engineering"], "Tuition, Accommodation, Books, Stipend", "Bursary for water-sector critical skills."),
+  makeBursary("saps", "SAPS Bursary", "South African Police Service", ["Law", "Forensic Science", "IT", "Policing"], "All Provinces", "Varies annually", "https://www.saps.gov.za/careers/bursaries.php", ["government"], "Tuition, Accommodation", "Supports studies aligned to law-enforcement careers."),
+  makeBursary("dot", "Department of Transport Bursary", "Department of Transport", ["Engineering", "Logistics", "Transport Management"], "All Provinces", "Usually August-September", "https://www.transport.gov.za/", ["government", "transport"], "Tuition, Accommodation, Books", "Transport and logistics pipeline bursary programme."),
+  makeBursary("dmre", "DMRE Bursary", "Department of Mineral Resources and Energy", ["Mining Engineering", "Geology", "Energy Studies"], "All Provinces", "Varies annually", "https://www.dmre.gov.za/", ["government", "mining", "energy"], "Tuition, Accommodation, Books, Stipend", "Builds mining and energy-sector professional capacity."),
+  makeBursary("gcis", "GCIS Bursary", "Government Communication and Information System", ["Communication", "Journalism", "Media Studies", "IT"], "All Provinces", "Varies annually", "https://www.gcis.gov.za/", ["government", "media"], "Tuition, Accommodation", "For communication and media-focused public-sector careers."),
+  makeBursary("dpwi", "Department of Public Works Bursary", "Department of Public Works and Infrastructure", ["Civil Engineering", "Architecture", "Quantity Surveying"], "All Provinces", "Varies annually", "https://www.publicworks.gov.za/", ["government", "construction"], "Tuition, Accommodation, Books", "Built-environment bursaries for infrastructure skills."),
+
+  makeBursary("rand-water", "Rand Water Bursary", "Rand Water", ["Engineering", "Chemistry", "Environmental Science"], "Gauteng", "Usually September each year", "https://www.randwater.co.za/", ["public entity", "engineering"], "Tuition, Accommodation, Books, Stipend", "Supports water utility and treatment related disciplines."),
+  makeBursary("umgeni-water", "Umgeni Water Bursary", "Umgeni Water", ["Engineering", "Chemistry", "Environmental Science"], "KwaZulu-Natal", "Usually September each year", "https://www.umgeni.co.za/", ["public entity", "engineering"], "Tuition, Accommodation, Books", "Water-sector bursary with vacation work opportunities."),
+  makeBursary("idc", "IDC Bursary", "Industrial Development Corporation", ["Engineering", "Finance", "Economics", "IT"], "All Provinces", "Varies annually", "https://www.idc.co.za/", ["public entity", "finance"], "Tuition, Accommodation, Books", "Supports scarce skills tied to industrial growth and development finance."),
+  makeBursary("dbsa", "DBSA Bursary", "Development Bank of Southern Africa", ["Engineering", "Economics", "Finance", "Environmental Science"], "All Provinces", "Varies annually", "https://www.dbsa.org/", ["public entity", "finance"], "Tuition, Accommodation", "Development-finance aligned bursary opportunities."),
+  makeBursary("eskom", "Eskom Bursary", "Eskom", ["Electrical Engineering", "Mechanical Engineering", "Civil Engineering", "IT", "Finance"], "All Provinces", "Usually August-October", "https://www.eskom.co.za/careers/bursary/", ["public entity", "energy", "engineering"], "Tuition, Accommodation, Books, Stipend", "Large utility bursary with vacation work and graduate pipeline."),
+  makeBursary("transnet", "Transnet Bursary", "Transnet SOC Ltd", ["Engineering", "IT", "Logistics", "Supply Chain", "Finance"], "All Provinces", "Usually August-September", "https://www.transnet.net/Careers/Pages/Bursaries.aspx", ["public entity", "transport", "engineering"], "Tuition, Accommodation, Books, Stipend", "Transport and logistics sector bursary with practical exposure."),
+
+  makeBursary("sasol", "Sasol Bursary", "Sasol", ["Chemical Engineering", "Mechanical Engineering", "Electrical Engineering", "Chemistry", "IT"], "All Provinces", "Usually March-June each year", "https://www.sasol.com/careers/students-and-graduates", ["corporate", "energy", "engineering"], "Tuition, Accommodation, Books, Meals, Allowance", "One of SA's top STEM bursary programmes."),
+  makeBursary("anglo-american", "Anglo American Bursary", "Anglo American", ["Mining Engineering", "Geology", "Metallurgy", "Mechanical Engineering"], "All Provinces", "Usually March-April", "https://www.angloamerican.com/careers/students-and-graduates", ["corporate", "mining"], "Tuition, Accommodation, Books, Stipend", "Mining industry bursary with vacation work."),
+  makeBursary("de-beers", "De Beers Bursary", "De Beers Group", ["Mining Engineering", "Geology", "Mechanical Engineering"], "All Provinces", "Usually March each year", "https://www.debeersgroup.com/careers", ["corporate", "mining"], "Tuition, Accommodation, Books", "Supports mining and technical disciplines."),
+  makeBursary("harmony", "Harmony Gold Bursary", "Harmony Gold", ["Mining Engineering", "Geology", "Metallurgy"], "Free State, Gauteng", "Usually March-April", "https://www.harmony.co.za/careers/bursary-programme", ["corporate", "mining"], "Tuition, Accommodation, Books", "Mining bursary with operational exposure."),
+  makeBursary("sibanye", "Sibanye-Stillwater Bursary", "Sibanye-Stillwater", ["Mining Engineering", "Chemical Engineering", "Geology"], "All Provinces", "Usually March each year", "https://www.sibanyestillwater.com/careers/", ["corporate", "mining"], "Tuition, Accommodation, Books, Stipend", "Critical-skills bursary in precious-metals mining."),
+  makeBursary("anglogold", "AngloGold Ashanti Bursary", "AngloGold Ashanti", ["Mining Engineering", "Geology", "Metallurgy"], "All Provinces", "Usually March-April", "https://www.anglogoldashanti.com/careers/", ["corporate", "mining"], "Tuition, Accommodation, Books", "Mining-focused professional bursary route."),
+  makeBursary("implats", "Implats Bursary", "Impala Platinum", ["Mining Engineering", "Chemical Engineering", "Geology"], "Limpopo, North West, Gauteng", "Usually March each year", "https://www.implats.co.za/bursaries.php", ["corporate", "mining"], "Tuition, Accommodation, Books, Stipend", "Platinum sector bursary with vacation work."),
+  makeBursary("kumba", "Kumba Iron Ore Bursary", "Kumba Iron Ore", ["Mining Engineering", "Mechanical Engineering", "Electrical Engineering", "Geology"], "Northern Cape, Gauteng", "Usually March-April", "https://www.angloamericankumba.com/careers", ["corporate", "mining"], "Tuition, Accommodation, Books", "Iron ore operations-linked bursary stream."),
+  makeBursary("samancor", "Samancor Chrome Bursary", "Samancor Chrome", ["Mining Engineering", "Metallurgy", "Chemical Engineering"], "Mpumalanga, Limpopo, North West", "Usually March each year", "https://www.samancorcr.com/", ["corporate", "mining"], "Tuition, Accommodation, Books", "Chrome and metallurgy-focused bursary."),
+  makeBursary("arcelor", "ArcelorMittal SA Bursary", "ArcelorMittal South Africa", ["Metallurgy", "Mechanical Engineering", "Electrical Engineering", "Chemical Engineering"], "Gauteng, Mpumalanga, KwaZulu-Natal", "Usually September each year", "https://southafrica.arcelormittal.com/", ["corporate", "engineering", "manufacturing"], "Tuition, Accommodation, Books", "Steel industry bursary for engineering and metallurgy."),
+
+  makeBursary("allan-gray", "Allan Gray Orbis Foundation Scholarship", "Allan Gray Orbis Foundation", ["Commerce", "Finance", "Accounting", "Entrepreneurship"], "All Provinces", "Usually March each year", "https://www.allangrayorbis.org/", ["foundation", "finance"], "Tuition, Accommodation, Books, Living Allowance", "Prestigious scholarship with entrepreneurship development."),
+  makeBursary("standard-bank", "Standard Bank Bursary", "Standard Bank", ["Finance", "Accounting", "IT", "Data Science", "Actuarial Science"], "All Provinces", "Usually March-April", "https://www.standardbank.com/sbg/standard-bank-group/careers/early-careers", ["corporate", "banking", "finance"], "Tuition, Accommodation, Books", "Banking bursary for high-performing students."),
+  makeBursary("absa", "Absa Bursary", "Absa Group", ["Finance", "Accounting", "IT", "Actuarial Science", "Data Science"], "All Provinces", "Usually March-April", "https://www.absa.co.za/about-us/careers/students-and-graduates/", ["corporate", "banking", "finance"], "Tuition, Accommodation, Books", "Financial services bursary across quantitative fields."),
+  makeBursary("fnb", "FNB Fund Bursary", "First National Bank", ["IT", "Finance", "Accounting", "Data Analytics"], "All Provinces", "Usually March each year", "https://www.fnb.co.za/about-fnb/careers/students-graduates.html", ["corporate", "banking", "IT"], "Tuition, Accommodation", "Supports digital and finance talent in banking."),
+  makeBursary("nedbank", "Nedbank Bursary", "Nedbank", ["Finance", "Accounting", "IT", "Actuarial Science", "Mathematics"], "All Provinces", "Usually March each year", "https://www.nedbank.co.za/content/nedbank/desktop/gt/en/careers.html", ["corporate", "banking", "finance"], "Tuition, Accommodation, Books", "Bursary route into banking and analytics careers."),
+  makeBursary("capitec", "Capitec Bursary", "Capitec Bank", ["IT", "Finance", "Actuarial Science", "Data Science"], "All Provinces", "Varies annually", "https://www.capitecbank.co.za/about-us/careers/", ["corporate", "banking", "IT"], "Tuition, Accommodation", "Technology and finance bursary opportunities."),
+  makeBursary("investec", "Investec Bursary", "Investec", ["Finance", "Accounting", "IT", "Actuarial Science", "Economics"], "Gauteng, Western Cape", "Usually March each year", "https://www.investec.com/en_za/welcome-to-investec/careers/graduates.html", ["corporate", "banking", "finance"], "Tuition, Accommodation, Books", "Structured bursary with vacation work pathway."),
+  makeBursary("old-mutual", "Old Mutual Bursary", "Old Mutual", ["Actuarial Science", "Finance", "Accounting", "IT", "Data Science"], "All Provinces", "Usually March-April", "https://www.oldmutual.co.za/careers/", ["corporate", "insurance", "finance"], "Tuition, Accommodation, Books, Stipend", "Comprehensive insurance and financial services bursary."),
+  makeBursary("sanlam", "Sanlam Bursary", "Sanlam", ["Actuarial Science", "Finance", "Accounting", "IT", "Mathematics"], "All Provinces", "Varies annually", "https://www.sanlam.co.za/careers/Pages/default.aspx", ["corporate", "insurance", "finance"], "Tuition, Accommodation, Books", "Supports actuarial and finance students."),
+  makeBursary("liberty", "Liberty Bursary", "Liberty Group", ["Actuarial Science", "Finance", "IT", "Mathematics"], "Gauteng", "Varies annually", "https://www.liberty.co.za/careers", ["corporate", "insurance", "finance"], "Tuition, Accommodation", "Insurance-sector bursary for quantitative fields."),
+  makeBursary("momentum", "Momentum Bursary", "Momentum Metropolitan", ["Actuarial Science", "Finance", "IT", "Accounting"], "All Provinces", "Varies annually", "https://www.momentum.co.za/momentum/careers", ["corporate", "insurance", "finance"], "Tuition, Accommodation", "Bursary with mentoring in financial services."),
+  makeBursary("discovery", "Discovery Bursary", "Discovery", ["Actuarial Science", "Data Science", "IT", "Finance", "Health Sciences"], "Gauteng", "Usually March each year", "https://www.discovery.co.za/corporate/careers-graduates", ["corporate", "insurance", "health"], "Tuition, Accommodation, Books", "Strong graduate pipeline into analytics and health innovation."),
+
+  makeBursary("thuthuka", "Thuthuka Bursary Fund", "SAICA", ["Accounting", "Finance"], "All Provinces", "Usually September each year", "https://www.thuthukabursaryfund.co.za/", ["professional body", "accounting"], "Tuition, Accommodation, Books, Mentorship", "Top accounting bursary for CA(SA) pathway students."),
+  makeBursary("deloitte", "Deloitte Bursary", "Deloitte South Africa", ["Accounting", "Finance", "Audit", "IT"], "All Provinces", "Varies annually", "https://www2.deloitte.com/za/en/careers/students.html", ["corporate", "accounting", "big four"], "Tuition, Accommodation, Books", "Big Four bursary and training pipeline."),
+  makeBursary("pwc", "PwC Bursary", "PricewaterhouseCoopers", ["Accounting", "Finance", "Audit", "IT"], "All Provinces", "Varies annually", "https://www.pwc.co.za/en/careers/student-careers.html", ["corporate", "accounting", "big four"], "Tuition, Accommodation, Books", "Bursary route to articles and audit careers."),
+  makeBursary("kpmg", "KPMG Bursary", "KPMG South Africa", ["Accounting", "Finance", "Audit"], "All Provinces", "Varies annually", "https://home.kpmg/za/en/home/careers/students-and-graduates.html", ["corporate", "accounting", "big four"], "Tuition, Accommodation, Books", "Accounting bursary with graduate opportunities."),
+  makeBursary("ey", "EY Bursary", "Ernst & Young South Africa", ["Accounting", "Finance", "Audit", "IT"], "All Provinces", "Varies annually", "https://www.ey.com/en_za/careers/students", ["corporate", "accounting", "big four"], "Tuition, Accommodation, Books", "Supports top accounting students with practical exposure."),
+
+  makeBursary("vodacom", "Vodacom Bursary", "Vodacom", ["IT", "Engineering", "Data Science", "Computer Science"], "All Provinces", "Usually March each year", "https://www.vodacom.co.za/vodacom/careers/", ["corporate", "telecom", "IT"], "Tuition, Accommodation, Books", "Digital talent bursary with telecom practical experience."),
+  makeBursary("mtn", "MTN SA Foundation Bursary", "MTN Foundation", ["IT", "Engineering", "Computer Science", "Mathematics"], "All Provinces", "Usually March each year", "https://www.mtn.co.za/Pages/MTN-SA-Foundation.aspx", ["corporate", "telecom", "IT"], "Tuition, Accommodation, Books", "STEM-focused bursary for youth development."),
+  makeBursary("telkom", "Telkom Bursary", "Telkom", ["IT", "Engineering", "Computer Science", "Finance"], "All Provinces", "Varies annually", "https://www.telkom.co.za/about-us/careers/", ["corporate", "telecom", "IT"], "Tuition, Accommodation, Books", "Technology and engineering bursary stream."),
+  makeBursary("multichoice", "MultiChoice Bursary", "MultiChoice Group", ["IT", "Engineering", "Media", "Data Science", "Finance"], "Gauteng", "Varies annually", "https://www.multichoice.com/careers/", ["corporate", "media", "IT"], "Tuition, Accommodation", "Media-tech bursary opportunities."),
+
+  makeBursary("shoprite", "Shoprite Bursary", "Shoprite Holdings", ["Retail Management", "IT", "Finance", "Supply Chain", "Food Technology"], "All Provinces", "Varies annually", "https://www.shopriteholdings.co.za/careers.html", ["corporate", "retail"], "Tuition, Accommodation", "Retail and supply-chain bursary programme."),
+  makeBursary("picknpay", "Pick n Pay Bursary", "Pick n Pay", ["Retail Management", "IT", "Finance", "Supply Chain"], "All Provinces", "Varies annually", "https://www.pnp.co.za/careers", ["corporate", "retail"], "Tuition, Accommodation", "Retail talent development bursary."),
+  makeBursary("woolworths", "Woolworths SA Bursary", "Woolworths", ["Retail Management", "Fashion Design", "IT", "Finance", "Food Science"], "Western Cape, Gauteng", "Varies annually", "https://www.woolworths.co.za/corporate/careers", ["corporate", "retail", "fashion"], "Tuition, Accommodation", "Bursary options in food, fashion, retail and tech."),
+  makeBursary("tiger", "Tiger Brands Bursary", "Tiger Brands", ["Food Science", "Engineering", "Supply Chain", "Finance"], "Gauteng", "Varies annually", "https://www.tigerbrands.com/careers", ["corporate", "manufacturing"], "Tuition, Accommodation, Books", "FMCG-focused bursary in technical and business fields."),
+  makeBursary("sab", "SAB (AB InBev) Bursary", "South African Breweries", ["Engineering", "Finance", "Supply Chain", "Marketing"], "All Provinces", "Usually March each year", "https://www.ab-inbev.com/careers/students-and-graduates/", ["corporate", "manufacturing"], "Tuition, Accommodation, Books", "Manufacturing and supply-chain bursary programme."),
+
+  makeBursary("toyota", "Toyota SA Bursary", "Toyota South Africa", ["Mechanical Engineering", "Electrical Engineering", "Industrial Engineering", "IT"], "KwaZulu-Natal, Gauteng", "Varies annually", "https://www.toyota.co.za/careers", ["corporate", "automotive", "engineering"], "Tuition, Accommodation, Books", "Automotive engineering bursary with plant exposure."),
+  makeBursary("bmw", "BMW SA Bursary", "BMW Group South Africa", ["Mechanical Engineering", "Electrical Engineering", "Mechatronics", "IT"], "Gauteng", "Varies annually", "https://www.bmw.co.za/en/topics/offers-and-services/careers.html", ["corporate", "automotive", "engineering"], "Tuition, Accommodation, Books", "Engineering bursary linked to automotive operations."),
+  makeBursary("mercedes", "Mercedes-Benz SA Bursary", "Mercedes-Benz South Africa", ["Mechanical Engineering", "Electrical Engineering", "Industrial Engineering"], "Eastern Cape, Gauteng", "Varies annually", "https://www.mercedes-benz.co.za/passengercars/being-an-owner/careers.html", ["corporate", "automotive", "engineering"], "Tuition, Accommodation, Books", "Automotive technical bursary with practical training pathways."),
+
+  makeBursary("sappi", "Sappi Bursary", "Sappi", ["Chemical Engineering", "Mechanical Engineering", "Forestry", "Pulp and Paper Technology"], "KwaZulu-Natal, Mpumalanga, Gauteng", "Usually August-September", "https://www.sappi.com/careers", ["corporate", "forestry", "engineering"], "Tuition, Accommodation, Books, Stipend", "Forestry and process-engineering bursary programme."),
+  makeBursary("mondi", "Mondi Bursary", "Mondi Group", ["Chemical Engineering", "Mechanical Engineering", "Electrical Engineering", "Forestry"], "KwaZulu-Natal, Mpumalanga", "Varies annually", "https://www.mondigroup.com/en/careers/", ["corporate", "forestry", "engineering"], "Tuition, Accommodation, Books", "Industrial and forestry skills bursary."),
+
+  makeBursary("netcare", "Netcare Bursary", "Netcare", ["Nursing", "Pharmacy", "Health Sciences"], "All Provinces", "Varies annually", "https://www.netcare.co.za/Netcare-Nursing", ["corporate", "healthcare"], "Tuition, Accommodation", "Healthcare bursary route for nursing and allied fields."),
+  makeBursary("life-healthcare", "Life Healthcare Bursary", "Life Healthcare", ["Nursing", "Health Sciences", "Pharmacy"], "All Provinces", "Varies annually", "https://www.lifehealthcare.co.za/careers/", ["corporate", "healthcare"], "Tuition, Accommodation", "Clinical training linked healthcare bursary opportunities."),
+  makeBursary("mediclinic", "Mediclinic Bursary", "Mediclinic", ["Nursing", "Pharmacy", "Health Sciences"], "All Provinces", "Varies annually", "https://www.mediclinic.co.za/en/corporate/careers.html", ["corporate", "healthcare"], "Tuition, Accommodation", "Private-hospital network bursary programme."),
+
+  makeBursary("murray-roberts", "Murray and Roberts Bursary", "Murray and Roberts", ["Civil Engineering", "Mechanical Engineering", "Electrical Engineering", "Quantity Surveying"], "Gauteng", "Varies annually", "https://www.murrob.com/careers", ["corporate", "construction", "engineering"], "Tuition, Accommodation, Books", "Infrastructure and construction bursary pathway."),
+  makeBursary("clicks", "Clicks Group Bursary", "Clicks Group", ["Pharmacy", "Retail Management", "IT"], "All Provinces", "Varies annually", "https://clicks.co.za/careers", ["corporate", "pharmacy", "retail"], "Tuition, Accommodation", "Pharmacy and retail-focused bursary options."),
+  makeBursary("bidvest", "Bidvest Bursary", "Bidvest", ["Finance", "Engineering", "IT", "Supply Chain"], "All Provinces", "Varies annually", "https://www.bidvest.co.za/careers.php", ["corporate", "services"], "Tuition, Accommodation", "Diversified-group bursary programme across critical fields."),
+
+  makeBursary("merseta", "merSETA Bursary", "Manufacturing, Engineering and Related Services SETA", ["Engineering", "Manufacturing", "Mechatronics"], "All Provinces", "Varies annually", "https://www.merseta.org.za/", ["SETA", "engineering"], "Tuition, Stipend", "SETA bursary for manufacturing and engineering skills."),
+  makeBursary("bankseta", "BankSETA Bursary", "Banking Sector Education and Training Authority", ["Finance", "Accounting", "IT", "Risk Management"], "All Provinces", "Varies annually", "https://www.bankseta.org.za/", ["SETA", "banking", "finance"], "Tuition, Stipend", "Banking sector scarce-skills bursary support."),
+  makeBursary("ewseta", "EWSETA Bursary", "Energy and Water SETA", ["Engineering", "Environmental Science", "Energy Studies"], "All Provinces", "Varies annually", "https://www.ewseta.org.za/", ["SETA", "energy", "engineering"], "Tuition, Stipend", "SETA bursary for energy and water economy skills."),
+  makeBursary("chieta", "CHIETA Bursary", "Chemical Industries SETA", ["Chemical Engineering", "Chemistry", "Biotechnology"], "All Provinces", "Varies annually", "https://www.chieta.org.za/", ["SETA", "chemical", "engineering"], "Tuition, Stipend", "Chemical-sector bursary for technical pipeline development."),
+  makeBursary("mict", "MICT SETA Bursary", "Media, Information and Communication Technologies SETA", ["IT", "Media", "Film", "Telecommunications"], "All Provinces", "Varies annually", "https://www.mict.org.za/", ["SETA", "IT", "media"], "Tuition, Stipend", "Digital economy and media skills bursary."),
+  makeBursary("hwseta", "HWSETA Bursary", "Health and Welfare SETA", ["Nursing", "Social Work", "Psychology", "Public Health"], "All Provinces", "Varies annually", "https://www.hwseta.org.za/", ["SETA", "healthcare", "social work"], "Tuition, Stipend", "Health and social development bursary options."),
 ];
 
-// All unique fields and provinces for filter dropdowns
 const ALL_FIELDS = [...new Set(BURSARIES.flatMap((b) => b.fields))].sort();
 const ALL_PROVINCES = [
   "All Provinces",
@@ -957,11 +149,67 @@ const ALL_PROVINCES = [
   "North West",
   "Western Cape",
 ];
-const ALL_CATEGORIES = ["All", "government", "corporate", "public entity", "foundation", "professional body", "SETA"];
+const ALL_CATEGORIES = [
+  "All",
+  "government",
+  "corporate",
+  "public entity",
+  "foundation",
+  "professional body",
+  "SETA",
+];
 
 const BOOKMARK_FOLDERS = ["General", "Top Choice", "Backup", "Applied"];
 
-// ── Component ────────────────────────────────────────────────────────────────
+const LOGO_COLORS = ["#e2e8f0", "#dbeafe", "#d1fae5", "#fee2e2", "#fef3c7", "#ede9fe"];
+
+const hashString = (input) =>
+  input.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+
+const getProviderInitials = (provider) => {
+  const words = provider
+    .replace(/[^A-Za-z\s]/g, "")
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2);
+  if (!words.length) return "BU";
+  return words.map((word) => word[0]).join("").toUpperCase();
+};
+
+const createLogoDataUri = (provider, id) => {
+  const initials = getProviderInitials(provider);
+  const color = LOGO_COLORS[hashString(id) % LOGO_COLORS.length];
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='160' height='110' viewBox='0 0 160 110'><rect width='160' height='110' rx='16' fill='${color}'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='34' font-weight='700' fill='#1e293b'>${initials}</text></svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+};
+
+const getCategoryLabel = (tags) => {
+  if (tags.includes("government")) return "Government";
+  if (tags.includes("SETA")) return "SETA";
+  if (tags.includes("foundation")) return "Foundation";
+  if (tags.includes("public entity")) return "Public Entity";
+  if (tags.includes("professional body")) return "Professional Body";
+  return "Corporate";
+};
+
+const getDeadlinePill = (deadlineText) => {
+  const normalized = deadlineText.toLowerCase();
+
+  if (normalized.includes("varies")) {
+    return {
+      label: "Deadline Varies",
+      background: "#e2e8f0",
+      color: "#334155",
+    };
+  }
+
+  return {
+    label: "Application Open",
+    background: "#dcfce7",
+    color: "#166534",
+  };
+};
+
 export default function Bursary() {
   const [search, setSearch] = useState("");
   const [fieldFilter, setFieldFilter] = useState("all");
@@ -970,7 +218,9 @@ export default function Bursary() {
   const [activeTab, setActiveTab] = useState("all");
   const [bookmarks, setBookmarks] = useState([]);
   const [bookmarkMeta, setBookmarkMeta] = useState({});
+  const [compareIds, setCompareIds] = useState([]);
   const [menuOpen, setMenuOpen] = useState(false);
+
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const isGuest = !user?.uid;
@@ -984,12 +234,13 @@ export default function Bursary() {
     }
   };
 
-  // ── Firestore bookmark helpers ──
   const saveBursaryBookmark = useCallback(
     async (bursaryId, overrides = {}) => {
       if (!user?.uid) return;
+
       const b = BURSARIES.find((item) => item.id === bursaryId);
       if (!b) return;
+
       await setDoc(
         doc(db, "users", user.uid, "bursaryBookmarks", bursaryId),
         {
@@ -1013,20 +264,24 @@ export default function Bursary() {
 
   const loadBursaryBookmarks = useCallback(async () => {
     if (!user?.uid) return { ids: [], metaById: {} };
+
     const snapshot = await getDocs(collection(db, "users", user.uid, "bursaryBookmarks"));
     const ids = snapshot.docs.map((d) => d.id);
     const metaById = {};
+
     snapshot.docs.forEach((d) => {
       metaById[d.id] = d.data() || {};
     });
+
     return { ids, metaById };
   }, [user?.uid]);
 
-  // ── Sync bookmarks with Firestore ──
   useEffect(() => {
     let cancelled = false;
+
     const sync = async () => {
       if (!user?.uid) return;
+
       try {
         const cloud = await loadBursaryBookmarks();
         if (!cancelled) {
@@ -1037,50 +292,87 @@ export default function Bursary() {
         console.error("Failed to sync bursary bookmarks", err);
       }
     };
+
     sync();
-    return () => { cancelled = true; };
+
+    return () => {
+      cancelled = true;
+    };
   }, [loadBursaryBookmarks, user?.uid]);
 
   useEffect(() => {
     if (!isGuest) return;
+
     setBookmarks([]);
     setBookmarkMeta({});
     if (activeTab === "saved") setActiveTab("all");
   }, [activeTab, isGuest]);
 
   const toggleBookmark = (id) => {
-    if (isGuest) { navigate("/auth"); return; }
+    if (isGuest) {
+      navigate("/auth");
+      return;
+    }
+
     setBookmarks((prev) => {
       const removing = prev.includes(id);
       const next = removing ? prev.filter((b) => b !== id) : [...prev, id];
       const persist = removing ? removeBursaryBookmark(id) : saveBursaryBookmark(id);
+
       persist.catch((e) => console.error("Bookmark sync error", e));
+
       setBookmarkMeta((m) => {
         const nm = { ...m };
-        if (removing) delete nm[id];
-        else if (!nm[id]) nm[id] = { folder: "General", notes: "" };
+        if (removing) {
+          delete nm[id];
+        } else if (!nm[id]) {
+          nm[id] = { folder: "General", notes: "" };
+        }
         return nm;
       });
+
       return next;
     });
   };
 
   const updateBookmarkMeta = (id, partial) => {
-    if (isGuest) { navigate("/auth"); return; }
-    setBookmarkMeta((prev) => ({ ...prev, [id]: { ...(prev[id] || {}), ...partial } }));
-    if (user?.uid) {
-      setDoc(
-        doc(db, "users", user.uid, "bursaryBookmarks", id),
-        { ...partial, updatedAt: serverTimestamp() },
-        { merge: true }
-      ).catch((e) => console.error("Meta update error", e));
+    if (isGuest) {
+      navigate("/auth");
+      return;
     }
+
+    setBookmarkMeta((prev) => ({
+      ...prev,
+      [id]: {
+        ...(prev[id] || {}),
+        ...partial,
+      },
+    }));
+
+    if (!user?.uid) return;
+
+    setDoc(
+      doc(db, "users", user.uid, "bursaryBookmarks", id),
+      { ...partial, updatedAt: serverTimestamp() },
+      { merge: true }
+    ).catch((e) => console.error("Meta update error", e));
   };
 
-  // ── Filtering ──
+  const toggleCompare = (id) => {
+    setCompareIds((prev) => {
+      if (prev.includes(id)) return prev.filter((item) => item !== id);
+      if (prev.length >= 4) return prev;
+      return [...prev, id];
+    });
+  };
+
   const filtered = useMemo(() => {
     let list = BURSARIES;
-    if (activeTab === "saved") list = list.filter((b) => bookmarks.includes(b.id));
+
+    if (activeTab === "saved") {
+      list = list.filter((b) => bookmarks.includes(b.id));
+    }
+
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter(
@@ -1092,24 +384,54 @@ export default function Bursary() {
           b.tags.some((t) => t.toLowerCase().includes(q))
       );
     }
+
     if (fieldFilter !== "all") {
-      list = list.filter((b) => b.fields.some((f) => f === fieldFilter));
+      list = list.filter((b) => b.fields.includes(fieldFilter));
     }
+
     if (provinceFilter !== "all") {
       list = list.filter(
         (b) => b.province === "All Provinces" || b.province.includes(provinceFilter)
       );
     }
+
     if (categoryFilter !== "All") {
       list = list.filter((b) => b.tags.includes(categoryFilter));
     }
+
     return list;
   }, [search, fieldFilter, provinceFilter, categoryFilter, activeTab, bookmarks]);
 
-  // ── Render ─────────────────────────────────────────────────────────────────
+  const compareBursaries = useMemo(
+    () => BURSARIES.filter((b) => compareIds.includes(b.id)),
+    [compareIds]
+  );
+
+  const recommendations = useMemo(() => {
+    if (!bookmarks.length) {
+      return BURSARIES.slice(0, 3);
+    }
+
+    const saved = BURSARIES.filter((b) => bookmarks.includes(b.id));
+    const categoryScores = saved.reduce((acc, item) => {
+      item.tags.forEach((tag) => {
+        acc[tag] = (acc[tag] || 0) + 1;
+      });
+      return acc;
+    }, {});
+
+    return BURSARIES
+      .filter((b) => !bookmarks.includes(b.id))
+      .map((b) => ({
+        ...b,
+        score: b.tags.reduce((acc, tag) => acc + (categoryScores[tag] || 0), 0),
+      }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3);
+  }, [bookmarks]);
+
   return (
     <div>
-      {/* Navbar */}
       <nav className="navbar-responsive">
         <div className="navbar-container">
           <a
@@ -1162,9 +484,7 @@ export default function Bursary() {
         </div>
       </nav>
 
-      {/* Dashboard Content */}
       <div className="dashboard-page">
-        {/* Welcome */}
         <header className="dashboard-welcome">
           <h1 className="dashboard-welcome__greeting">
             <FaGraduationCap /> Bursary <span>Finder</span>
@@ -1174,7 +494,6 @@ export default function Bursary() {
           </p>
         </header>
 
-        {/* Search */}
         <div className="dashboard-search">
           <div className="dashboard-search__wrapper">
             <FaSearch className="dashboard-search__icon" />
@@ -1188,7 +507,6 @@ export default function Bursary() {
           </div>
         </div>
 
-        {/* Quick Nav Shortcuts */}
         <div className="dashboard-shortcuts">
           <button
             className="dashboard-shortcut"
@@ -1196,43 +514,29 @@ export default function Bursary() {
           >
             <FaUserCircle /> {isGuest ? "Sign In / Create Account" : "My Profile"}
           </button>
-          <button
-            className="dashboard-shortcut"
-            onClick={() => navigate("/Aplication")}
-          >
+          <button className="dashboard-shortcut" onClick={() => navigate("/Aplication")}>
             <FaPencilAlt /> Application
           </button>
-          <button
-            className="dashboard-shortcut"
-            onClick={() => navigate("/Practise")}
-          >
+          <button className="dashboard-shortcut" onClick={() => navigate("/Practise")}>
             <FaPencilAlt /> Past Papers
           </button>
         </div>
 
-        {/* Stats */}
         <div className="dashboard-stats">
           <div className="dashboard-stat">
-            <p className="dashboard-stat__value dashboard-stat__value--blue">
-              {BURSARIES.length}
-            </p>
+            <p className="dashboard-stat__value dashboard-stat__value--blue">{BURSARIES.length}</p>
             <p className="dashboard-stat__label">Bursaries</p>
           </div>
           <div className="dashboard-stat">
-            <p className="dashboard-stat__value dashboard-stat__value--green">
-              {ALL_FIELDS.length}
-            </p>
+            <p className="dashboard-stat__value dashboard-stat__value--green">{ALL_FIELDS.length}</p>
             <p className="dashboard-stat__label">Fields of Study</p>
           </div>
           <div className="dashboard-stat">
-            <p className="dashboard-stat__value dashboard-stat__value--purple">
-              {bookmarks.length}
-            </p>
+            <p className="dashboard-stat__value dashboard-stat__value--purple">{bookmarks.length}</p>
             <p className="dashboard-stat__label">Saved</p>
           </div>
         </div>
 
-        {/* Tabs */}
         <div className="dashboard-tabs">
           <button
             className={`dashboard-tab ${activeTab === "all" ? "dashboard-tab--active" : ""}`}
@@ -1250,7 +554,6 @@ export default function Bursary() {
           )}
         </div>
 
-        {/* Filters */}
         <div className="dashboard-tabs" style={{ marginTop: 8, gap: 8, flexWrap: "wrap" }}>
           <span className="dashboard-stat__label" style={{ margin: 0 }}>
             <FaFilter /> Filters
@@ -1262,7 +565,9 @@ export default function Bursary() {
           >
             <option value="all">All Fields of Study</option>
             {ALL_FIELDS.map((f) => (
-              <option key={f} value={f}>{f}</option>
+              <option key={f} value={f}>
+                {f}
+              </option>
             ))}
           </select>
           <select
@@ -1272,7 +577,9 @@ export default function Bursary() {
           >
             <option value="all">All Provinces</option>
             {ALL_PROVINCES.filter((p) => p !== "All Provinces").map((p) => (
-              <option key={p} value={p}>{p}</option>
+              <option key={p} value={p}>
+                {p}
+              </option>
             ))}
           </select>
           <select
@@ -1281,56 +588,172 @@ export default function Bursary() {
             style={{ border: "1px solid #cbd5e1", borderRadius: 10, padding: "8px 10px" }}
           >
             {ALL_CATEGORIES.map((c) => (
-              <option key={c} value={c}>{c === "All" ? "All Categories" : c.charAt(0).toUpperCase() + c.slice(1)}</option>
+              <option key={c} value={c}>
+                {c === "All" ? "All Categories" : c.charAt(0).toUpperCase() + c.slice(1)}
+              </option>
             ))}
           </select>
         </div>
 
-        {/* Bursary Cards */}
+        {recommendations.length > 0 && (
+          <section className="dashboard-recommendations" aria-label="Smart Recommendations">
+            <div className="dashboard-recommendations__header">
+              <p className="dashboard-stat__label" style={{ margin: 0 }}>
+                Smart Recommendations
+              </p>
+              <span className="dashboard-recommendations__hint">
+                Based on your saved bursaries and preferred categories.
+              </span>
+            </div>
+            <div className="dashboard-recommendations__grid">
+              {recommendations.map((b) => {
+                const isSaved = bookmarks.includes(b.id);
+
+                return (
+                  <button
+                    key={`rec-${b.id}`}
+                    className={`dashboard-recommendation ${isSaved ? "dashboard-recommendation--saved" : ""}`}
+                    onClick={() => toggleBookmark(b.id)}
+                  >
+                    <span className="dashboard-recommendation__title">{b.name}</span>
+                    <span className="dashboard-recommendation__meta">
+                      <FaMapMarkerAlt /> {b.province}
+                    </span>
+                    <span className="dashboard-recommendation__cta">
+                      {isSaved ? "Saved" : "Save Recommendation"}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {compareBursaries.length > 0 && (
+          <section className="dashboard-compare" aria-label="Compare Bursaries">
+            <div className="dashboard-compare__header">
+              <p className="dashboard-stat__label" style={{ margin: 0 }}>
+                <FaBalanceScale /> Compare Bursaries ({compareBursaries.length}/4)
+              </p>
+              <button
+                className="dashboard-tab dashboard-compare__clear"
+                onClick={() => setCompareIds([])}
+              >
+                Clear Compare
+              </button>
+            </div>
+            <div className="dashboard-compare__table-wrap">
+              <table className="dashboard-compare__table">
+                <thead>
+                  <tr>
+                    <th>Bursary</th>
+                    <th>Provider</th>
+                    <th>Province</th>
+                    <th>Deadline</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {compareBursaries.map((b) => (
+                    <tr key={`compare-${b.id}`}>
+                      <td data-label="Bursary">{b.name}</td>
+                      <td data-label="Provider">{b.provider}</td>
+                      <td data-label="Province">{b.province}</td>
+                      <td data-label="Deadline">{b.deadline}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
+
         {filtered.length > 0 ? (
-          <div className="bursaries-grid" style={{ marginTop: "1.5rem" }}>
+          <div className="uni-grid" key={activeTab}>
             {filtered.map((b) => {
               const saved = bookmarks.includes(b.id);
               const folderValue = bookmarkMeta[b.id]?.folder || "General";
               const noteValue = bookmarkMeta[b.id]?.notes || "";
+              const compareSelected = compareIds.includes(b.id);
+              const deadlinePill = getDeadlinePill(b.deadline);
+              const categoryLabel = getCategoryLabel(b.tags);
 
               return (
-                <article className={`bursary-card ${saved ? "matched" : ""}`} key={b.id}>
-                  <div className="card-header">
-                    <h3>{b.name}</h3>
-                    <p className="institution">{b.provider}</p>
-                    {saved && <span className="match-badge">Saved</span>}
+                <article className="uni-card" key={b.id}>
+                  <div className="uni-card__header">
+                    <img className="uni-card__logo" src={createLogoDataUri(b.provider, b.id)} alt={`${b.provider} logo`} />
+                    <button
+                      className={`uni-card__bookmark ${!isGuest && saved ? "uni-card__bookmark--active" : ""}`}
+                      onClick={() => toggleBookmark(b.id)}
+                      aria-label={isGuest ? "Sign in to save bursary" : saved ? "Remove bookmark" : "Add bookmark"}
+                      title={
+                        isGuest
+                          ? "Sign in to save bursaries"
+                          : saved
+                          ? "Remove from saved"
+                          : "Save for later"
+                      }
+                    >
+                      {!isGuest && saved ? <FaBookmark /> : <FaRegBookmark />}
+                    </button>
                   </div>
-                  <div className="card-body">
-                    <div className="bursary-detail">
-                      <FaUniversity /> {b.provider}
-                    </div>
-                    <div className="bursary-detail">
+
+                  <div className="uni-card__body">
+                    <h3 className="uni-card__name">{b.name}</h3>
+                    <p className="uni-card__location">
                       <FaMapMarkerAlt /> {b.province}
-                    </div>
-                    <div className="bursary-detail">
-                      <FaCalendarAlt /> {b.deadline}
-                    </div>
-                    <div className="bursary-detail">
-                      <FaMoneyBillWave /> {b.covers}
-                    </div>
-                    <p style={{ fontSize: "0.9rem", color: "#475569", marginTop: 8 }}>
-                      {b.description}
                     </p>
-                    <div className="bursary-tags">
-                      {b.fields.map((f) => (
-                        <span className="tag" key={f}>{f}</span>
-                      ))}
-                      {b.tags.map((t) => (
-                        <span className="tag" key={t} style={{ background: "#e0f2fe", color: "#0369a1" }}>
-                          {t}
+
+                    <div className="uni-card__status-row">
+                      <span className="uni-card__status-pill" style={{ background: "#dbeafe", color: "#1d4ed8" }}>
+                        {categoryLabel}
+                      </span>
+                      <span
+                        className="uni-card__status-pill uni-card__status-pill--days"
+                        style={{ background: deadlinePill.background, color: deadlinePill.color }}
+                      >
+                        <FaClock className="uni-card__status-icon" />
+                        {deadlinePill.label}
+                      </span>
+                    </div>
+
+                    <p style={{ fontSize: "0.8rem", color: "#475569", marginTop: 8 }}>
+                      {b.deadline}
+                    </p>
+                    <p className="uni-card__desc">{b.description}</p>
+                    <p style={{ fontSize: "0.83rem", color: "#334155", marginTop: 6 }}>
+                      <FaUniversity /> {b.provider}
+                    </p>
+                    <p style={{ fontSize: "0.82rem", color: "#475569", marginTop: 4 }}>{b.covers}</p>
+
+                    <div className="bursary-tags" style={{ marginTop: 10 }}>
+                      {b.fields.slice(0, 3).map((f) => (
+                        <span className="tag" key={f}>
+                          {f}
                         </span>
                       ))}
                     </div>
 
-                    {/* Saved meta (folder + notes) when viewing saved tab */}
+                    <div className="uni-card__actions" style={{ gap: 8, display: "flex", flexWrap: "wrap", marginTop: 10 }}>
+                      <button
+                        className="uni-card__btn uni-card__btn--primary"
+                        onClick={() => window.open(b.applyUrl, "_blank", "noopener,noreferrer")}
+                      >
+                        Apply Now <FaExternalLinkAlt style={{ fontSize: "0.7rem" }} />
+                      </button>
+                      <button
+                        className="uni-card__btn"
+                        onClick={() => toggleCompare(b.id)}
+                        style={{
+                          borderColor: compareSelected ? "#4338ca" : undefined,
+                          color: compareSelected ? "#4338ca" : undefined,
+                        }}
+                      >
+                        <FaBalanceScale /> {compareSelected ? "Added to Compare" : "Compare"}
+                      </button>
+                    </div>
+
                     {!isGuest && saved && activeTab === "saved" && (
-                      <div style={{ marginTop: 12, display: "grid", gap: 8 }}>
+                      <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
                         <label style={{ fontSize: "0.82rem", color: "#334155", fontWeight: 600 }}>
                           Folder
                         </label>
@@ -1340,9 +763,12 @@ export default function Bursary() {
                           style={{ border: "1px solid #cbd5e1", borderRadius: 10, padding: 8 }}
                         >
                           {BOOKMARK_FOLDERS.map((folder) => (
-                            <option key={`${b.id}-${folder}`} value={folder}>{folder}</option>
+                            <option key={`${b.id}-${folder}`} value={folder}>
+                              {folder}
+                            </option>
                           ))}
                         </select>
+
                         <label style={{ fontSize: "0.82rem", color: "#334155", fontWeight: 600 }}>
                           Notes
                         </label>
@@ -1356,53 +782,24 @@ export default function Bursary() {
                       </div>
                     )}
                   </div>
-                  <div className="card-footer">
-                    <button
-                      className="save-btn"
-                      onClick={() => toggleBookmark(b.id)}
-                      title={isGuest ? "Sign in to save" : saved ? "Remove from saved" : "Save bursary"}
-                    >
-                      {!isGuest && saved ? <FaBookmark /> : <FaRegBookmark />}{" "}
-                      {saved ? "Saved" : "Save"}
-                    </button>
-                    <a
-                      className="btn-primary"
-                      href={b.applyUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 6,
-                        padding: "0.5rem 1rem",
-                        background: "#3498db",
-                        color: "#fff",
-                        borderRadius: 8,
-                        textDecoration: "none",
-                        fontSize: "0.9rem",
-                        fontWeight: 600,
-                      }}
-                    >
-                      Apply <FaExternalLinkAlt style={{ fontSize: "0.7rem" }} />
-                    </a>
-                  </div>
                 </article>
               );
             })}
           </div>
         ) : (
           <div className="dashboard-empty">
-            <div className="dashboard-empty__icon" aria-hidden="true"><FaSearch /></div>
+            <div className="dashboard-empty__icon" aria-hidden="true">
+              <FaSearch />
+            </div>
             <p className="dashboard-empty__text">
               {activeTab === "saved"
-                ? "You haven't saved any bursaries yet. Tap the save button on a bursary to bookmark it."
-                : "No bursaries match your current filters."}
+                ? "You haven't saved any bursaries yet. Tap the bookmark icon to save."
+                : "No bursaries match your search."}
             </p>
           </div>
         )}
       </div>
 
-      {/* Footer */}
       <footer className="footer">
         <div className="container">
           <div className="footer-content">
@@ -1445,9 +842,7 @@ export default function Bursary() {
                 <FaInstagram />
               </a>
             </div>
-            <p className="copyright">
-              &copy; 2026 THANDULULO TECHNOLOGIES. All rights reserved.
-            </p>
+            <p className="copyright">&copy; 2026 THANDULULO TECHNOLOGIES. All rights reserved.</p>
           </div>
         </div>
       </footer>
