@@ -2603,6 +2603,516 @@ body.logged-in #logged-in-view {
     }
 }
 
+/* ===== NEW CONTENT SECTIONS (added for public-facing improvements) ===== */
+
+/* --- About Intro (Homepage) --- */
+.about-intro {
+    padding: 4rem 0;
+    background-color: var(--white);
+}
+
+.about-intro-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: start;
+}
+
+.about-intro-text h2 {
+    text-align: left;
+}
+
+.about-intro-text p {
+    font-size: 1.05rem;
+    line-height: 1.85;
+    color: var(--gray-text);
+}
+
+.about-intro-highlights {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.highlight-pill {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    background: var(--light-bg);
+    border-radius: var(--border-radius);
+    padding: 1rem 1.25rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.highlight-icon {
+    font-size: 1.8rem;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.highlight-pill strong {
+    display: block;
+    font-size: 1rem;
+    color: var(--primary-blue);
+    margin-bottom: 0.25rem;
+}
+
+.highlight-pill p {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: var(--gray-text);
+}
+
+@media (max-width: 768px) {
+    .about-intro-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+}
+
+/* --- How Gradiate Works (Homepage) --- */
+.how-it-works-section {
+    padding: 4rem 0;
+    background-color: var(--light-bg);
+}
+
+.steps-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.step-card {
+    background-color: var(--white);
+    padding: 1.75rem 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    text-align: center;
+    position: relative;
+}
+
+.step-number {
+    width: 48px;
+    height: 48px;
+    background: var(--secondary-blue);
+    color: var(--white);
+    border-radius: 50%;
+    font-size: 1.4rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+}
+
+.step-card h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.6rem;
+    color: var(--primary-blue);
+}
+
+.step-card p {
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--gray-text);
+    margin: 0;
+}
+
+@media (max-width: 1024px) {
+    .steps-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .steps-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* --- Testimonials Grid (replaces carousel) --- */
+.testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.testimonial-card {
+    background-color: var(--white);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.testimonial-card .quote {
+    font-size: 1rem;
+    line-height: 1.7;
+    font-style: italic;
+    color: var(--dark-text);
+    padding-left: 1.5rem;
+}
+
+@media (max-width: 900px) {
+    .testimonials-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* --- APS Guide Section (Homepage) --- */
+.aps-guide-section {
+    padding: 4rem 0;
+    background-color: var(--light-bg);
+}
+
+.aps-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+    margin-top: 2rem;
+}
+
+.aps-card {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 1.5rem;
+    text-align: center;
+    border-top: 4px solid var(--secondary-blue);
+}
+
+.aps-card--highlight {
+    border-top-color: var(--accent-green);
+}
+
+.aps-range {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--secondary-blue);
+    margin-bottom: 0.5rem;
+}
+
+.aps-card--highlight .aps-range {
+    color: var(--accent-green);
+}
+
+.aps-card h3 {
+    font-size: 1rem;
+    margin-bottom: 0.6rem;
+    color: var(--primary-blue);
+}
+
+.aps-card p {
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--gray-text);
+    margin: 0;
+}
+
+@media (max-width: 1024px) {
+    .aps-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .aps-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* --- FAQ Section --- */
+.faq-section {
+    padding: 4rem 0;
+    background-color: var(--white);
+}
+
+.faq-list {
+    max-width: 860px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.faq-item {
+    background: var(--light-bg);
+    border-radius: var(--border-radius);
+    padding: 1.25rem 1.5rem;
+    border-left: 4px solid var(--secondary-blue);
+}
+
+.faq-item h3 {
+    font-size: 1rem;
+    color: var(--primary-blue);
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+.faq-item p {
+    font-size: 0.93rem;
+    line-height: 1.7;
+    color: var(--gray-text);
+    margin: 0;
+}
+
+/* --- Public Listings (Bursary & Programs pages) --- */
+.public-listings {
+    margin: 2rem 0 3rem;
+}
+
+/* --- Info Sections (Bursary & Programs pages) --- */
+.info-section {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    padding: 2rem 2.5rem;
+    margin-bottom: 1.75rem;
+}
+
+.info-section h2 {
+    text-align: left;
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+    color: var(--primary-blue);
+}
+
+.info-section p {
+    font-size: 0.98rem;
+    line-height: 1.8;
+    color: var(--gray-text);
+}
+
+.info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0.75rem 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.info-list li {
+    padding-left: 1.5rem;
+    position: relative;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--gray-text);
+}
+
+.info-list li::before {
+    content: "✓";
+    color: var(--accent-green);
+    font-weight: 700;
+    position: absolute;
+    left: 0;
+}
+
+.info-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    margin-top: 0.75rem;
+}
+
+.info-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.info-step-num {
+    width: 32px;
+    height: 32px;
+    background: var(--secondary-blue);
+    color: var(--white);
+    border-radius: 50%;
+    font-size: 0.95rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.info-step strong {
+    display: block;
+    font-size: 0.98rem;
+    color: var(--primary-blue);
+    margin-bottom: 0.2rem;
+}
+
+.info-step div {
+    font-size: 0.93rem;
+    line-height: 1.6;
+    color: var(--gray-text);
+}
+
+/* --- Programs Public Card --- */
+.programs-public-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.5rem;
+}
+
+.program-public-card {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+    transition: transform 0.2s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.program-public-card:hover {
+    transform: translateY(-4px);
+}
+
+.program-public-card__header {
+    background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%);
+    padding: 1rem 1.5rem 0.75rem;
+}
+
+.program-qual-badge {
+    display: inline-block;
+    background: var(--secondary-blue);
+    color: var(--white);
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+}
+
+.program-public-card__body {
+    padding: 1.25rem 1.5rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.program-public-card__name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--dark-text);
+    margin: 0;
+}
+
+.program-public-card__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.88rem;
+    color: var(--gray-text);
+}
+
+.program-public-card__desc {
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--gray-text);
+    margin: 0.25rem 0 0;
+    flex-grow: 1;
+}
+
+@media (max-width: 768px) {
+    .programs-public-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* --- Qualification Comparison Cards (Programs page) --- */
+.qual-comparison {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+    margin-top: 1rem;
+}
+
+.qual-card {
+    background: var(--light-bg);
+    border-radius: var(--border-radius);
+    padding: 1.25rem;
+    border-top: 4px solid var(--secondary-blue);
+}
+
+.qual-card__badge {
+    display: inline-block;
+    background: var(--secondary-blue);
+    color: var(--white);
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    margin-bottom: 0.75rem;
+}
+
+.qual-card__badge--blue {
+    background: var(--primary-blue);
+}
+
+.qual-card__badge--green {
+    background: var(--accent-green);
+}
+
+.qual-card p {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--gray-text);
+    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .qual-comparison {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* --- APS Table (Programs page) --- */
+.aps-table-wrapper {
+    overflow-x: auto;
+    margin-top: 1rem;
+}
+
+.aps-table {
+    width: 100%;
+    max-width: 400px;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.aps-table th,
+.aps-table td {
+    padding: 0.6rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--light-gray);
+}
+
+.aps-table th {
+    background: var(--light-bg);
+    font-weight: 700;
+    color: var(--primary-blue);
+}
+
+.aps-table td {
+    color: var(--gray-text);
+}
+
+/* Info section faq-list override (inside info-section) */
+.info-section .faq-list {
+    max-width: 100%;
+    margin: 1rem 0 0;
+}
+
+.info-section .faq-item {
+    background: var(--light-bg);
+}
+
 /* ===== LOGIN STYLES ===== */
 
 /* Variables (consistent with your theme) */

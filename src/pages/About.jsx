@@ -93,32 +93,34 @@ const About = () => {
           <div className="about-grid">
             <div className="about-text">
               <h2 className="section-title" style={{fontWeight:"bold"}}>Our Story</h2>
-              <p>
+              <p style={{ lineHeight: "1.85", fontSize: "1.05rem" }}>
                 Gradiate was born in 2023 from a simple observation: too many
                 talented students were missing out on educational opportunities
                 simply because they didn't know they existed or how to access
                 them.
               </p>
-              <p>
+              <p style={{ lineHeight: "1.85", fontSize: "1.05rem" }}>
                 What started as a small project to help local students find
                 bursaries has grown into a comprehensive platform serving
                 thousands of students across the country. Today, we're proud to
-                be the most trusted education matching platform in South Africa.
+                be a trusted education matching platform in South Africa —
+                connecting students with the opportunities they deserve.
               </p>
             </div>
             <div className="about-text">
               <h2 className="section-title" style={{fontWeight:"bold"}}>Our Approach</h2>
-              <p>
-                We believe that every student deserves personalized guidance in
+              <p style={{ lineHeight: "1.85", fontSize: "1.05rem" }}>
+                We believe that every student deserves personalised guidance in
                 their educational journey. Unlike traditional resources that
                 provide generic information, Gradiate uses smart matching
-                algorithms to connect students with opportunities.
+                algorithms to connect students with opportunities that are right
+                for them.
               </p>
-              <p>
-                Our platform analyzes students' academic records, interests, and
-                goals to recommend relevant bursaries, study programs, and
+              <p style={{ lineHeight: "1.85", fontSize: "1.05rem" }}>
+                Our platform analyses students' academic records, interests, and
+                goals to recommend relevant bursaries, study programmes, and
                 career opportunities — ensuring each user gets matched with what
-                truly fits them.
+                truly fits their profile and aspirations.
               </p>
             </div>
           </div>
@@ -147,8 +149,8 @@ const About = () => {
               <img src={"https://firebasestorage.googleapis.com/v0/b/my-univen-project.firebasestorage.app/o/gemini-2.5-flash-image_make_me_look_profetional_for_a_portfolio_profile_picture_and_make_the_suit_black-0.jpg?alt=media&token=7a85f9f2-d8cc-47f1-be49-7684677b2522"} alt="Nengovhela Thandululo" />
               <h3 style={{fontWeight:"bold"}}>Nengovhela Thandululo</h3>
               <p className="position">Founder & CEO</p>
-              <p className="bio">
-                The Young man with a passion for education equity and helping the disadvantaged, and has a good background in software development.
+              <p className="bio" style={{ lineHeight: "1.8", fontSize: "0.98rem" }}>
+                A young man with a passion for education equity and helping disadvantaged students. He has a strong background in software development and built Gradiate to ensure no South African student misses an opportunity due to lack of information.
               </p>
               <div className="social-links" style={{ marginTop: 12 }}>
                 <a href="https://www.linkedin.com/in/nengovhela-thandululo-880080367/" style={{ marginRight: 16, color: "#0077b5" }}>
@@ -163,8 +165,8 @@ const About = () => {
               <img src={team1} alt="Nicoroy Zwane" />
               <h3 style={{fontWeight:"bold"}}>Nicoroy Zwane</h3>
               <p className="position">Website Designer</p>
-              <p className="bio">
-                Experienced web designer who laid a hand focused on creating user-friendly interfaces. he also braught a wealth of experience in graphic design and branding including how Gradiate must stand up.
+              <p className="bio" style={{ lineHeight: "1.8", fontSize: "0.98rem" }}>
+                Experienced web designer who contributed significantly to Gradiate&apos;s user experience. He brought a wealth of knowledge in graphic design and branding, shaping the visual identity that makes Gradiate stand out.
               </p>
               <div className="social-links" style={{ marginTop: 12 }}>
                 <a href="#" style={{ marginRight: 16, color: "#0077b5" }}>
@@ -299,13 +301,13 @@ const About = () => {
               </div>
               <div className="link-group">
                 <h4>Resources</h4>
-                <a href="#">Help Center</a>
-                <a href="#">Contact</a>
+                <a href="mailto:thandululo99@gmail.com">Contact Us</a>
+                <a onClick={() => navigate("/bursaries")} style={{ cursor: "pointer" }}>Bursaries</a>
               </div>
               <div className="link-group">
                 <h4>Legal</h4>
-                <a href="#">Privacy Policy</a>
-                <a href="#">Terms of Service</a>
+                <a href="/privacy-policy">Privacy Policy</a>
+                <a href="/terms-of-service">Terms of Service</a>
               </div>
             </div>
           </div>
