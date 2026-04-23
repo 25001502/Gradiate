@@ -102,14 +102,14 @@ export default function Startup() {
               </p>
               <p>
                 Thousands of South African students miss out on university placements and bursaries every
-                year — not because they don&apos;t qualify, but because they don&apos;t know they exist.
+                year  not because they don&apos;t qualify, but because they don&apos;t know they exist.
                 Gradiate solves this by matching your academic profile to real, available opportunities
                 across every province.
               </p>
               <p>
                 Whether you are a Grade 12 learner figuring out which programmes your APS qualifies
                 you for, or a graduate looking for postgraduate funding and learnerships, Gradiate is
-                built for you — and it is completely free.
+                built for you  and it is completely free.
               </p>
             </div>
             <div className="about-intro-highlights">
