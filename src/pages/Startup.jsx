@@ -2,6 +2,8 @@ import { useNavigate } from "react-router-dom";
 import React, { useState } from "react";
 import image from "../images/hero-image.jpg";
 import image2 from "../images/testimonial1.jpg";
+import image3 from "../images/testimonial2.jpg";
+import image4 from "../images/testimonial3.jpg";
 
 import {
   FaSearch,
@@ -304,7 +306,7 @@ export default function Startup() {
                 saved my family so much financial stress.&rdquo;
               </div>
               <div className="author">
-                <img src={image2} alt="Sarah M." />
+                <img src={image3} alt="Sarah M." />
                 <div className="author-info">
                   <h4>Sarah M.</h4>
                   <p>Computer Science Student, University of Pretoria</p>
@@ -318,7 +320,7 @@ export default function Startup() {
                 right after I graduated.&rdquo;
               </div>
               <div className="author">
-                <img src={image2} alt="Jake Mpane" />
+                <img src={image4} alt="Jake Mpane" />
                 <div className="author-info">
                   <h4>Jake Mpane</h4>
                   <p>Mechanical Engineer Graduate, Anglo American Internship</p>
