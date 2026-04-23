@@ -2648,6 +2648,7 @@ body.logged-in #logged-in-view {
     font-size: 1.8rem;
     flex-shrink: 0;
     line-height: 1;
+    color: var(--secondary-blue);
 }
 
 .highlight-pill strong {
