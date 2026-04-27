@@ -4,6 +4,7 @@ import image from "../images/hero-image.jpg";
 import image2 from "../images/testimonial1.jpg";
 import image3 from "../images/testimonial2.jpg";
 import image4 from "../images/testimonial3.jpg";
+import SmartImage from "../components/SmartImage";
 
 import {
   FaSearch,
@@ -87,7 +88,14 @@ export default function Startup() {
            
           </div>
           <div className="hero-image">
-            <img src={image} alt="Students celebrating graduation" />
+            <SmartImage
+              src={image}
+              alt="Students celebrating graduation"
+              width={1800}
+              height={1200}
+              loading="eager"
+              fetchPriority="high"
+            />
           </div>
         </div>
       </section>
@@ -292,7 +300,7 @@ export default function Startup() {
                 I would never have found this on my own.&rdquo;
               </div>
               <div className="author">
-                <img src={image2} alt="Lerato M." />
+                <SmartImage src={image2} alt="Lerato M." width={480} height={320} />
                 <div className="author-info">
                   <h4>Lerato M.</h4>
                   <p>Civil Engineering Student, University of the Witwatersrand</p>
@@ -306,7 +314,7 @@ export default function Startup() {
                 saved my family so much financial stress.&rdquo;
               </div>
               <div className="author">
-                <img src={image3} alt="Sarah M." />
+                <SmartImage src={image3} alt="Sarah M." width={320} height={480} />
                 <div className="author-info">
                   <h4>Sarah M.</h4>
                   <p>Computer Science Student, University of Pretoria</p>
@@ -320,7 +328,7 @@ export default function Startup() {
                 right after I graduated.&rdquo;
               </div>
               <div className="author">
-                <img src={image4} alt="Jake Mpane" />
+                <SmartImage src={image4} alt="Jake Mpane" width={360} height={480} />
                 <div className="author-info">
                   <h4>Jake Mpane</h4>
                   <p>Mechanical Engineer Graduate, Anglo American Internship</p>

@@ -10,6 +10,35 @@ const functionsApiTarget =
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(),tailwindcss(),],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes('node_modules')) {
+            return undefined
+          }
+
+          if (id.includes('firebase')) {
+            return 'firebase'
+          }
+
+          if (id.includes('react-router')) {
+            return 'router'
+          }
+
+          if (id.includes('@fortawesome') || id.includes('react-icons')) {
+            return 'icons'
+          }
+
+          if (id.includes('react')) {
+            return 'react-vendor'
+          }
+
+          return 'vendor'
+        },
+      },
+    },
+  },
   server: {
     proxy: {
       '/api': {

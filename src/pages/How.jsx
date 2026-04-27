@@ -11,6 +11,7 @@ import image8 from '../images/upload-screen.jpg';
 import image9 from '../images/graduate-matches.jpg';
 import image10 from '../images/notifications-screen.jpg';
 import image11 from '../images/video-thumbnail.jpg';    
+import SmartImage from '../components/SmartImage';
 import {FaSearch, FaBullseye, FaBolt, FaRoad, FaHandsHelping, FaUserGraduate, FaUserTie, FaCheck, FaClock, FaPlay,
         
         FaRobot,
@@ -110,9 +111,13 @@ const How = () => {
                             </div>
                         </div>
                         <div className="hero-image">
-                            <img
+                            <SmartImage
                                 src={image}
                                 alt="How Gradiate Works"
+                                width={1800}
+                                height={1200}
+                                loading="eager"
+                                fetchPriority="high"
                             />
                         </div>
                     </div>
@@ -187,9 +192,11 @@ const How = () => {
                                     </p>
                                 </div>
                                 <div className="step-image">
-                                    <img
+                                    <SmartImage
                                         src={image2}
                                         alt="Sign Up Screen"
+                                        width={1400}
+                                        height={1050}
                                     />
                                 </div>
                             </div>
@@ -203,9 +210,11 @@ const How = () => {
                                     </p>
                                 </div>
                                 <div className="step-image">
-                                    <img
+                                    <SmartImage
                                         src={image3}
                                         alt="Profile Screen"
+                                        width={1400}
+                                        height={933}
                                     />
                                 </div>
                             </div>
@@ -219,9 +228,11 @@ const How = () => {
                                     </p>
                                 </div>
                                 <div className="step-image">
-                                    <img
+                                    <SmartImage
                                         src={image4}
                                         alt="Interests Screen"
+                                        width={1400}
+                                        height={933}
                                     />
                                 </div>
                             </div>
@@ -230,14 +241,16 @@ const How = () => {
                                 <div className="step-content">
                                     <h3 style={{fontWeight:"bold"}}>Get Matched</h3>
                                     <p>
-                                        Instantly see bursaries you're eligible htmlFor
+                                        Instantly see bursaries you're eligible for
                                         with match percentages
                                     </p>
                                 </div>
                                 <div className="step-image">
-                                    <img
+                                    <SmartImage
                                         src={image5}
                                         alt="Matches Screen"
+                                        width={1400}
+                                        height={933}
                                     />
                                 </div>
                             </div>
@@ -251,9 +264,11 @@ const How = () => {
                                     </p>
                                 </div>
                                 <div className="step-image">
-                                    <img
+                                    <SmartImage
                                         src={image6}
                                         alt="Apply Screen"
+                                        width={1400}
+                                        height={933}
                                     />
                                 </div>
                             </div>
@@ -285,9 +300,11 @@ const How = () => {
                                     </p>
                                 </div>
                                 <div className="step-image">
-                                    <img
+                                    <SmartImage
                                         src={image7}
                                         alt="Graduate Profile"
+                                        width={1400}
+                                        height={927}
                                     />
                                 </div>
                             </div>
@@ -301,9 +318,11 @@ const How = () => {
                                     </p>
                                 </div>
                                 <div className="step-image">
-                                    <img
+                                    <SmartImage
                                         src={image8}
                                         alt="Upload Screen"
+                                        width={1400}
+                                        height={933}
                                     />
                                 </div>
                             </div>
@@ -317,9 +336,11 @@ const How = () => {
                                     </p>
                                 </div>
                                 <div className="step-image">
-                                    <img
+                                    <SmartImage
                                         src={image9}
                                         alt="Graduate Matches"
+                                        width={1400}
+                                        height={877}
                                     />
                                 </div>
                             </div>
@@ -328,14 +349,16 @@ const How = () => {
                                 <div className="step-content">
                                     <h3 style={{fontWeight:"bold"}}>Apply or Get Notified</h3>
                                     <p>
-                                        Set up alerts htmlFor new opportunities or apply
+                                        Set up alerts for new opportunities or apply
                                         instantly
                                     </p>
                                 </div>
                                 <div className="step-image">
-                                    <img
+                                    <SmartImage
                                         src={image10}
                                         alt="Notifications Screen"
+                                        width={1400}
+                                        height={933}
                                     />
                                 </div>
                             </div>
@@ -416,7 +439,7 @@ const How = () => {
                                 </div>
                                 <h3 style={{fontWeight:"bold"}}>High School Learners</h3>
                                 <p>
-                                    Grade 11-12 students looking htmlFor bursaries and
+                                    Grade 11-12 students looking for bursaries and
                                     funding options
                                 </p>
                             </div>
@@ -470,9 +493,11 @@ const How = () => {
                     <div className="container">
                         <div className="video-container">
                             <div className="video-placeholder">
-                                <img
+                                <SmartImage
                                     src={image11}
                                     alt="Video Thumbnail"
+                                    width={1400}
+                                    height={1050}
                                 />
                                 <button className="play-button">
                                     <FaPlay />
@@ -504,9 +529,9 @@ const How = () => {
                                 </button>
                                 <div className="faq-answer">
                                     <p>
-                                        Yes! Gradiate is completely free htmlFor
+                                        Yes! Gradiate is completely free for
                                         students and graduates. We never charge you
-                                        to search htmlFor or apply to opportunities.
+                                        to search for or apply to opportunities.
                                     </p>
                                 </div>
                             </div>
@@ -526,13 +551,13 @@ const How = () => {
                             </div>
                             <div className="faq-item">
                                 <button className="faq-question">
-                                    How do I know if I'm eligible For a bursary?
+                                    How do I know if I'm eligible for a bursary?
                                     <FaChevronDown />
                                 </button>
                                 <div className="faq-answer">
                                     <p>
                                         Our matching system shows you only
-                                        opportunities you qualify htmlFor based on your
+                                        opportunities you qualify for based on your
                                         profile. Each listing also clearly displays
                                         the eligibility requirements.
                                     </p>

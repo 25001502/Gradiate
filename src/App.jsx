@@ -1,16 +1,17 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import AuthForm from './AuthForm';
-import Application from './pages/Aplication';
 import Startup from './pages/Startup';
-import Bursaryguest from './pages/Bursaryguest';
-import ProgramsGuest from './pages/Programsguest';
-import How from './pages/How';
-import About from './pages/About';
-import Practise from './pages/Practise';
-import Profile from './pages/Profile';
-import Bursary from './pages/Bursary';
 import { useAuth } from './context/AuthContext';
+
+const AuthForm = lazy(() => import('./AuthForm'));
+const Application = lazy(() => import('./pages/Aplication'));
+const Bursaryguest = lazy(() => import('./pages/Bursaryguest'));
+const ProgramsGuest = lazy(() => import('./pages/Programsguest'));
+const How = lazy(() => import('./pages/How'));
+const About = lazy(() => import('./pages/About'));
+const Practise = lazy(() => import('./pages/Practise'));
+const Profile = lazy(() => import('./pages/Profile'));
+const Bursary = lazy(() => import('./pages/Bursary'));
 
 function CanonicalTagManager() {
   const location = useLocation();
@@ -42,36 +43,55 @@ function ProtectedProfileRoute() {
   return <Profile />;
 }
 
+function RouteFallback() {
+  return (
+    <main
+      style={{
+        minHeight: '60vh',
+        display: 'grid',
+        placeItems: 'center',
+        padding: '2rem',
+        color: '#475569',
+      }}
+      aria-live="polite"
+    >
+      <p style={{ margin: 0, fontWeight: 600 }}>Loading page...</p>
+    </main>
+  );
+}
+
 
 function App() {
   return (
     <Router>
       <CanonicalTagManager />
-      <Routes>
-        <Route path="/" element={<Startup />} />
+      <Suspense fallback={<RouteFallback />}>
+        <Routes>
+          <Route path="/" element={<Startup />} />
 
-        {/* Canonical SEO-friendly paths */}
-        <Route path="/auth" element={<AuthForm />} />
-        <Route path="/application" element={<Application />} />
-        <Route path="/bursaries" element={<Bursaryguest />} />
-        <Route path="/programs" element={<ProgramsGuest />} />
-        <Route path="/how-it-works" element={<How />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/practice" element={<Practise />} />
-        <Route path="/profile" element={<ProtectedProfileRoute />} />
-        <Route path="/bursary" element={<Bursary />} />
+          {/* Canonical SEO-friendly paths */}
+          <Route path="/auth" element={<AuthForm />} />
+          <Route path="/application" element={<Application />} />
+          <Route path="/bursaries" element={<Bursaryguest />} />
+          <Route path="/programs" element={<ProgramsGuest />} />
+          <Route path="/how-it-works" element={<How />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/practice" element={<Practise />} />
+          <Route path="/profile" element={<ProtectedProfileRoute />} />
+          <Route path="/bursary" element={<Bursary />} />
 
-        {/* Legacy paths kept for backward compatibility */}
-        <Route path="/AuthForm" element={<AuthForm />} />
-        <Route path="/Aplication" element={<Application />} />
-        <Route path="/Bursaryguest" element={<Bursaryguest />} />
-        <Route path="/Programsguest" element={<ProgramsGuest />} />
-        <Route path="/How" element={<How />} />
-        <Route path="/About" element={<About />} />
-        <Route path="/Practise" element={<Practise />} />
-        <Route path="/Profile" element={<ProtectedProfileRoute />} />
-        <Route path="/Bursary" element={<Bursary />} />
-      </Routes>
+          {/* Legacy paths kept for backward compatibility */}
+          <Route path="/AuthForm" element={<AuthForm />} />
+          <Route path="/Aplication" element={<Application />} />
+          <Route path="/Bursaryguest" element={<Bursaryguest />} />
+          <Route path="/Programsguest" element={<ProgramsGuest />} />
+          <Route path="/How" element={<How />} />
+          <Route path="/About" element={<About />} />
+          <Route path="/Practise" element={<Practise />} />
+          <Route path="/Profile" element={<ProtectedProfileRoute />} />
+          <Route path="/Bursary" element={<Bursary />} />
+        </Routes>
+      </Suspense>
     </Router>
   );
 }

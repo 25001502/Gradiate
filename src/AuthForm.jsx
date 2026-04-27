@@ -10,6 +10,7 @@ import {
 } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { getAvatarUrl, DEFAULT_AVATAR_STYLE } from "./utils/avatarUtils";
+import SmartImage from "./components/SmartImage";
 
 import {
   FaTwitter,
@@ -276,10 +277,12 @@ export default function AuthForm() {
       >
         <form className="login-form" onSubmit={handleEmailSubmit}>
             <div className="auth-badge auth-3d-pop">
-              <img
+              <SmartImage
                 src="https://firebasestorage.googleapis.com/v0/b/my-univen-project.firebasestorage.app/o/ChatGPT%20Image%20Feb%2016%2C%202026%2C%2010_40_33%20AM.png?alt=media&token=99a62911-665e-4997-94cb-46f47f56d17e"
                 alt="Gradiate badge"
                 className="auth-badge__image"
+                width={512}
+                height={512}
                 referrerPolicy="no-referrer"
                 fetchPriority="high"
                 loading="eager"

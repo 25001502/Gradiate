@@ -3,6 +3,7 @@ import heroAbout from "../images/hero-about.jpg";
 import aboutTeam from "../images/about-team.jpg";
 import aboutApproach from "../images/about-approach.jpg";
 import team1 from "../images/team1.jpg";
+import SmartImage from "../components/SmartImage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faEnvelope,
@@ -75,7 +76,14 @@ const About = () => {
 
       {/* About Hero Section */}
       <section className="about-hero">
-        <img src={heroAbout} alt="Diverse students studying together" />
+        <SmartImage
+          src={heroAbout}
+          alt="Diverse students studying together"
+          width={1800}
+          height={1200}
+          loading="eager"
+          fetchPriority="high"
+        />
         <div className="hero-image-overlay"></div>
         <div className="container hero-image-content">
           <h1 style={{fontWeight:"bold"}}>Our Mission to Transform Education Access</h1>
@@ -126,10 +134,10 @@ const About = () => {
           </div>
           <div className="about-grid">
             <div className="about-image">
-              <img src={aboutTeam} alt="Gradiate team working together" />
+              <SmartImage src={aboutTeam} alt="Gradiate team working together" width={1600} height={1067} />
             </div>
             <div className="about-image">
-              <img src={aboutApproach} alt="Gradiate approach illustration" />
+              <SmartImage src={aboutApproach} alt="Gradiate approach illustration" width={1600} height={1067} />
             </div>
           </div>
         </div>
@@ -146,7 +154,12 @@ const About = () => {
 
           <div className="team-grid">
             <div className="team-card">
-              <img src={"https://firebasestorage.googleapis.com/v0/b/my-univen-project.firebasestorage.app/o/gemini-2.5-flash-image_make_me_look_profetional_for_a_portfolio_profile_picture_and_make_the_suit_black-0.jpg?alt=media&token=7a85f9f2-d8cc-47f1-be49-7684677b2522"} alt="Nengovhela Thandululo" />
+              <SmartImage
+                src={"https://firebasestorage.googleapis.com/v0/b/my-univen-project.firebasestorage.app/o/gemini-2.5-flash-image_make_me_look_profetional_for_a_portfolio_profile_picture_and_make_the_suit_black-0.jpg?alt=media&token=7a85f9f2-d8cc-47f1-be49-7684677b2522"}
+                alt="Nengovhela Thandululo"
+                width={800}
+                height={800}
+              />
               <h3 style={{fontWeight:"bold"}}>Nengovhela Thandululo</h3>
               <p className="position">Founder & CEO</p>
               <p className="bio" style={{ lineHeight: "1.8", fontSize: "0.98rem" }}>
@@ -162,7 +175,7 @@ const About = () => {
               </div>
             </div>
             <div className="team-card">
-              <img src={team1} alt="Nicoroy Zwane" />
+              <SmartImage src={team1} alt="Nicoroy Zwane" width={800} height={1000} />
               <h3 style={{fontWeight:"bold"}}>Nicoroy Zwane</h3>
               <p className="position">Website Designer</p>
               <p className="bio" style={{ lineHeight: "1.8", fontSize: "0.98rem" }}>
