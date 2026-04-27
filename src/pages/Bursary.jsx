@@ -183,6 +183,20 @@ const createLogoDataUri = (provider, id) => {
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 };
 
+const LOGO_OVERRIDES = {
+  dws: "https://www.dws.gov.za/images/logo.png",
+};
+
+const getProviderLogoUrl = (id, applyUrl) => {
+  if (LOGO_OVERRIDES[id]) return LOGO_OVERRIDES[id];
+  try {
+    const url = new URL(applyUrl);
+    return `https://www.google.com/s2/favicons?domain_url=${encodeURIComponent(url.origin)}&sz=128`;
+  } catch {
+    return null;
+  }
+};
+
 const getCategoryLabel = (tags) => {
   if (tags.includes("government")) return "Government";
   if (tags.includes("SETA")) return "SETA";
@@ -676,11 +690,28 @@ export default function Bursary() {
               const compareSelected = compareIds.includes(b.id);
               const deadlinePill = getDeadlinePill(b.deadline);
               const categoryLabel = getCategoryLabel(b.tags);
+              const fallbackLogo = createLogoDataUri(b.provider, b.id);
+              const providerLogo = getProviderLogoUrl(b.id, b.applyUrl) || fallbackLogo;
 
               return (
                 <article className="uni-card" key={b.id}>
                   <div className="uni-card__header">
-                    <img className="uni-card__logo" src={createLogoDataUri(b.provider, b.id)} alt={`${b.provider} logo`} />
+                    <img
+                      className="uni-card__logo"
+                      src={providerLogo}
+                      alt={`${b.provider} logo`}
+                      loading="lazy"
+                      decoding="async"
+                      referrerPolicy="no-referrer"
+                      onError={(event) => {
+                        if (event.currentTarget.dataset.fallbackApplied === "true") {
+                          return;
+                        }
+
+                        event.currentTarget.dataset.fallbackApplied = "true";
+                        event.currentTarget.src = fallbackLogo;
+                      }}
+                    />
                     <button
                       className={`uni-card__bookmark ${!isGuest && saved ? "uni-card__bookmark--active" : ""}`}
                       onClick={() => toggleBookmark(b.id)}
