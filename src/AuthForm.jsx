@@ -454,10 +454,10 @@ export default function AuthForm() {
   @keyframes pulseGlow {
     0%,
     100% {
-      box-shadow: 0 10px 22px rgba(37, 99, 235, 0.35);
+      box-shadow: 0 10px 22px rgba(39, 174, 96, 0.35);
     }
     50% {
-      box-shadow: 0 14px 28px rgba(14, 165, 233, 0.42);
+      box-shadow: 0 14px 28px rgba(39, 174, 96, 0.42);
     }
   }
 
@@ -677,13 +677,13 @@ export default function AuthForm() {
     border: 0;
     border-radius: 12px;
     padding: 0.78rem 1rem;
-    background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
     color: #ffffff !important;
     font-weight: 700;
     font-size: 1rem;
     letter-spacing: 0.01em;
     cursor: pointer;
-    box-shadow: 0 10px 22px rgba(37, 99, 235, 0.35);
+    box-shadow: 0 10px 22px rgba(39, 174, 96, 0.35);
     transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
     animation: pulseGlow 2.8s ease-in-out infinite;
   }
@@ -703,7 +703,7 @@ export default function AuthForm() {
   .btn.btn-login:hover {
     transform: translateY(-2px);
     filter: saturate(1.06);
-    box-shadow: 0 14px 28px rgba(37, 99, 235, 0.3);
+    box-shadow: 0 14px 28px rgba(39, 174, 96, 0.3);
   }
 
   .btn.btn-login:hover::after {
