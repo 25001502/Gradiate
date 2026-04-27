@@ -420,11 +420,11 @@ export default function AuthForm() {
   @keyframes authCardIn {
     0% {
       opacity: 0;
-      transform: translateY(22px) scale(0.98);
+      transform: translateY(22px);
     }
     100% {
       opacity: 1;
-      transform: translateY(0) scale(1);
+      transform: translateY(0);
     }
   }
 
@@ -576,15 +576,6 @@ export default function AuthForm() {
     border-color: #38bdf8;
     box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.16);
     transform: translateY(-1px);
-  }
-
-  .form-group,
-  .form-group label,
-  .form-group input,
-  .password-field-wrap input {
-    backface-visibility: hidden;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: geometricPrecision;
   }
 
   .password-field-wrap {
@@ -793,24 +784,22 @@ export default function AuthForm() {
 
       <style>{`
   .auth-3d-stage {
-    perspective: 1200px;
-    perspective-origin: center top;
+    perspective: none;
   }
 
   .auth-3d-stage .auth-shell {
-    transform-style: flat;
-    transform: translateY(0);
-    transition: transform 420ms cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 420ms ease;
+    transform: none;
+    transition: box-shadow 420ms ease;
   }
 
   .auth-3d-stage:hover .auth-shell {
-    transform: translateY(-6px);
+    transform: none;
     box-shadow: 0 26px 48px rgba(15, 23, 42, 0.2);
   }
 
   .auth-3d-stage .auth-shell::before,
   .auth-3d-stage .auth-shell::after {
-    transform: translateZ(14px);
+    transform: none;
   }
 
   .auth-3d-pop {
