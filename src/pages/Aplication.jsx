@@ -899,7 +899,7 @@ export default function Aplication() {
                     <p className="uni-card__desc">{uni.description}</p>
                     <div className="uni-card__actions" style={{ gap: 8, display: "flex", flexWrap: "wrap" }}>
                       <button
-                        className="uni-card__btn uni-card__btn--primary"
+                        className="uni-card__btn uni-card__btn--primary uni-card__btn--apply"
                         onClick={() => window.open(uni.applyUrl)}
                       >
                         Apply Now <FaExternalLinkAlt style={{ fontSize: "0.7rem" }} />

@@ -735,7 +735,7 @@ export default function Bursary() {
 
                     <div className="uni-card__actions" style={{ gap: 8, display: "flex", flexWrap: "wrap", marginTop: 10 }}>
                       <button
-                        className="uni-card__btn uni-card__btn--primary"
+                        className="uni-card__btn uni-card__btn--primary uni-card__btn--apply"
                         onClick={() => window.open(b.applyUrl, "_blank", "noopener,noreferrer")}
                       >
                         Apply Now <FaExternalLinkAlt style={{ fontSize: "0.7rem" }} />
