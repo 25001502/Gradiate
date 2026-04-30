@@ -106,6 +106,7 @@ export default function Community() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [posts, setPosts] = useState([]);
   const [engagementByPost, setEngagementByPost] = useState({});
   const [postDraft, setPostDraft] = useState("");
@@ -212,6 +213,12 @@ export default function Community() {
       setActiveView("feed");
     }
   }, [activeView, isCommunityAdmin, isGuest]);
+
+  useEffect(() => {
+    if (isGuest) {
+      setNotificationsOpen(false);
+    }
+  }, [isGuest]);
 
   useEffect(() => {
     if (!isCommunityAdmin) {
@@ -707,9 +714,80 @@ export default function Community() {
                 Sign Up
               </button>
             )}
+            <div className="community-nav-notifications">
+              <button
+                className={`community-notification-trigger ${
+                  unreadNotifications ? "community-notification-trigger--unread" : ""
+                }`}
+                onClick={() => {
+                  if (isGuest) {
+                    navigate(routes.auth);
+                    return;
+                  }
+
+                  setNotificationsOpen((open) => !open);
+                  setMenuOpen(false);
+                }}
+                type="button"
+                aria-label="Notifications"
+                aria-expanded={notificationsOpen}
+                aria-haspopup="dialog"
+                title="Notifications"
+              >
+                <FaBell />
+                {unreadNotifications > 0 && (
+                  <span>{unreadNotifications > 9 ? "9+" : unreadNotifications}</span>
+                )}
+              </button>
+
+              {notificationsOpen && !isGuest && (
+                <div className="community-notification-popover" role="dialog" aria-label="Notifications">
+                  <div className="community-notification-popover__header">
+                    <strong>Notifications</strong>
+                    <button
+                      className="community-icon-button community-icon-button--quiet"
+                      onClick={markAllNotificationsRead}
+                      type="button"
+                      aria-label="Mark notifications read"
+                      title="Mark notifications read"
+                      disabled={!unreadNotifications}
+                    >
+                      <FaCheck />
+                    </button>
+                  </div>
+
+                  {notifications.length ? (
+                    <div className="community-notification-list community-notification-list--popover">
+                      {notifications.slice(0, 5).map((notification) => (
+                        <button
+                          key={notification.id}
+                          className={`community-notification ${
+                            notification.read ? "" : "community-notification--unread"
+                          }`}
+                          onClick={() => markNotificationRead(notification)}
+                          type="button"
+                        >
+                          <FaBell />
+                          <span>
+                            <strong>{notification.actorName || "A student"}</strong>{" "}
+                            {notification.type === "comment" ? "commented on" : "liked"} your post
+                            <small>{notification.commentPreview || notification.postPreview}</small>
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="community-notification-popover__empty">No notifications yet.</p>
+                  )}
+                </div>
+              )}
+            </div>
             <button
               className="burger"
-              onClick={() => setMenuOpen((open) => !open)}
+              onClick={() => {
+                setMenuOpen((open) => !open);
+                setNotificationsOpen(false);
+              }}
               aria-label="Toggle menu"
               type="button"
             >
@@ -810,9 +888,6 @@ export default function Community() {
                 <option value="feed">Feed</option>
                 <option value="mine" disabled={isGuest}>My Posts</option>
                 <option value="saved" disabled={isGuest}>Saved Posts</option>
-                <option value="notifications" disabled={isGuest}>
-                  Notifications{unreadNotifications ? ` (${unreadNotifications})` : ""}
-                </option>
                 {isCommunityAdmin && <option value="reports">Reports</option>}
               </select>
             </label>
@@ -835,7 +910,7 @@ export default function Community() {
           </aside>
 
           <div className="community-feed">
-            {activeView !== "notifications" && activeView !== "reports" && (
+            {activeView !== "reports" && (
               <form className="community-composer" onSubmit={handleCreatePost}>
                 <div className="community-composer__top">
                   <Avatar name={getDisplayName(user)} photoURL={user?.photoURL || ""} />
@@ -889,46 +964,7 @@ export default function Community() {
 
             {error && <p className="community-alert">{error}</p>}
 
-            {activeView === "notifications" ? (
-              <section className="community-panel">
-                <div className="community-panel__header">
-                  <div>
-                    <h2>Notifications</h2>
-                    <p>{unreadNotifications ? `${unreadNotifications} unread` : "All caught up"}</p>
-                  </div>
-                  <button
-                    className="community-soft-button"
-                    onClick={markAllNotificationsRead}
-                    type="button"
-                    disabled={!unreadNotifications}
-                  >
-                    <FaCheck /> Mark read
-                  </button>
-                </div>
-
-                {notifications.length ? (
-                  <div className="community-notification-list">
-                    {notifications.map((notification) => (
-                      <button
-                        key={notification.id}
-                        className={`community-notification ${notification.read ? "" : "community-notification--unread"}`}
-                        onClick={() => markNotificationRead(notification)}
-                        type="button"
-                      >
-                        <FaBell />
-                        <span>
-                          <strong>{notification.actorName || "A student"}</strong>{" "}
-                          {notification.type === "comment" ? "commented on" : "liked"} your post
-                          <small>{notification.commentPreview || notification.postPreview}</small>
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="community-empty">No notifications yet.</div>
-                )}
-              </section>
-            ) : activeView === "reports" && isCommunityAdmin ? (
+            {activeView === "reports" && isCommunityAdmin ? (
               <section className="community-panel">
                 <div className="community-panel__header">
                   <div>
