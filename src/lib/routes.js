@@ -9,6 +9,7 @@ export const routes = {
   practice: '/practice',
   profile: '/profile',
   bursaryDashboard: '/bursary',
+  community: '/community',
 };
 
 export const legacyRouteRedirects = {
@@ -21,4 +22,5 @@ export const legacyRouteRedirects = {
   '/Practise': routes.practice,
   '/Profile': routes.profile,
   '/Bursary': routes.bursaryDashboard,
+  '/Community': routes.community,
 };

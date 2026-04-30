@@ -13,6 +13,7 @@ const About = lazy(() => import('./pages/About'));
 const Practise = lazy(() => import('./pages/Practise'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Bursary = lazy(() => import('./pages/Bursary'));
+const Community = lazy(() => import('./pages/Community'));
 
 function CanonicalTagManager() {
   const location = useLocation();
@@ -80,6 +81,7 @@ function App() {
           <Route path={routes.practice} element={<Practise />} />
           <Route path={routes.profile} element={<ProtectedProfileRoute />} />
           <Route path={routes.bursaryDashboard} element={<Bursary />} />
+          <Route path={routes.community} element={<Community />} />
 
           {legacyRoutes.map(([legacyPath, canonicalPath]) => (
             <Route

@@ -28,6 +28,7 @@ import {
   FaMapMarkerAlt,
   FaUniversity,
   FaFilter,
+  FaUsers,
 } from "react-icons/fa";
 
 const makeBursary = (
@@ -483,6 +484,7 @@ export default function Bursary() {
               )}
               <a onClick={() => navigate(routes.application)}>Application</a>
               <a onClick={() => navigate(routes.practice)}>Practise</a>
+              <a onClick={() => navigate(routes.community)}>Community</a>
               <a className="active">Bursaries</a>
               {!isGuest && (
                 <a
@@ -534,6 +536,9 @@ export default function Bursary() {
           </button>
           <button className="dashboard-shortcut" onClick={() => navigate(routes.practice)}>
             <FaPencilAlt /> Past Papers
+          </button>
+          <button className="dashboard-shortcut" onClick={() => navigate(routes.community)}>
+            <FaUsers /> Community
           </button>
         </div>
 

@@ -255,6 +255,7 @@ export default function AuthForm() {
               </a>
               <a onClick={() => navigate(routes.programs)}>Programs</a>
               <a onClick={() => navigate(routes.howItWorks)}>How It Works</a>
+              <a onClick={() => navigate(routes.community)}>Community</a>
               <a onClick={() => navigate(routes.about)}>About</a>
             </div>
           )}

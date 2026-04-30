@@ -24,6 +24,7 @@ import {
   FaShieldAlt,
   FaUserCircle,
   FaHome,
+  FaUsers,
 } from "react-icons/fa";
 import { auth } from "../lib/firebase/auth";
 import { db } from "../lib/firebase/firestore";
@@ -754,6 +755,14 @@ const Profile = () => {
               <a
                 onClick={() => {
                   setMenuOpen(false);
+                  navigate(routes.community);
+                }}
+              >
+                Community
+              </a>
+              <a
+                onClick={() => {
+                  setMenuOpen(false);
                   setActiveTab("overview");
                 }}
                 className="active"
@@ -806,8 +815,12 @@ const Profile = () => {
             <FaShieldAlt /> Security
           </button>
 
-          <button className="dashboard-shortcut" onClick={() => navigate("/application") }>
+          <button className="dashboard-shortcut" onClick={() => navigate(routes.application)}>
             <FaHome /> Home
+          </button>
+
+          <button className="dashboard-shortcut" onClick={() => navigate(routes.community)}>
+            <FaUsers /> Community
           </button>
           
           <button className="dashboard-shortcut" onClick={handleLogout}>

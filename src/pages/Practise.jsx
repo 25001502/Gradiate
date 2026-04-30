@@ -34,6 +34,7 @@ import {
   FaLanguage,
   FaBriefcase,
   FaUniversity,
+  FaUsers,
 } from "react-icons/fa";
 
 const subjects = [
@@ -405,21 +406,15 @@ export default function Practise() {
           {menuOpen && (
             <div className="burger-menu">
               {isGuest ? (
-                <a onClick={() => navigate("/auth")}>Sign In / Create Account</a>
+                <a onClick={() => navigate(routes.auth)}>Sign In / Create Account</a>
               ) : (
-                <a onClick={() => navigate("/profile")}>
+                <a onClick={() => navigate(routes.profile)}>
                   {user?.displayName || user?.email || "Guest"}
                 </a>
               )}
-              <a onClick={() => navigate("/application")}>Application</a>
-              <a
-                onClick={() =>
-                  alert("Sorry! this feature is not yet available")
-                }
-                className="active"
-              >
-                Bursaries
-              </a>
+              <a onClick={() => navigate(routes.application)}>Application</a>
+              <a onClick={() => navigate(routes.bursaryDashboard)}>Bursaries</a>
+              <a onClick={() => navigate(routes.community)}>Community</a>
               {!isGuest && (
                 <a
                   onClick={async () => {
@@ -457,6 +452,11 @@ export default function Practise() {
               label: "Bursaries",
               icon: <FaGraduationCap />,
               onClick: () => navigate(routes.bursaryDashboard),
+            },
+            {
+              label: "Community",
+              icon: <FaUsers />,
+              onClick: () => navigate(routes.community),
             },
             
           ]}

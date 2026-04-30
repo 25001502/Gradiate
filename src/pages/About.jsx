@@ -68,6 +68,7 @@ const About = () => {
               </a>
               <a onClick={() => navigate("/programs")}>Programs</a>
               <a onClick={() => navigate("/how-it-works")}>How It Works</a>
+              <a onClick={() => navigate("/community")}>Community</a>
               <a onClick={() => navigate("/about")}>About</a>
             </div>
           )}

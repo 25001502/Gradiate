@@ -1,16 +1,110 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isValidCommunityCategory(category) {
+      return category in ['general', 'questions', 'bursaries', 'applications', 'study', 'wins'];
+    }
+
+    function isCommunityPostAuthor(postId) {
+      return signedIn()
+        && get(/databases/$(database)/documents/communityPosts/$(postId)).data.authorId == request.auth.uid;
+    }
+
+    function validCommunityAuthorFields(data) {
+      return data.authorId == request.auth.uid
+        && data.authorName is string
+        && data.authorName.size() > 0
+        && data.authorName.size() <= 80
+        && data.authorPhotoURL is string
+        && data.authorPhotoURL.size() <= 500;
+    }
+
+    function validCommunityPost(data) {
+      return data.content is string
+        && data.content.size() > 0
+        && data.content.size() <= 800
+        && isValidCommunityCategory(data.category);
+    }
+
+    function validCommunityComment(data) {
+      return data.content is string
+        && data.content.size() > 0
+        && data.content.size() <= 420;
+    }
+
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if signedIn() && request.auth.uid == userId;
     }
 
     match /users/{userId}/bookmarks/{bookmarkId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if signedIn() && request.auth.uid == userId;
     }
 
     match /users/{userId}/practiceSavedSubjects/{subjectId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if signedIn() && request.auth.uid == userId;
+    }
+
+    match /users/{userId}/bursaryBookmarks/{bursaryId} {
+      allow read, write: if signedIn() && request.auth.uid == userId;
+    }
+
+    match /communityPosts/{postId} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly([
+          'authorId',
+          'authorName',
+          'authorPhotoURL',
+          'category',
+          'content',
+          'createdAt',
+          'updatedAt'
+        ])
+        && validCommunityAuthorFields(request.resource.data)
+        && validCommunityPost(request.resource.data)
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+      allow update: if signedIn()
+        && resource.data.authorId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'category',
+          'content',
+          'updatedAt'
+        ])
+        && validCommunityPost(request.resource.data)
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if signedIn() && resource.data.authorId == request.auth.uid;
+
+      match /likes/{likeUserId} {
+        allow read: if true;
+        allow create: if signedIn()
+          && likeUserId == request.auth.uid
+          && request.resource.data.keys().hasOnly(['uid', 'createdAt'])
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.createdAt == request.time;
+        allow delete: if signedIn() && (likeUserId == request.auth.uid || isCommunityPostAuthor(postId));
+      }
+
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if signedIn()
+          && request.resource.data.keys().hasOnly([
+            'authorId',
+            'authorName',
+            'authorPhotoURL',
+            'content',
+            'createdAt'
+          ])
+          && validCommunityAuthorFields(request.resource.data)
+          && validCommunityComment(request.resource.data)
+          && request.resource.data.createdAt == request.time;
+        allow delete: if signedIn()
+          && (resource.data.authorId == request.auth.uid || isCommunityPostAuthor(postId));
+      }
     }
   }
 }

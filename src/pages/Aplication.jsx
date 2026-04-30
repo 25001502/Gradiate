@@ -28,6 +28,7 @@ import {
   FaBalanceScale,
   FaClock,
   FaSignOutAlt,
+  FaUsers,
 } from "react-icons/fa";
 
 // ── University data ──────────────────────────────────────────────────────────
@@ -591,6 +592,7 @@ export default function Aplication() {
                 </a>
               )}
               <a onClick={() => navigate(routes.practice)}>Practise</a>
+              <a onClick={() => navigate(routes.community)}>Community</a>
               <a onClick={() => navigate(routes.bursaryDashboard)} className="active">
                 Bursaries
               </a>
@@ -648,6 +650,9 @@ export default function Aplication() {
           </button>
           <button className="dashboard-shortcut" onClick={() => navigate(routes.bursaryDashboard)}>
             <FaGraduationCap /> Bursaries
+          </button>
+          <button className="dashboard-shortcut" onClick={() => navigate(routes.community)}>
+            <FaUsers /> Community
           </button>
           <button
             className="dashboard-shortcut"

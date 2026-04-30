@@ -71,6 +71,7 @@ export default function Startup() {
               </a>
               <a onClick={() => navigate("/programs")} className="cursor-pointer">Programs</a>
               <a onClick={() => navigate("/how-it-works")} className="cursor-pointer">How It Works</a>
+              <a onClick={() => navigate("/community")} className="cursor-pointer">Community</a>
               <a onClick={() => navigate("/about")} className="cursor-pointer">About</a>
             </div>
           )}
