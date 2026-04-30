@@ -15,10 +15,19 @@ import {
   doc,
   getDoc,
   getDocs,
+  limit,
+  onSnapshot,
+  orderBy,
+  query,
   setDoc,
   serverTimestamp,
+  updateDoc,
+  where,
 } from "firebase/firestore";
 import {
+  FaBell,
+  FaBookmark,
+  FaComments,
   FaPencilAlt,
   FaSignOutAlt,
   FaShieldAlt,
@@ -89,6 +98,28 @@ const formatSecurityDate = (value) => {
     minute: "2-digit",
   });
 };
+
+const formatCommunityDate = (value) => {
+  const parsed = typeof value?.toDate === "function" ? value.toDate() : value ? new Date(value) : null;
+
+  if (!parsed || Number.isNaN(parsed.getTime())) {
+    return "Just now";
+  }
+
+  return parsed.toLocaleString("en-ZA", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+const sortByNewestCommunityDate = (items, field = "createdAt") =>
+  [...items].sort((a, b) => {
+    const aTime = typeof a[field]?.toMillis === "function" ? a[field].toMillis() : 0;
+    const bTime = typeof b[field]?.toMillis === "function" ? b[field].toMillis() : 0;
+    return bTime - aTime;
+  });
 
 const getDeviceDescriptor = () => {
   if (typeof navigator === "undefined") {
@@ -213,6 +244,9 @@ const Profile = () => {
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [activityLog, setActivityLog] = useState([]);
+  const [communityPosts, setCommunityPosts] = useState([]);
+  const [savedCommunityPosts, setSavedCommunityPosts] = useState([]);
+  const [communityNotifications, setCommunityNotifications] = useState([]);
   const menuRef = useRef(null);
   const deviceDescriptor = useMemo(() => getDeviceDescriptor(), []);
   const passwordStrength = useMemo(() => getPasswordStrength(newPassword), [newPassword]);
@@ -294,6 +328,55 @@ const Profile = () => {
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!user?.uid) {
+      setCommunityPosts([]);
+      setSavedCommunityPosts([]);
+      setCommunityNotifications([]);
+      return undefined;
+    }
+
+    const postsUnsubscribe = onSnapshot(
+      query(collection(db, "communityPosts"), where("authorId", "==", user.uid), limit(8)),
+      (snapshot) => {
+        setCommunityPosts(sortByNewestCommunityDate(snapshot.docs.map((postDoc) => ({
+          id: postDoc.id,
+          ...postDoc.data(),
+        }))));
+      }
+    );
+
+    const savedUnsubscribe = onSnapshot(
+      collection(db, "users", user.uid, "savedCommunityPosts"),
+      (snapshot) => {
+        setSavedCommunityPosts(sortByNewestCommunityDate(
+          snapshot.docs.map((savedDoc) => ({ id: savedDoc.id, ...savedDoc.data() })),
+          "savedAt"
+        ));
+      }
+    );
+
+    const notificationsUnsubscribe = onSnapshot(
+      query(
+        collection(db, "users", user.uid, "notifications"),
+        orderBy("createdAt", "desc"),
+        limit(8)
+      ),
+      (snapshot) => {
+        setCommunityNotifications(snapshot.docs.map((notificationDoc) => ({
+          id: notificationDoc.id,
+          ...notificationDoc.data(),
+        })));
+      }
+    );
+
+    return () => {
+      postsUnsubscribe();
+      savedUnsubscribe();
+      notificationsUnsubscribe();
+    };
+  }, [user?.uid]);
 
   // Allow selecting from generated DiceBear styles (same seed, different style = different look)
   const avatarOptions = AVATAR_STYLES.map((s) => ({
@@ -531,6 +614,12 @@ const Profile = () => {
       const practiceSnapshot = await getDocs(collection(db, "users", userId, "practiceSavedSubjects"));
       await Promise.all(practiceSnapshot.docs.map((savedDoc) => deleteDoc(savedDoc.ref)));
 
+      const savedCommunitySnapshot = await getDocs(collection(db, "users", userId, "savedCommunityPosts"));
+      await Promise.all(savedCommunitySnapshot.docs.map((savedDoc) => deleteDoc(savedDoc.ref)));
+
+      const notificationSnapshot = await getDocs(collection(db, "users", userId, "notifications"));
+      await Promise.all(notificationSnapshot.docs.map((notificationDoc) => deleteDoc(notificationDoc.ref)));
+
       await deleteDoc(doc(db, "users", userId));
       try {
         localStorage.removeItem(getSecurityActivityKey(userId));
@@ -620,6 +709,21 @@ const Profile = () => {
     }
   };
 
+  const markCommunityNotificationRead = async (notificationId) => {
+    if (!user?.uid) {
+      return;
+    }
+
+    try {
+      await updateDoc(doc(db, "users", user.uid, "notifications", notificationId), {
+        read: true,
+        readAt: serverTimestamp(),
+      });
+    } catch (err) {
+      console.error("Failed to mark notification read", err);
+    }
+  };
+
   useEffect(() => {
     if (!success) return undefined;
     const timer = window.setTimeout(() => setSuccess(""), 3000);
@@ -706,6 +810,7 @@ const Profile = () => {
   const skillsCount = profileData.skills
     ? profileData.skills.split(",").filter((skill) => skill.trim()).length
     : 0;
+  const unreadCommunityNotifications = communityNotifications.filter((notification) => !notification.read).length;
 
   return (
     <>
@@ -815,6 +920,10 @@ const Profile = () => {
             <FaShieldAlt /> Security
           </button>
 
+          <button className="dashboard-shortcut" onClick={() => setActiveTab("community")}>
+            <FaComments /> Community Activity
+          </button>
+
           <button className="dashboard-shortcut" onClick={() => navigate(routes.application)}>
             <FaHome /> Home
           </button>
@@ -840,6 +949,10 @@ const Profile = () => {
           <div className="dashboard-stat">
             <p className="dashboard-stat__value dashboard-stat__value--purple">{stageLabel}</p>
             <p className="dashboard-stat__label">Academic Stage</p>
+          </div>
+          <div className="dashboard-stat">
+            <p className="dashboard-stat__value dashboard-stat__value--green">{unreadCommunityNotifications}</p>
+            <p className="dashboard-stat__label">Community Alerts</p>
           </div>
           <div className="dashboard-stat">
             <p className="dashboard-stat__value" style={{ color: emailVerified ? "#10b981" : "#f59e0b" }}>
@@ -1164,6 +1277,96 @@ const Profile = () => {
           </div>
         )}
 
+        {activeTab === "community" && (
+          <div className="uni-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}>
+            <article className="uni-card">
+              <div className="uni-card__body">
+                <h3 className="uni-card__name">
+                  <FaComments /> My Posts
+                </h3>
+                <div style={profileUi.communityList}>
+                  {communityPosts.length ? (
+                    communityPosts.map((post) => (
+                      <div key={post.id} style={profileUi.communityItem}>
+                        <strong style={profileUi.communityItemTitle}>{post.category || "general"}</strong>
+                        <p style={profileUi.communityItemText}>{post.content}</p>
+                        <span style={profileUi.communityItemMeta}>{formatCommunityDate(post.createdAt)}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="uni-card__desc" style={{ margin: 0 }}>
+                      No community posts yet.
+                    </p>
+                  )}
+                </div>
+                <button
+                  className="uni-card__btn uni-card__btn--primary"
+                  onClick={() => navigate(routes.community)}
+                  style={{ marginTop: 14, width: "fit-content" }}
+                >
+                  Open Community
+                </button>
+              </div>
+            </article>
+
+            <article className="uni-card">
+              <div className="uni-card__body">
+                <h3 className="uni-card__name">
+                  <FaBookmark /> Saved Posts
+                </h3>
+                <div style={profileUi.communityList}>
+                  {savedCommunityPosts.length ? (
+                    savedCommunityPosts.map((post) => (
+                      <div key={post.id} style={profileUi.communityItem}>
+                        <strong style={profileUi.communityItemTitle}>{post.authorName || "Student"}</strong>
+                        <p style={profileUi.communityItemText}>{post.contentPreview || "Saved community post"}</p>
+                        <span style={profileUi.communityItemMeta}>Saved {formatCommunityDate(post.savedAt)}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="uni-card__desc" style={{ margin: 0 }}>
+                      Saved community posts will appear here.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </article>
+
+            <article className="uni-card">
+              <div className="uni-card__body">
+                <h3 className="uni-card__name">
+                  <FaBell /> Notifications
+                </h3>
+                <div style={profileUi.communityList}>
+                  {communityNotifications.length ? (
+                    communityNotifications.map((notification) => (
+                      <button
+                        key={notification.id}
+                        style={{
+                          ...profileUi.communityNotification,
+                          ...(notification.read ? {} : profileUi.communityNotificationUnread),
+                        }}
+                        onClick={() => markCommunityNotificationRead(notification.id)}
+                        type="button"
+                      >
+                        <strong style={profileUi.communityItemTitle}>{notification.actorName || "A student"}</strong>
+                        <span style={profileUi.communityItemText}>
+                          {notification.type === "comment" ? "commented on" : "liked"} your post
+                        </span>
+                        <span style={profileUi.communityItemMeta}>{formatCommunityDate(notification.createdAt)}</span>
+                      </button>
+                    ))
+                  ) : (
+                    <p className="uni-card__desc" style={{ margin: 0 }}>
+                      No community notifications yet.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </article>
+          </div>
+        )}
+
         {activeTab === "security" && (
           <div className="uni-grid" style={{ gridTemplateColumns: "1fr" }}>
             <article className="uni-card">
@@ -1478,6 +1681,49 @@ const profileUi = {
     color: "#64748b",
     fontSize: 12,
     whiteSpace: "nowrap",
+  },
+  communityList: {
+    display: "grid",
+    gap: 10,
+  },
+  communityItem: {
+    border: "1px solid #e2e8f0",
+    borderRadius: 12,
+    background: "#fff",
+    padding: "10px 11px",
+  },
+  communityItemTitle: {
+    display: "block",
+    color: "#1e293b",
+    fontSize: 13,
+    fontWeight: 800,
+    textTransform: "capitalize",
+  },
+  communityItemText: {
+    display: "block",
+    color: "#475569",
+    fontSize: 13,
+    lineHeight: 1.45,
+    margin: "4px 0",
+    overflowWrap: "anywhere",
+  },
+  communityItemMeta: {
+    color: "#64748b",
+    fontSize: 12,
+    fontWeight: 600,
+  },
+  communityNotification: {
+    width: "100%",
+    border: "1px solid #e2e8f0",
+    borderRadius: 12,
+    background: "#fff",
+    cursor: "pointer",
+    padding: "10px 11px",
+    textAlign: "left",
+  },
+  communityNotificationUnread: {
+    borderColor: "#93c5fd",
+    background: "#eff6ff",
   },
   passwordStrengthWrap: {
     marginTop: 10,

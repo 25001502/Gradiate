@@ -5,6 +5,11 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function isCommunityAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/communityAdmins/$(request.auth.uid));
+    }
+
     function isValidCommunityCategory(category) {
       return category in ['general', 'questions', 'bursaries', 'applications', 'study', 'wins'];
     }
@@ -36,6 +41,58 @@ service cloud.firestore {
         && data.content.size() <= 420;
     }
 
+    function validCommunityNotification(userId, data) {
+      return data.recipientId == userId
+        && data.actorId == request.auth.uid
+        && data.actorId != userId
+        && data.actorName is string
+        && data.actorName.size() > 0
+        && data.actorName.size() <= 80
+        && data.actorPhotoURL is string
+        && data.actorPhotoURL.size() <= 500
+        && data.type in ['like', 'comment']
+        && data.postId is string
+        && data.postId.size() > 0
+        && data.postPreview is string
+        && data.postPreview.size() <= 180
+        && data.read == false
+        && data.createdAt == request.time
+        && get(/databases/$(database)/documents/communityPosts/$(data.postId)).data.authorId == userId;
+    }
+
+    function validSavedCommunityPost(data) {
+      return data.postId is string
+        && data.postId.size() > 0
+        && data.authorId is string
+        && data.authorName is string
+        && data.authorName.size() <= 80
+        && isValidCommunityCategory(data.category)
+        && data.contentPreview is string
+        && data.contentPreview.size() <= 200
+        && data.savedAt == request.time;
+    }
+
+    function validCommunityReport(data) {
+      return data.reporterId == request.auth.uid
+        && data.reporterName is string
+        && data.reporterName.size() > 0
+        && data.reporterName.size() <= 80
+        && data.targetType in ['post', 'comment']
+        && data.targetId is string
+        && data.targetId.size() > 0
+        && data.postId is string
+        && data.postId.size() > 0
+        && data.commentId is string
+        && data.targetAuthorId is string
+        && data.reason is string
+        && data.reason.size() > 0
+        && data.reason.size() <= 280
+        && data.contentPreview is string
+        && data.contentPreview.size() <= 240
+        && data.status == 'open'
+        && data.createdAt == request.time;
+    }
+
     match /users/{userId} {
       allow read, write: if signedIn() && request.auth.uid == userId;
     }
@@ -50,6 +107,82 @@ service cloud.firestore {
 
     match /users/{userId}/bursaryBookmarks/{bursaryId} {
       allow read, write: if signedIn() && request.auth.uid == userId;
+    }
+
+    match /users/{userId}/savedCommunityPosts/{postId} {
+      allow read, delete: if signedIn() && request.auth.uid == userId;
+      allow create: if signedIn()
+        && request.auth.uid == userId
+        && postId == request.resource.data.postId
+        && request.resource.data.keys().hasOnly([
+          'postId',
+          'authorId',
+          'authorName',
+          'category',
+          'contentPreview',
+          'savedAt'
+        ])
+        && validSavedCommunityPost(request.resource.data);
+    }
+
+    match /users/{userId}/notifications/{notificationId} {
+      allow read, delete: if signedIn() && request.auth.uid == userId;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly([
+          'recipientId',
+          'actorId',
+          'actorName',
+          'actorPhotoURL',
+          'type',
+          'postId',
+          'postPreview',
+          'commentId',
+          'commentPreview',
+          'read',
+          'createdAt'
+        ])
+        && validCommunityNotification(userId, request.resource.data)
+        && request.resource.data.commentId is string
+        && request.resource.data.commentPreview is string
+        && request.resource.data.commentPreview.size() <= 180;
+      allow update: if signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'readAt'])
+        && request.resource.data.read == true
+        && request.resource.data.readAt == request.time;
+    }
+
+    match /communityAdmins/{adminId} {
+      allow read: if signedIn() && request.auth.uid == adminId;
+      allow write: if false;
+    }
+
+    match /communityReports/{reportId} {
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly([
+          'reporterId',
+          'reporterName',
+          'targetType',
+          'targetId',
+          'postId',
+          'commentId',
+          'targetAuthorId',
+          'reason',
+          'contentPreview',
+          'status',
+          'createdAt'
+        ])
+        && validCommunityReport(request.resource.data);
+      allow read, delete: if isCommunityAdmin();
+      allow update: if isCommunityAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'status',
+          'reviewedAt',
+          'reviewedBy'
+        ])
+        && request.resource.data.status in ['reviewed', 'removed']
+        && request.resource.data.reviewedAt == request.time
+        && request.resource.data.reviewedBy == request.auth.uid;
     }
 
     match /communityPosts/{postId} {
@@ -77,7 +210,7 @@ service cloud.firestore {
         ])
         && validCommunityPost(request.resource.data)
         && request.resource.data.updatedAt == request.time;
-      allow delete: if signedIn() && resource.data.authorId == request.auth.uid;
+      allow delete: if signedIn() && (resource.data.authorId == request.auth.uid || isCommunityAdmin());
 
       match /likes/{likeUserId} {
         allow read: if true;
@@ -86,7 +219,8 @@ service cloud.firestore {
           && request.resource.data.keys().hasOnly(['uid', 'createdAt'])
           && request.resource.data.uid == request.auth.uid
           && request.resource.data.createdAt == request.time;
-        allow delete: if signedIn() && (likeUserId == request.auth.uid || isCommunityPostAuthor(postId));
+        allow delete: if signedIn()
+          && (likeUserId == request.auth.uid || isCommunityPostAuthor(postId) || isCommunityAdmin());
       }
 
       match /comments/{commentId} {
@@ -103,7 +237,7 @@ service cloud.firestore {
           && validCommunityComment(request.resource.data)
           && request.resource.data.createdAt == request.time;
         allow delete: if signedIn()
-          && (resource.data.authorId == request.auth.uid || isCommunityPostAuthor(postId));
+          && (resource.data.authorId == request.auth.uid || isCommunityPostAuthor(postId) || isCommunityAdmin());
       }
     }
   }
