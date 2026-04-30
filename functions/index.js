@@ -68,7 +68,7 @@ api.post("/send-verification", async (req, res) => {
     }
 
     const verificationLink = await adminAuth.generateEmailVerificationLink(email, {
-      url: process.env.VERIFICATION_CONTINUE_URL || "https://gradiate.co.za/AuthForm",
+      url: process.env.VERIFICATION_CONTINUE_URL || "https://gradiate.co.za/auth",
       handleCodeInApp: false,
     });
 
@@ -93,6 +93,5 @@ api.post("/send-verification", async (req, res) => {
 });
 
 export const apiRouter = functions.https.onRequest(api);
-
 
 

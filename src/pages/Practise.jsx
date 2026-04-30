@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import { useNavigate } from "react-router-dom";
-import db from "../firebase";
 import {
   collection,
   deleteDoc,
@@ -10,6 +9,8 @@ import {
   serverTimestamp,
   setDoc,
 } from "firebase/firestore";
+import { db } from "../lib/firebase/firestore";
+import { routes } from "../lib/routes";
 import DashboardSection from "../components/DashboardSection";
 import {
   FaTwitter,
@@ -445,17 +446,17 @@ export default function Practise() {
             {
               label: isGuest ? "Sign In / Create Account" : "My Profile",
               icon: <FaUserCircle />,
-              onClick: () => navigate(isGuest ? "/auth" : "/profile"),
+              onClick: () => navigate(isGuest ? routes.auth : routes.profile),
             },
             {
               label: "Application",
               icon: <FaUniversity />,
-              onClick: () => navigate("/application"),
+              onClick: () => navigate(routes.application),
             },
             {
               label: "Bursaries",
               icon: <FaGraduationCap />,
-              onClick: () => navigate("/Bursary"),
+              onClick: () => navigate(routes.bursaryDashboard),
             },
             
           ]}

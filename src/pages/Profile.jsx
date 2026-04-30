@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { getAvatarUrl, AVATAR_STYLES, DEFAULT_AVATAR_STYLE } from "../utils/avatarUtils";
 import avDefault from "../images/default-avatar.jpg";
 import {
-  getAuth,
   updateProfile,
   signOut,
   deleteUser,
@@ -16,7 +15,6 @@ import {
   doc,
   getDoc,
   getDocs,
-  getFirestore,
   setDoc,
   serverTimestamp,
 } from "firebase/firestore";
@@ -27,6 +25,9 @@ import {
   FaUserCircle,
   FaHome,
 } from "react-icons/fa";
+import { auth } from "../lib/firebase/auth";
+import { db } from "../lib/firebase/firestore";
+import { routes } from "../lib/routes";
 
 const PASSWORD_RULES = [
   { key: "length", label: "At least 8 characters", test: (value) => value.length >= 8 },
@@ -184,9 +185,7 @@ const Profile = () => {
   const verificationEndpoint =
     import.meta.env.VITE_SEND_VERIFICATION_ENDPOINT || "/api/send-verification";
 
-  const auth = getAuth();
   const navigate = useNavigate();
-  const db = getFirestore();
   const [user, setUser] = useState(null);
   const [avatarUrl, setAvatarUrl] = useState("");
   const [avatarKey, setAvatarKey] = useState("");
@@ -293,7 +292,7 @@ const Profile = () => {
     });
 
     return () => unsubscribe();
-  }, [auth, db]);
+  }, []);
 
   // Allow selecting from generated DiceBear styles (same seed, different style = different look)
   const avatarOptions = AVATAR_STYLES.map((s) => ({
@@ -390,7 +389,7 @@ const Profile = () => {
 
       addSecurityActivity("Signed out all sessions", "success");
       await signOut(auth);
-      navigate("/auth");
+      navigate(routes.auth);
     } catch (err) {
       console.error(err);
       setSecurityError("Failed to sign out all sessions.");
@@ -539,7 +538,7 @@ const Profile = () => {
       }
 
       await deleteUser(auth.currentUser);
-      navigate("/");
+      navigate(routes.home);
     } catch (err) {
       console.error(err);
       const code = (err?.code || "").toLowerCase();
@@ -739,7 +738,7 @@ const Profile = () => {
               <a
                 onClick={() => {
                   setMenuOpen(false);
-                  navigate("/application");
+                  navigate(routes.application);
                 }}
               >
                 Application
@@ -747,7 +746,7 @@ const Profile = () => {
               <a
                 onClick={() => {
                   setMenuOpen(false);
-                  navigate("/practice");
+                  navigate(routes.practice);
                 }}
               >
                 Practise

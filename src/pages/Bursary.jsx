@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import { useNavigate } from "react-router-dom";
-import db from "../firebase";
 import {
   collection,
   deleteDoc,
@@ -10,6 +9,8 @@ import {
   serverTimestamp,
   setDoc,
 } from "firebase/firestore";
+import { db } from "../lib/firebase/firestore";
+import { routes } from "../lib/routes";
 import {
   FaTwitter,
   FaInstagram,
@@ -474,14 +475,14 @@ export default function Bursary() {
           {menuOpen && (
             <div className="burger-menu">
               {isGuest ? (
-                <a onClick={() => navigate("/auth")}>Sign In / Create Account</a>
+                <a onClick={() => navigate(routes.auth)}>Sign In / Create Account</a>
               ) : (
-                <a onClick={() => navigate("/Profile")}>
+                <a onClick={() => navigate(routes.profile)}>
                   {user?.displayName || user?.email || "Guest"}
                 </a>
               )}
-              <a onClick={() => navigate("/Aplication")}>Application</a>
-              <a onClick={() => navigate("/Practise")}>Practise</a>
+              <a onClick={() => navigate(routes.application)}>Application</a>
+              <a onClick={() => navigate(routes.practice)}>Practise</a>
               <a className="active">Bursaries</a>
               {!isGuest && (
                 <a
@@ -524,14 +525,14 @@ export default function Bursary() {
         <div className="dashboard-shortcuts">
           <button
             className="dashboard-shortcut"
-            onClick={() => navigate(isGuest ? "/auth" : "/Profile")}
+            onClick={() => navigate(isGuest ? routes.auth : routes.profile)}
           >
             <FaUserCircle /> {isGuest ? "Sign In / Create Account" : "My Profile"}
           </button>
-          <button className="dashboard-shortcut" onClick={() => navigate("/Aplication")}>
+          <button className="dashboard-shortcut" onClick={() => navigate(routes.application)}>
             <FaUniversity /> Application
           </button>
-          <button className="dashboard-shortcut" onClick={() => navigate("/Practise")}>
+          <button className="dashboard-shortcut" onClick={() => navigate(routes.practice)}>
             <FaPencilAlt /> Past Papers
           </button>
         </div>

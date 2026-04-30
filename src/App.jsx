@@ -1,7 +1,8 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Startup from './pages/Startup';
-import { useAuth } from './context/AuthContext';
+import { useAuth } from './context/useAuth';
+import { legacyRouteRedirects, routes } from './lib/routes';
 
 const AuthForm = lazy(() => import('./AuthForm'));
 const Application = lazy(() => import('./pages/Aplication'));
@@ -17,7 +18,7 @@ function CanonicalTagManager() {
   const location = useLocation();
 
   useEffect(() => {
-    const baseUrl = import.meta.env.VITE_SITE_URL || 'https://gradiate';
+    const baseUrl = import.meta.env.VITE_SITE_URL || 'https://gradiate.co.za';
     const canonicalHref = `${baseUrl}${location.pathname}`;
     let canonical = document.querySelector('link[rel="canonical"]');
 
@@ -37,7 +38,7 @@ function ProtectedProfileRoute() {
   const { user } = useAuth();
 
   if (!user?.uid) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to={routes.auth} replace />;
   }
 
   return <Profile />;
@@ -62,34 +63,33 @@ function RouteFallback() {
 
 
 function App() {
+  const legacyRoutes = Object.entries(legacyRouteRedirects);
+
   return (
     <Router>
       <CanonicalTagManager />
       <Suspense fallback={<RouteFallback />}>
         <Routes>
-          <Route path="/" element={<Startup />} />
+          <Route path={routes.home} element={<Startup />} />
+          <Route path={routes.auth} element={<AuthForm />} />
+          <Route path={routes.application} element={<Application />} />
+          <Route path={routes.bursaries} element={<Bursaryguest />} />
+          <Route path={routes.programs} element={<ProgramsGuest />} />
+          <Route path={routes.howItWorks} element={<How />} />
+          <Route path={routes.about} element={<About />} />
+          <Route path={routes.practice} element={<Practise />} />
+          <Route path={routes.profile} element={<ProtectedProfileRoute />} />
+          <Route path={routes.bursaryDashboard} element={<Bursary />} />
 
-          {/* Canonical SEO-friendly paths */}
-          <Route path="/auth" element={<AuthForm />} />
-          <Route path="/application" element={<Application />} />
-          <Route path="/bursaries" element={<Bursaryguest />} />
-          <Route path="/programs" element={<ProgramsGuest />} />
-          <Route path="/how-it-works" element={<How />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/practice" element={<Practise />} />
-          <Route path="/profile" element={<ProtectedProfileRoute />} />
-          <Route path="/bursary" element={<Bursary />} />
+          {legacyRoutes.map(([legacyPath, canonicalPath]) => (
+            <Route
+              key={legacyPath}
+              path={legacyPath}
+              element={<Navigate to={canonicalPath} replace />}
+            />
+          ))}
 
-          {/* Legacy paths kept for backward compatibility */}
-          <Route path="/AuthForm" element={<AuthForm />} />
-          <Route path="/Aplication" element={<Application />} />
-          <Route path="/Bursaryguest" element={<Bursaryguest />} />
-          <Route path="/Programsguest" element={<ProgramsGuest />} />
-          <Route path="/How" element={<How />} />
-          <Route path="/About" element={<About />} />
-          <Route path="/Practise" element={<Practise />} />
-          <Route path="/Profile" element={<ProtectedProfileRoute />} />
-          <Route path="/Bursary" element={<Bursary />} />
+          <Route path="*" element={<Navigate to={routes.home} replace />} />
         </Routes>
       </Suspense>
     </Router>

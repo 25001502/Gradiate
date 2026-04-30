@@ -1,6 +1,4 @@
 import React, { useMemo, useState } from "react";
-import { auth } from "./firebase";
-import db from "./firebase";
 import { useNavigate } from "react-router-dom";
 import {
   createUserWithEmailAndPassword,
@@ -11,6 +9,9 @@ import {
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { getAvatarUrl, DEFAULT_AVATAR_STYLE } from "./utils/avatarUtils";
 import SmartImage from "./components/SmartImage";
+import { auth } from "./lib/firebase/auth";
+import { db } from "./lib/firebase/firestore";
+import { routes } from "./lib/routes";
 
 import {
   FaTwitter,
@@ -179,7 +180,7 @@ export default function AuthForm() {
         toast.success("Verification email sent! Please verify before logging in.");
         return;
       }
-      navigate("/application"); // ✅ fixed spelling
+      navigate(routes.application);
     } catch (error) {
       toast.error(error.message);
     } finally {
@@ -196,7 +197,7 @@ export default function AuthForm() {
     try {
       // Always clear an existing account session before entering guest mode.
       await signOut(auth);
-      navigate("/application");
+      navigate(routes.application);
     } catch (error) {
       toast.error(error.message || "Unable to continue as guest right now.");
     } finally {
@@ -248,13 +249,13 @@ export default function AuthForm() {
           </div>
           {menuOpen && (
             <div className="burger-menu">
-              <a onClick={() => navigate("/")}>Home</a>
-              <a onClick={() => navigate("/bursaries")} className="active">
+              <a onClick={() => navigate(routes.home)}>Home</a>
+              <a onClick={() => navigate(routes.bursaries)} className="active">
                 Bursaries
               </a>
-              <a onClick={() => navigate("/programs")}>Programs</a>
-              <a onClick={() => navigate("/how-it-works")}>How It Works</a>
-              <a onClick={() => navigate("/about")}>About</a>
+              <a onClick={() => navigate(routes.programs)}>Programs</a>
+              <a onClick={() => navigate(routes.howItWorks)}>How It Works</a>
+              <a onClick={() => navigate(routes.about)}>About</a>
             </div>
           )}
         </div>

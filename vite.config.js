@@ -18,8 +18,16 @@ export default defineConfig({
             return undefined
           }
 
+          if (id.includes('firebase/auth')) {
+            return 'firebase-auth'
+          }
+
+          if (id.includes('firebase/firestore')) {
+            return 'firebase-firestore'
+          }
+
           if (id.includes('firebase')) {
-            return 'firebase'
+            return 'firebase-core'
           }
 
           if (id.includes('react-router')) {
