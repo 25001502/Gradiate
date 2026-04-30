@@ -3703,68 +3703,48 @@ body {
   box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
 }
 
-.community-filter-list {
+.community-topic-control {
   display: grid;
-  gap: 0.5rem;
+  gap: 0.35rem;
 }
 
-.community-filter,
+.community-topic-control span {
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.community-select {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #0f172a;
+  cursor: pointer;
+  font-size: 0.92rem;
+  font-weight: 700;
+  outline: none;
+  padding: 0.68rem 0.8rem;
+}
+
+.community-select:focus {
+  border-color: #0f766e;
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+}
+
+.community-topic-control--composer {
+  min-width: 220px;
+}
+
 .community-category-pill {
   border: 1px solid #dbe4ef;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.8);
   color: #475569;
-  cursor: pointer;
   font-weight: 700;
-  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
-}
-
-.community-filter {
-  min-height: 40px;
-  padding: 0.55rem 0.8rem;
-  text-align: left;
-}
-
-.community-filter:hover,
-.community-category-pill:hover {
-  transform: translateY(-1px);
-}
-
-.community-filter--active,
-.community-category-pill--active {
-  background: #0f172a;
-  border-color: #0f172a;
-  color: #fff;
-}
-
-.community-filter--blue.community-filter--active,
-.community-category-pill--blue.community-category-pill--active {
-  background: #2563eb;
-  border-color: #2563eb;
-}
-
-.community-filter--green.community-filter--active,
-.community-category-pill--green.community-category-pill--active {
-  background: #16a34a;
-  border-color: #16a34a;
-}
-
-.community-filter--orange.community-filter--active,
-.community-category-pill--orange.community-category-pill--active {
-  background: #ea580c;
-  border-color: #ea580c;
-}
-
-.community-filter--teal.community-filter--active,
-.community-category-pill--teal.community-category-pill--active {
-  background: #0f766e;
-  border-color: #0f766e;
-}
-
-.community-filter--gold.community-filter--active,
-.community-category-pill--gold.community-category-pill--active {
-  background: #b45309;
-  border-color: #b45309;
 }
 
 .community-feed {
@@ -3842,12 +3822,6 @@ body {
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
-.community-category-picker {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-}
-
 .community-category-pill {
   display: inline-flex;
   align-items: center;
@@ -3889,6 +3863,12 @@ body {
 .community-composer__footer {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.community-composer__actions {
+  display: inline-flex;
   align-items: center;
   gap: 0.75rem;
 }
@@ -4097,11 +4077,6 @@ body {
   .community-sidebar {
     position: static;
   }
-
-  .community-filter-list {
-    display: flex;
-    flex-wrap: wrap;
-  }
 }
 
 @media (max-width: 560px) {
@@ -4113,6 +4088,15 @@ body {
   .community-composer__footer {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .community-composer__actions,
+  .community-topic-control--composer {
+    width: 100%;
+  }
+
+  .community-composer__actions {
+    justify-content: space-between;
   }
 
   .community-post__meta {

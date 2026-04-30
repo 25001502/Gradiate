@@ -99,7 +99,7 @@ export default function Community() {
   const [posts, setPosts] = useState([]);
   const [engagementByPost, setEngagementByPost] = useState({});
   const [postDraft, setPostDraft] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("general");
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
   const [search, setSearch] = useState("");
   const [commentDrafts, setCommentDrafts] = useState({});
@@ -212,6 +212,11 @@ export default function Community() {
       return;
     }
 
+    if (!selectedCategory) {
+      setError("Please choose a topic before posting.");
+      return;
+    }
+
     if (!trimmedPostDraft || trimmedPostDraft.length > MAX_POST_LENGTH || publishing) {
       return;
     }
@@ -230,7 +235,7 @@ export default function Community() {
         updatedAt: serverTimestamp(),
       });
       setPostDraft("");
-      setSelectedCategory("general");
+      setSelectedCategory("");
     } catch (createError) {
       console.error("Failed to create community post", createError);
       setError("Your post could not be published. Please try again.");
@@ -456,27 +461,21 @@ export default function Community() {
               />
             </div>
 
-            <div className="community-filter-list" aria-label="Community categories">
-              <button
-                className={`community-filter ${activeCategory === "all" ? "community-filter--active" : ""}`}
-                onClick={() => setActiveCategory("all")}
-                type="button"
+            <label className="community-topic-control">
+              <span>Topic</span>
+              <select
+                className="community-select"
+                value={activeCategory}
+                onChange={(event) => setActiveCategory(event.target.value)}
               >
-                All Topics
-              </button>
-              {POST_CATEGORIES.map((category) => (
-                <button
-                  key={category.key}
-                  className={`community-filter community-filter--${category.tone} ${
-                    activeCategory === category.key ? "community-filter--active" : ""
-                  }`}
-                  onClick={() => setActiveCategory(category.key)}
-                  type="button"
-                >
-                  {category.label}
-                </button>
-              ))}
-            </div>
+                <option value="all">All Topics</option>
+                {POST_CATEGORIES.map((category) => (
+                  <option key={category.key} value={category.key}>
+                    {category.label}
+                  </option>
+                ))}
+              </select>
+            </label>
           </aside>
 
           <div className="community-feed">
@@ -497,33 +496,36 @@ export default function Community() {
                 maxLength={MAX_POST_LENGTH}
               />
 
-              <div className="community-category-picker">
-                {POST_CATEGORIES.map((category) => (
-                  <button
-                    key={category.key}
-                    className={`community-category-pill community-category-pill--${category.tone} ${
-                      selectedCategory === category.key ? "community-category-pill--active" : ""
-                    }`}
-                    onClick={() => setSelectedCategory(category.key)}
-                    type="button"
-                    disabled={isGuest || publishing}
-                  >
-                    {category.label}
-                  </button>
-                ))}
-              </div>
-
               <div className="community-composer__footer">
-                <span className={postCharactersLeft < 80 ? "community-limit community-limit--low" : "community-limit"}>
-                  {postCharactersLeft}
-                </span>
-                <button
-                  className="community-submit"
-                  type="submit"
-                  disabled={isGuest || publishing || !trimmedPostDraft}
-                >
-                  <FaPaperPlane /> {publishing ? "Posting..." : "Post"}
-                </button>
+                <label className="community-topic-control community-topic-control--composer">
+                  <span>Topic</span>
+                  <select
+                    className="community-select"
+                    value={selectedCategory}
+                    onChange={(event) => setSelectedCategory(event.target.value)}
+                    disabled={isGuest || publishing}
+                    required
+                  >
+                    <option value="">Choose topic</option>
+                    {POST_CATEGORIES.map((category) => (
+                      <option key={category.key} value={category.key}>
+                        {category.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <div className="community-composer__actions">
+                  <span className={postCharactersLeft < 80 ? "community-limit community-limit--low" : "community-limit"}>
+                    {postCharactersLeft}
+                  </span>
+                  <button
+                    className="community-submit"
+                    type="submit"
+                    disabled={isGuest || publishing || !trimmedPostDraft || !selectedCategory}
+                  >
+                    <FaPaperPlane /> {publishing ? "Posting..." : "Post"}
+                  </button>
+                </div>
               </div>
             </form>
 
