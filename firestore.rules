@@ -10,6 +10,27 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/communityAdmins/$(request.auth.uid));
     }
 
+    function hasField(data, field) {
+      return data.keys().hasAny([field]);
+    }
+
+    function optionalString(data, field, maxLength) {
+      return !hasField(data, field)
+        || (data[field] is string && data[field].size() <= maxLength);
+    }
+
+    function optionalBool(data, field) {
+      return !hasField(data, field) || data[field] is bool;
+    }
+
+    function optionalTimestampOrNull(data, field) {
+      return !hasField(data, field) || data[field] == null || data[field] is timestamp;
+    }
+
+    function optionalCount(data, field) {
+      return !hasField(data, field) || (data[field] is number && data[field] >= 0);
+    }
+
     function isValidCommunityCategory(category) {
       return category in ['general', 'questions', 'bursaries', 'applications', 'study', 'wins'];
     }
@@ -24,21 +45,193 @@ service cloud.firestore {
         && data.authorName is string
         && data.authorName.size() > 0
         && data.authorName.size() <= 80
-        && data.authorPhotoURL is string
-        && data.authorPhotoURL.size() <= 500;
+        && optionalString(data, 'authorPhotoURL', 500)
+        && optionalString(data, 'authorAvatarSeed', 120)
+        && optionalString(data, 'authorAvatarStyle', 40)
+        && optionalString(data, 'authorUniversity', 120)
+        && optionalString(data, 'authorProgram', 140)
+        && optionalString(data, 'authorYearOfStudy', 60);
     }
 
-    function validCommunityPost(data) {
+    function validCommunityPostBase(data) {
       return data.content is string
         && data.content.size() > 0
         && data.content.size() <= 800
-        && isValidCommunityCategory(data.category);
+        && isValidCommunityCategory(data.category)
+        && optionalString(data, 'moduleCode', 40)
+        && (!hasField(data, 'tags') || (data.tags is list && data.tags.size() <= 10));
+    }
+
+    function validCommunityPostCreate(data) {
+      return data.keys().hasOnly([
+          'authorId',
+          'authorName',
+          'authorPhotoURL',
+          'authorAvatarSeed',
+          'authorAvatarStyle',
+          'authorUniversity',
+          'authorProgram',
+          'authorYearOfStudy',
+          'category',
+          'content',
+          'moduleCode',
+          'tags',
+          'likeCount',
+          'commentCount',
+          'saveCount',
+          'lastActivityAt',
+          'createdAt',
+          'updatedAt'
+        ])
+        && validCommunityAuthorFields(data)
+        && validCommunityPostBase(data)
+        && data.likeCount == 0
+        && data.commentCount == 0
+        && data.saveCount == 0
+        && data.createdAt == request.time
+        && data.updatedAt == request.time
+        && data.lastActivityAt == request.time;
+    }
+
+    function validAnswerFields(data) {
+      return data.category == 'questions'
+        && data.isAnswered is bool
+        && optionalString(data, 'acceptedCommentId', 120)
+        && optionalString(data, 'acceptedAnswerPreview', 180)
+        && optionalString(data, 'acceptedAnswerAuthorId', 120)
+        && optionalString(data, 'acceptedAnswerAuthorName', 80)
+        && optionalTimestampOrNull(data, 'answeredAt');
+    }
+
+    function validOwnerCommunityPostUpdate() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      return resource.data.authorId == request.auth.uid
+        && changed.hasOnly([
+          'category',
+          'content',
+          'moduleCode',
+          'tags',
+          'updatedAt',
+          'isAnswered',
+          'acceptedCommentId',
+          'acceptedAnswerPreview',
+          'acceptedAnswerAuthorId',
+          'acceptedAnswerAuthorName',
+          'answeredAt',
+          'lastActivityAt'
+        ])
+        && validCommunityPostBase(request.resource.data)
+        && (!changed.hasAny(['category', 'content', 'moduleCode', 'tags', 'updatedAt'])
+          || request.resource.data.updatedAt == request.time)
+        && (!changed.hasAny([
+          'isAnswered',
+          'acceptedCommentId',
+          'acceptedAnswerPreview',
+          'acceptedAnswerAuthorId',
+          'acceptedAnswerAuthorName',
+          'answeredAt'
+        ]) || (validAnswerFields(request.resource.data)
+          && request.resource.data.lastActivityAt == request.time));
+    }
+
+    function countBefore(field) {
+      return hasField(resource.data, field) && resource.data[field] is number
+        ? resource.data[field]
+        : 0;
+    }
+
+    function validCounterStep(field) {
+      return hasField(request.resource.data, field)
+        && request.resource.data[field] is number
+        && request.resource.data[field] >= 0
+        && (
+          request.resource.data[field] == countBefore(field) + 1
+          || (countBefore(field) > 0 && request.resource.data[field] == countBefore(field) - 1)
+        );
+    }
+
+    function validCommunityCounterUpdate() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      return signedIn()
+        && changed.hasOnly(['likeCount', 'commentCount', 'saveCount', 'lastActivityAt'])
+        && request.resource.data.lastActivityAt == request.time
+        && (
+          (changed.hasOnly(['likeCount', 'lastActivityAt'])
+            && changed.hasAny(['likeCount'])
+            && validCounterStep('likeCount'))
+          || (changed.hasOnly(['commentCount', 'lastActivityAt'])
+            && changed.hasAny(['commentCount'])
+            && validCounterStep('commentCount'))
+          || (changed.hasOnly(['saveCount', 'lastActivityAt'])
+            && changed.hasAny(['saveCount'])
+            && validCounterStep('saveCount'))
+        );
+    }
+
+    function validAdminCommunityPostUpdate() {
+      return isCommunityAdmin()
+        && request.resource.data.keys().hasOnly([
+          'authorId',
+          'authorName',
+          'authorPhotoURL',
+          'authorAvatarSeed',
+          'authorAvatarStyle',
+          'authorUniversity',
+          'authorProgram',
+          'authorYearOfStudy',
+          'category',
+          'content',
+          'moduleCode',
+          'tags',
+          'likeCount',
+          'commentCount',
+          'saveCount',
+          'lastActivityAt',
+          'createdAt',
+          'updatedAt',
+          'isAnswered',
+          'acceptedCommentId',
+          'acceptedAnswerPreview',
+          'acceptedAnswerAuthorId',
+          'acceptedAnswerAuthorName',
+          'answeredAt',
+          'isOfficial',
+          'pinned',
+          'pinnedAt'
+        ])
+        && validCommunityPostBase(request.resource.data)
+        && optionalCount(request.resource.data, 'likeCount')
+        && optionalCount(request.resource.data, 'commentCount')
+        && optionalCount(request.resource.data, 'saveCount')
+        && optionalBool(request.resource.data, 'isAnswered')
+        && optionalBool(request.resource.data, 'isOfficial')
+        && optionalBool(request.resource.data, 'pinned')
+        && optionalString(request.resource.data, 'acceptedCommentId', 120)
+        && optionalString(request.resource.data, 'acceptedAnswerPreview', 180)
+        && optionalString(request.resource.data, 'acceptedAnswerAuthorId', 120)
+        && optionalString(request.resource.data, 'acceptedAnswerAuthorName', 80)
+        && optionalTimestampOrNull(request.resource.data, 'answeredAt')
+        && optionalTimestampOrNull(request.resource.data, 'pinnedAt');
     }
 
     function validCommunityComment(data) {
-      return data.content is string
+      return data.keys().hasOnly([
+          'authorId',
+          'authorName',
+          'authorPhotoURL',
+          'authorAvatarSeed',
+          'authorAvatarStyle',
+          'authorUniversity',
+          'authorProgram',
+          'authorYearOfStudy',
+          'content',
+          'createdAt'
+        ])
+        && validCommunityAuthorFields(data)
+        && data.content is string
         && data.content.size() > 0
-        && data.content.size() <= 420;
+        && data.content.size() <= 420
+        && data.createdAt == request.time;
     }
 
     function validCommunityNotification(userId, data) {
@@ -69,6 +262,9 @@ service cloud.firestore {
         && isValidCommunityCategory(data.category)
         && data.contentPreview is string
         && data.contentPreview.size() <= 200
+        && optionalTimestampOrNull(data, 'createdAt')
+        && optionalString(data, 'moduleCode', 40)
+        && optionalBool(data, 'isAnswered')
         && data.savedAt == request.time;
     }
 
@@ -111,7 +307,7 @@ service cloud.firestore {
 
     match /users/{userId}/savedCommunityPosts/{postId} {
       allow read, delete: if signedIn() && request.auth.uid == userId;
-      allow create: if signedIn()
+      allow create, update: if signedIn()
         && request.auth.uid == userId
         && postId == request.resource.data.postId
         && request.resource.data.keys().hasOnly([
@@ -120,7 +316,10 @@ service cloud.firestore {
           'authorName',
           'category',
           'contentPreview',
-          'savedAt'
+          'savedAt',
+          'createdAt',
+          'moduleCode',
+          'isAnswered'
         ])
         && validSavedCommunityPost(request.resource.data);
     }
@@ -153,8 +352,8 @@ service cloud.firestore {
     }
 
     match /communityAdmins/{adminId} {
-      allow read: if signedIn() && request.auth.uid == adminId;
-      allow write: if false;
+      allow read: if signedIn() && (request.auth.uid == adminId || isCommunityAdmin());
+      allow create, update, delete: if isCommunityAdmin();
     }
 
     match /communityReports/{reportId} {
@@ -188,28 +387,13 @@ service cloud.firestore {
     match /communityPosts/{postId} {
       allow read: if true;
       allow create: if signedIn()
-        && request.resource.data.keys().hasOnly([
-          'authorId',
-          'authorName',
-          'authorPhotoURL',
-          'category',
-          'content',
-          'createdAt',
-          'updatedAt'
-        ])
-        && validCommunityAuthorFields(request.resource.data)
-        && validCommunityPost(request.resource.data)
-        && request.resource.data.createdAt == request.time
-        && request.resource.data.updatedAt == request.time;
+        && validCommunityPostCreate(request.resource.data);
       allow update: if signedIn()
-        && resource.data.authorId == request.auth.uid
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'category',
-          'content',
-          'updatedAt'
-        ])
-        && validCommunityPost(request.resource.data)
-        && request.resource.data.updatedAt == request.time;
+        && (
+          validOwnerCommunityPostUpdate()
+          || validCommunityCounterUpdate()
+          || validAdminCommunityPostUpdate()
+        );
       allow delete: if signedIn() && (resource.data.authorId == request.auth.uid || isCommunityAdmin());
 
       match /likes/{likeUserId} {
@@ -226,16 +410,7 @@ service cloud.firestore {
       match /comments/{commentId} {
         allow read: if true;
         allow create: if signedIn()
-          && request.resource.data.keys().hasOnly([
-            'authorId',
-            'authorName',
-            'authorPhotoURL',
-            'content',
-            'createdAt'
-          ])
-          && validCommunityAuthorFields(request.resource.data)
-          && validCommunityComment(request.resource.data)
-          && request.resource.data.createdAt == request.time;
+          && validCommunityComment(request.resource.data);
         allow delete: if signedIn()
           && (resource.data.authorId == request.auth.uid || isCommunityPostAuthor(postId) || isCommunityAdmin());
       }

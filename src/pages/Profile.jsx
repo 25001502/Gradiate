@@ -38,6 +38,7 @@ import {
 import { auth } from "../lib/firebase/auth";
 import { db } from "../lib/firebase/firestore";
 import { routes } from "../lib/routes";
+import { createCommunityPostPath } from "../lib/communityHelpers";
 
 const PASSWORD_RULES = [
   { key: "length", label: "At least 8 characters", test: (value) => value.length >= 8 },
@@ -1317,11 +1318,16 @@ const Profile = () => {
                 <div style={profileUi.communityList}>
                   {savedCommunityPosts.length ? (
                     savedCommunityPosts.map((post) => (
-                      <div key={post.id} style={profileUi.communityItem}>
+                      <button
+                        key={post.id}
+                        style={{ ...profileUi.communityItem, textAlign: "left", cursor: "pointer" }}
+                        onClick={() => navigate(createCommunityPostPath(post.postId || post.id))}
+                        type="button"
+                      >
                         <strong style={profileUi.communityItemTitle}>{post.authorName || "Student"}</strong>
                         <p style={profileUi.communityItemText}>{post.contentPreview || "Saved community post"}</p>
                         <span style={profileUi.communityItemMeta}>Saved {formatCommunityDate(post.savedAt)}</span>
-                      </div>
+                      </button>
                     ))
                   ) : (
                     <p className="uni-card__desc" style={{ margin: 0 }}>
@@ -1346,7 +1352,12 @@ const Profile = () => {
                           ...profileUi.communityNotification,
                           ...(notification.read ? {} : profileUi.communityNotificationUnread),
                         }}
-                        onClick={() => markCommunityNotificationRead(notification.id)}
+                        onClick={async () => {
+                          await markCommunityNotificationRead(notification.id);
+                          if (notification.postId) {
+                            navigate(createCommunityPostPath(notification.postId));
+                          }
+                        }}
                         type="button"
                       >
                         <strong style={profileUi.communityItemTitle}>{notification.actorName || "A student"}</strong>

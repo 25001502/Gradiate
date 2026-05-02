@@ -10,6 +10,7 @@ export const routes = {
   profile: '/profile',
   bursaryDashboard: '/bursary',
   community: '/community',
+  communityPost: '/community/post/:postId',
 };
 
 export const legacyRouteRedirects = {

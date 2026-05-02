@@ -5,7 +5,9 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   getDocs,
+  increment,
   limit,
   onSnapshot,
   orderBy,
@@ -19,9 +21,11 @@ import {
   FaBell,
   FaBookOpen,
   FaBookmark,
+  FaBullhorn,
   FaCheck,
   FaCommentDots,
   FaEdit,
+  FaExternalLinkAlt,
   FaFlag,
   FaGraduationCap,
   FaHeart,
@@ -33,74 +37,38 @@ import {
   FaSearch,
   FaSignInAlt,
   FaTimes,
+  FaThumbtack,
   FaTrash,
   FaUniversity,
   FaUserCircle,
   FaUsers,
 } from "react-icons/fa";
+import CommunityAvatar from "../components/CommunityAvatar";
+import CommunityComments from "../components/CommunityComments";
+import CommunityReportModal from "../components/CommunityReportModal";
 import { useAuth } from "../context/useAuth";
 import { db } from "../lib/firebase/firestore";
 import { routes } from "../lib/routes";
-
-const POST_CATEGORIES = [
-  { key: "general", label: "General", tone: "slate" },
-  { key: "questions", label: "Questions", tone: "blue" },
-  { key: "bursaries", label: "Bursaries", tone: "green" },
-  { key: "applications", label: "Applications", tone: "orange" },
-  { key: "study", label: "Study Tips", tone: "teal" },
-  { key: "wins", label: "Wins", tone: "gold" },
-];
-
-const MAX_POST_LENGTH = 800;
-const MAX_COMMENT_LENGTH = 420;
-const POSTS_LIMIT = 40;
-const COMMENTS_LIMIT = 8;
-const REPORT_PREVIEW_LENGTH = 240;
-
-const categoryByKey = POST_CATEGORIES.reduce((map, category) => {
-  map[category.key] = category;
-  return map;
-}, {});
-
-function getDisplayName(user) {
-  return user?.displayName || user?.email?.split("@")[0] || "Gradiate Student";
-}
-
-function getInitials(name = "GS") {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("") || "GS";
-}
-
-function formatCommunityDate(value) {
-  const date = typeof value?.toDate === "function" ? value.toDate() : null;
-
-  if (!date) {
-    return "Just now";
-  }
-
-  return date.toLocaleString("en-ZA", {
-    day: "2-digit",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-function Avatar({ name, photoURL, size = "md" }) {
-  return (
-    <div className={`community-avatar community-avatar--${size}`}>
-      {photoURL ? (
-        <img src={photoURL} alt="" />
-      ) : (
-        <span>{getInitials(name)}</span>
-      )}
-    </div>
-  );
-}
+import {
+  COMMUNITY_SORT_OPTIONS,
+  COMMENTS_LIMIT,
+  MAX_COMMENT_LENGTH,
+  MAX_POST_LENGTH,
+  POSTS_LIMIT,
+  POST_CATEGORIES,
+  POST_TEMPLATES,
+  REPORT_PREVIEW_LENGTH,
+  categoryByKey,
+  createCommunityPostPath,
+  formatCommunityDate,
+  getAuthorAcademicLine,
+  getAuthorSnapshot,
+  getDisplayName,
+  getPostCommentCount,
+  getPostLikeCount,
+  normalizeModuleCode,
+  sortCommunityPosts,
+} from "../lib/communityHelpers";
 
 export default function Community() {
   const { user } = useAuth();
@@ -110,27 +78,54 @@ export default function Community() {
   const [posts, setPosts] = useState([]);
   const [engagementByPost, setEngagementByPost] = useState({});
   const [postDraft, setPostDraft] = useState("");
+  const [moduleDraft, setModuleDraft] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeView, setActiveView] = useState("feed");
+  const [activeSort, setActiveSort] = useState("latest");
   const [search, setSearch] = useState("");
   const [commentDrafts, setCommentDrafts] = useState({});
+  const [expandedCommentsByPost, setExpandedCommentsByPost] = useState({});
   const [savedPostIds, setSavedPostIds] = useState(new Set());
   const [savedPostItems, setSavedPostItems] = useState([]);
+  const [savedFullPosts, setSavedFullPosts] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [reports, setReports] = useState([]);
+  const [userProfile, setUserProfile] = useState(null);
   const [isCommunityAdmin, setIsCommunityAdmin] = useState(false);
   const [editingPostId, setEditingPostId] = useState("");
-  const [editDraft, setEditDraft] = useState({ content: "", category: "" });
+  const [editDraft, setEditDraft] = useState({ content: "", category: "", moduleCode: "" });
+  const [reportDraft, setReportDraft] = useState(null);
+  const [reportSubmitting, setReportSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
   const [busyPostId, setBusyPostId] = useState("");
   const [error, setError] = useState("");
   const isGuest = !user?.uid;
 
-  const postIdsKey = useMemo(() => posts.map((post) => post.id).join("|"), [posts]);
+  const expandedCommentsKey = useMemo(
+    () =>
+      Object.entries(expandedCommentsByPost)
+        .filter(([, isExpanded]) => isExpanded)
+        .map(([postId]) => postId)
+        .sort()
+        .join("|"),
+    [expandedCommentsByPost]
+  );
+  const savedPostIdsKey = useMemo(
+    () => savedPostItems.map((post) => post.postId || post.id).filter(Boolean).join("|"),
+    [savedPostItems]
+  );
+  const trackedPostIdsKey = useMemo(
+    () =>
+      [...new Set([...posts, ...savedFullPosts].map((post) => post.id).filter(Boolean))]
+        .sort()
+        .join("|"),
+    [posts, savedFullPosts]
+  );
   const trimmedPostDraft = postDraft.trim();
   const postCharactersLeft = MAX_POST_LENGTH - postDraft.length;
+  const mobileViewSortValue = activeView === "feed" ? `sort:${activeSort}` : `view:${activeView}`;
 
   useEffect(() => {
     const postsQuery = query(
@@ -160,10 +155,16 @@ export default function Community() {
     if (!user?.uid) {
       setSavedPostIds(new Set());
       setSavedPostItems([]);
+      setSavedFullPosts([]);
       setNotifications([]);
       setIsCommunityAdmin(false);
+      setUserProfile(null);
       return undefined;
     }
+
+    const profileUnsubscribe = onSnapshot(doc(db, "users", user.uid), (snapshot) => {
+      setUserProfile(snapshot.exists() ? snapshot.data() : null);
+    });
 
     const savedUnsubscribe = onSnapshot(
       collection(db, "users", user.uid, "savedCommunityPosts"),
@@ -198,6 +199,7 @@ export default function Community() {
     });
 
     return () => {
+      profileUnsubscribe();
       savedUnsubscribe();
       notificationsUnsubscribe();
       adminUnsubscribe();
@@ -241,74 +243,146 @@ export default function Community() {
   }, [isCommunityAdmin]);
 
   useEffect(() => {
-    const postIds = postIdsKey ? postIdsKey.split("|") : [];
+    const trackedPostIds = trackedPostIdsKey ? trackedPostIdsKey.split("|") : [];
+    const expandedPostIds = expandedCommentsKey ? expandedCommentsKey.split("|") : [];
 
-    if (!postIds.length) {
+    if (!trackedPostIds.length && !expandedPostIds.length) {
       setEngagementByPost({});
       return undefined;
     }
 
-    const unsubscribeFns = postIds.flatMap((postId) => {
-      const likesRef = collection(db, "communityPosts", postId, "likes");
+    const unsubscribeFns = [];
+
+    if (user?.uid) {
+      trackedPostIds.forEach((postId) => {
+        const likeRef = doc(db, "communityPosts", postId, "likes", user.uid);
+        unsubscribeFns.push(
+          onSnapshot(likeRef, (snapshot) => {
+            setEngagementByPost((current) => ({
+              ...current,
+              [postId]: {
+                ...current[postId],
+                likedByMe: snapshot.exists(),
+              },
+            }));
+          })
+        );
+      });
+    }
+
+    expandedPostIds.forEach((postId) => {
       const commentsQuery = query(
         collection(db, "communityPosts", postId, "comments"),
         orderBy("createdAt", "asc"),
         limit(COMMENTS_LIMIT)
       );
 
-      const unsubscribeLikes = onSnapshot(likesRef, (snapshot) => {
-        setEngagementByPost((current) => ({
-          ...current,
-          [postId]: {
-            ...current[postId],
-            likeCount: snapshot.size,
-            likedByMe: user?.uid ? snapshot.docs.some((likeDoc) => likeDoc.id === user.uid) : false,
-          },
-        }));
-      });
-
-      const unsubscribeComments = onSnapshot(commentsQuery, (snapshot) => {
-        setEngagementByPost((current) => ({
-          ...current,
-          [postId]: {
-            ...current[postId],
-            comments: snapshot.docs.map((commentDoc) => ({
-              id: commentDoc.id,
-              ...commentDoc.data(),
-            })),
-          },
-        }));
-      });
-
-      return [unsubscribeLikes, unsubscribeComments];
+      unsubscribeFns.push(
+        onSnapshot(commentsQuery, (snapshot) => {
+          setEngagementByPost((current) => ({
+            ...current,
+            [postId]: {
+              ...current[postId],
+              comments: snapshot.docs.map((commentDoc) => ({
+                id: commentDoc.id,
+                ...commentDoc.data(),
+              })),
+            },
+          }));
+        })
+      );
     });
 
     return () => unsubscribeFns.forEach((unsubscribe) => unsubscribe());
-  }, [postIdsKey, user?.uid]);
+  }, [expandedCommentsKey, trackedPostIdsKey, user?.uid]);
+
+  useEffect(() => {
+    if (!user?.uid || !savedPostIdsKey) {
+      setSavedFullPosts([]);
+      return undefined;
+    }
+
+    let cancelled = false;
+
+    async function loadSavedPosts() {
+      const savedItemsById = new Map(savedPostItems.map((item) => [item.postId || item.id, item]));
+      const savedIds = [...savedItemsById.keys()].filter(Boolean);
+
+      try {
+        const loadedPosts = await Promise.all(
+          savedIds.map(async (postId) => {
+            const snapshot = await getDoc(doc(db, "communityPosts", postId));
+            const savedItem = savedItemsById.get(postId) || {};
+
+            if (snapshot.exists()) {
+              return { id: snapshot.id, ...snapshot.data() };
+            }
+
+            return {
+              id: postId,
+              authorId: savedItem.authorId || "",
+              authorName: savedItem.authorName || "Student",
+              category: savedItem.category || "general",
+              content: savedItem.contentPreview || "Saved post unavailable.",
+              contentPreview: savedItem.contentPreview || "",
+              createdAt: savedItem.createdAt || savedItem.savedAt,
+              moduleCode: savedItem.moduleCode || "",
+              isAnswered: Boolean(savedItem.isAnswered),
+              missing: true,
+            };
+          })
+        );
+
+        if (!cancelled) {
+          setSavedFullPosts(loadedPosts);
+        }
+      } catch (savedError) {
+        console.error("Failed to load saved community posts", savedError);
+        if (!cancelled) {
+          setSavedFullPosts([]);
+        }
+      }
+    }
+
+    loadSavedPosts();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [savedPostIdsKey, savedPostItems, user?.uid]);
 
   const filteredPosts = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
+    const sourcePosts = activeView === "saved" ? savedFullPosts : posts;
 
-    return posts.filter((post) => {
+    const matchingPosts = sourcePosts.filter((post) => {
       const matchesCategory = activeCategory === "all" || post.category === activeCategory;
-      const haystack = `${post.content || ""} ${post.authorName || ""} ${post.category || ""}`.toLowerCase();
+      const matchesAnswerFilter =
+        activeSort === "answered"
+          ? post.category === "questions" && post.isAnswered
+          : activeSort === "unanswered"
+            ? post.category === "questions" && !post.isAnswered
+            : true;
+      const haystack = `${post.content || ""} ${post.authorName || ""} ${post.category || ""} ${post.moduleCode || ""}`.toLowerCase();
       const matchesSearch = !normalizedSearch || haystack.includes(normalizedSearch);
       const matchesView =
         activeView === "feed" ||
         (activeView === "mine" && post.authorId === user?.uid) ||
         (activeView === "saved" && savedPostIds.has(post.id));
 
-      return matchesCategory && matchesSearch && matchesView;
+      return matchesCategory && matchesAnswerFilter && matchesSearch && matchesView;
     });
-  }, [activeCategory, activeView, posts, savedPostIds, search, user?.uid]);
+
+    return sortCommunityPosts(matchingPosts, activeSort, engagementByPost);
+  }, [activeCategory, activeSort, activeView, engagementByPost, posts, savedFullPosts, savedPostIds, search, user?.uid]);
 
   const totalComments = useMemo(
     () =>
-      Object.values(engagementByPost).reduce(
-        (total, engagement) => total + (engagement.comments?.length || 0),
+      posts.reduce(
+        (total, post) => total + getPostCommentCount(post, engagementByPost[post.id]),
         0
       ),
-    [engagementByPost]
+    [engagementByPost, posts]
   );
   const unreadNotifications = useMemo(
     () => notifications.filter((notification) => !notification.read).length,
@@ -359,16 +433,22 @@ export default function Community() {
     setError("");
 
     try {
+      const authorSnapshot = getAuthorSnapshot(user, userProfile || {});
+
       await addDoc(collection(db, "communityPosts"), {
-        authorId: user.uid,
-        authorName: getDisplayName(user),
-        authorPhotoURL: user.photoURL || "",
+        ...authorSnapshot,
         category: selectedCategory,
         content: trimmedPostDraft,
+        moduleCode: normalizeModuleCode(moduleDraft),
+        likeCount: 0,
+        commentCount: 0,
+        saveCount: 0,
+        lastActivityAt: serverTimestamp(),
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
       setPostDraft("");
+      setModuleDraft("");
       setSelectedCategory("");
     } catch (createError) {
       console.error("Failed to create community post", createError);
@@ -384,17 +464,33 @@ export default function Community() {
       return;
     }
 
+    if (post.missing) {
+      setError("That saved post is no longer available.");
+      return;
+    }
+
     const engagement = engagementByPost[post.id] || {};
     const likeRef = doc(db, "communityPosts", post.id, "likes", user.uid);
+    const postRef = doc(db, "communityPosts", post.id);
     const batch = writeBatch(db);
 
     try {
       if (engagement.likedByMe) {
         batch.delete(likeRef);
+        if (getPostLikeCount(post, engagement) > 0) {
+          batch.update(postRef, {
+            likeCount: increment(-1),
+            lastActivityAt: serverTimestamp(),
+          });
+        }
       } else {
         batch.set(likeRef, {
           uid: user.uid,
           createdAt: serverTimestamp(),
+        });
+        batch.update(postRef, {
+          likeCount: increment(1),
+          lastActivityAt: serverTimestamp(),
         });
         addNotificationToBatch(batch, post, "like");
       }
@@ -412,6 +508,11 @@ export default function Community() {
       return;
     }
 
+    if (post.missing) {
+      setError("That saved post is no longer available.");
+      return;
+    }
+
     const postId = post.id;
     const content = (commentDrafts[postId] || "").trim();
 
@@ -425,13 +526,17 @@ export default function Community() {
     try {
       const batch = writeBatch(db);
       const commentRef = doc(collection(db, "communityPosts", postId, "comments"));
+      const postRef = doc(db, "communityPosts", postId);
+      const authorSnapshot = getAuthorSnapshot(user, userProfile || {});
 
       batch.set(commentRef, {
-        authorId: user.uid,
-        authorName: getDisplayName(user),
-        authorPhotoURL: user.photoURL || "",
+        ...authorSnapshot,
         content,
         createdAt: serverTimestamp(),
+      });
+      batch.update(postRef, {
+        commentCount: increment(1),
+        lastActivityAt: serverTimestamp(),
       });
       addNotificationToBatch(batch, post, "comment", {
         commentId: commentRef.id,
@@ -440,6 +545,7 @@ export default function Community() {
 
       await batch.commit();
       setCommentDrafts((current) => ({ ...current, [postId]: "" }));
+      setExpandedCommentsByPost((current) => ({ ...current, [postId]: true }));
     } catch (commentError) {
       console.error("Failed to create comment", commentError);
       setError("Your comment could not be posted.");
@@ -455,21 +561,52 @@ export default function Community() {
     }
 
     const savedRef = doc(db, "users", user.uid, "savedCommunityPosts", post.id);
+    const postRef = doc(db, "communityPosts", post.id);
     setError("");
 
     try {
-      if (savedPostIds.has(post.id)) {
+      if (post.missing) {
         await deleteDoc(savedRef);
+        return;
+      }
+
+      const batch = writeBatch(db);
+
+      if (savedPostIds.has(post.id)) {
+        batch.delete(savedRef);
+        if ((post.saveCount || 0) > 0) {
+          batch.update(postRef, {
+            saveCount: increment(-1),
+            lastActivityAt: serverTimestamp(),
+          });
+        }
       } else {
-        await setDoc(savedRef, {
+        const savedPayload = {
           postId: post.id,
           authorId: post.authorId || "",
           authorName: post.authorName || "Gradiate Student",
           category: post.category || "general",
           contentPreview: String(post.content || "").slice(0, 180),
+          isAnswered: Boolean(post.isAnswered),
           savedAt: serverTimestamp(),
+        };
+
+        if (post.createdAt) {
+          savedPayload.createdAt = post.createdAt;
+        }
+
+        if (post.moduleCode) {
+          savedPayload.moduleCode = post.moduleCode;
+        }
+
+        batch.set(savedRef, savedPayload);
+        batch.update(postRef, {
+          saveCount: increment(1),
+          lastActivityAt: serverTimestamp(),
         });
       }
+
+      await batch.commit();
     } catch (saveError) {
       console.error("Failed to update saved post", saveError);
       setError("That post could not be saved right now.");
@@ -481,13 +618,14 @@ export default function Community() {
     setEditDraft({
       content: post.content || "",
       category: post.category || "",
+      moduleCode: post.moduleCode || "",
     });
     setError("");
   };
 
   const handleCancelEdit = () => {
     setEditingPostId("");
-    setEditDraft({ content: "", category: "" });
+    setEditDraft({ content: "", category: "", moduleCode: "" });
   };
 
   const handleSaveEdit = async (postId) => {
@@ -509,6 +647,7 @@ export default function Community() {
       await updateDoc(doc(db, "communityPosts", postId), {
         content,
         category: editDraft.category,
+        moduleCode: normalizeModuleCode(editDraft.moduleCode),
         updatedAt: serverTimestamp(),
       });
       handleCancelEdit();
@@ -520,13 +659,120 @@ export default function Community() {
     }
   };
 
-  const submitReport = async ({ targetType, post, comment = null }) => {
+  const handleToggleComments = (postId) => {
+    setExpandedCommentsByPost((current) => ({
+      ...current,
+      [postId]: !current[postId],
+    }));
+  };
+
+  const handleMobileViewSortChange = (event) => {
+    const value = event.target.value;
+
+    if (value.startsWith("sort:")) {
+      setActiveView("feed");
+      setActiveSort(value.replace("sort:", ""));
+      return;
+    }
+
+    setActiveView(value.replace("view:", ""));
+  };
+
+  const handleCommentDraftChange = (postId, value) => {
+    setCommentDrafts((current) => ({
+      ...current,
+      [postId]: value.slice(0, MAX_COMMENT_LENGTH),
+    }));
+  };
+
+  const handleUseTemplate = () => {
+    const template = POST_TEMPLATES[selectedCategory];
+
+    if (!template) {
+      return;
+    }
+
+    if (postDraft.trim() && !window.confirm("Replace your current draft with the template?")) {
+      return;
+    }
+
+    setPostDraft(template.slice(0, MAX_POST_LENGTH));
+  };
+
+  const handleMarkAnswer = async (post, comment) => {
+    if (!user?.uid || (user.uid !== post.authorId && !isCommunityAdmin) || post.category !== "questions") {
+      return;
+    }
+
+    setBusyPostId(post.id);
+    setError("");
+
+    try {
+      await updateDoc(doc(db, "communityPosts", post.id), {
+        isAnswered: true,
+        acceptedCommentId: comment.id,
+        acceptedAnswerPreview: String(comment.content || "").slice(0, 180),
+        acceptedAnswerAuthorId: comment.authorId || "",
+        acceptedAnswerAuthorName: comment.authorName || "Student",
+        answeredAt: serverTimestamp(),
+        lastActivityAt: serverTimestamp(),
+      });
+    } catch (answerError) {
+      console.error("Failed to mark answer", answerError);
+      setError("That answer could not be marked right now.");
+    } finally {
+      setBusyPostId("");
+    }
+  };
+
+  const handleToggleOfficial = async (post) => {
+    if (!isCommunityAdmin) {
+      return;
+    }
+
+    try {
+      await updateDoc(doc(db, "communityPosts", post.id), {
+        isOfficial: !post.isOfficial,
+        updatedAt: serverTimestamp(),
+      });
+    } catch (officialError) {
+      console.error("Failed to update official status", officialError);
+      setError("Official status could not be updated.");
+    }
+  };
+
+  const handleTogglePinned = async (post) => {
+    if (!isCommunityAdmin) {
+      return;
+    }
+
+    try {
+      await updateDoc(doc(db, "communityPosts", post.id), {
+        pinned: !post.pinned,
+        pinnedAt: post.pinned ? null : serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+    } catch (pinError) {
+      console.error("Failed to update pinned status", pinError);
+      setError("Pinned status could not be updated.");
+    }
+  };
+
+  const openReportModal = ({ targetType, post, comment = null }) => {
     if (isGuest) {
       navigate(routes.auth);
       return;
     }
 
-    const reason = window.prompt("Why are you reporting this?", "Needs review");
+    setReportDraft({ targetType, post, comment });
+  };
+
+  const submitReport = async (reason) => {
+    if (!reportDraft) {
+      return;
+    }
+
+    const { targetType, post, comment = null } = reportDraft;
     const cleanReason = String(reason || "").trim();
 
     if (!cleanReason) {
@@ -536,6 +782,7 @@ export default function Community() {
     const targetId = comment?.id || post.id;
     const reportRef = doc(db, "communityReports", `${targetType}_${post.id}_${targetId}_${user.uid}`);
 
+    setReportSubmitting(true);
     setError("");
 
     try {
@@ -552,10 +799,13 @@ export default function Community() {
         status: "open",
         createdAt: serverTimestamp(),
       });
+      setReportDraft(null);
       setError("Report sent. Thanks for helping keep the community useful.");
     } catch (reportError) {
       console.error("Failed to report community content", reportError);
       setError("That report could not be sent, or you may have already reported it.");
+    } finally {
+      setReportSubmitting(false);
     }
   };
 
@@ -574,16 +824,27 @@ export default function Community() {
     await deleteDoc(postRef);
   };
 
-  const handleDeleteComment = async (postId, commentId) => {
+  const handleDeleteComment = async (post, commentId) => {
     if (!user?.uid || busyPostId) {
       return;
     }
 
+    const postId = post.id;
     setBusyPostId(postId);
     setError("");
 
     try {
-      await deleteDoc(doc(db, "communityPosts", postId, "comments", commentId));
+      const batch = writeBatch(db);
+
+      batch.delete(doc(db, "communityPosts", postId, "comments", commentId));
+      if (getPostCommentCount(post, engagementByPost[postId]) > 0) {
+        batch.update(doc(db, "communityPosts", postId), {
+          commentCount: increment(-1),
+          lastActivityAt: serverTimestamp(),
+        });
+      }
+
+      await batch.commit();
     } catch (deleteError) {
       console.error("Failed to delete comment", deleteError);
       setError("That comment could not be removed.");
@@ -647,7 +908,18 @@ export default function Community() {
 
     try {
       if (report.targetType === "comment" && report.commentId) {
-        await deleteDoc(doc(db, "communityPosts", report.postId, "comments", report.commentId));
+        const postRef = doc(db, "communityPosts", report.postId);
+        const postSnapshot = await getDoc(postRef);
+        const batch = writeBatch(db);
+
+        batch.delete(doc(db, "communityPosts", report.postId, "comments", report.commentId));
+        if ((postSnapshot.data()?.commentCount || 0) > 0) {
+          batch.update(postRef, {
+            commentCount: increment(-1),
+            lastActivityAt: serverTimestamp(),
+          });
+        }
+        await batch.commit();
       } else {
         await deletePostWithChildren(report.postId);
       }
@@ -764,7 +1036,11 @@ export default function Community() {
                           className={`community-notification ${
                             notification.read ? "" : "community-notification--unread"
                           }`}
-                          onClick={() => markNotificationRead(notification)}
+                          onClick={async () => {
+                            await markNotificationRead(notification);
+                            setNotificationsOpen(false);
+                            navigate(createCommunityPostPath(notification.postId));
+                          }}
                           type="button"
                         >
                           <FaBell />
@@ -878,7 +1154,30 @@ export default function Community() {
               />
             </div>
 
-            <label className="community-topic-control">
+            <label className="community-topic-control community-mobile-view-sort">
+              <span>View / Sort</span>
+              <select
+                className="community-select"
+                value={mobileViewSortValue}
+                onChange={handleMobileViewSortChange}
+              >
+                <optgroup label="View">
+                  <option value="view:feed">Feed</option>
+                  <option value="view:mine" disabled={isGuest}>My Posts</option>
+                  <option value="view:saved" disabled={isGuest}>Saved Posts</option>
+                  {isCommunityAdmin && <option value="view:reports">Reports</option>}
+                </optgroup>
+                <optgroup label="Sort feed">
+                  {COMMUNITY_SORT_OPTIONS.map((sortOption) => (
+                    <option key={sortOption.key} value={`sort:${sortOption.key}`}>
+                      {sortOption.label}
+                    </option>
+                  ))}
+                </optgroup>
+              </select>
+            </label>
+
+            <label className="community-topic-control community-desktop-view-control">
               <span>View</span>
               <select
                 className="community-select"
@@ -907,13 +1206,44 @@ export default function Community() {
                 ))}
               </select>
             </label>
+
+            <label className="community-topic-control community-desktop-sort-control">
+              <span>Sort</span>
+              <select
+                className="community-select"
+                value={activeSort}
+                onChange={(event) => setActiveSort(event.target.value)}
+              >
+                {COMMUNITY_SORT_OPTIONS.map((sortOption) => (
+                  <option key={sortOption.key} value={sortOption.key}>
+                    {sortOption.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <section className="community-guidelines-card">
+              <h2>Community Rules</h2>
+              <ul>
+                <li>Be respectful.</li>
+                <li>Do not share fake bursaries.</li>
+                <li>Do not post private banking details.</li>
+                <li>Give clear answers when helping others.</li>
+                <li>Report harmful or misleading content.</li>
+              </ul>
+            </section>
           </aside>
 
           <div className="community-feed">
             {activeView !== "reports" && (
               <form className="community-composer" onSubmit={handleCreatePost}>
                 <div className="community-composer__top">
-                  <Avatar name={getDisplayName(user)} photoURL={user?.photoURL || ""} />
+                  <CommunityAvatar
+                    name={getDisplayName(user)}
+                    photoURL={userProfile?.photoURL || user?.photoURL || ""}
+                    avatarSeed={userProfile?.avatarSeed || user?.uid}
+                    avatarStyle={userProfile?.avatarStyle}
+                  />
                   <div>
                     <h2>{isGuest ? "Browse the student feed" : `Post as ${getDisplayName(user)}`}</h2>
                     <p>{isGuest ? "Sign in to publish, comment, or react." : "Share a question, lead, or win."}</p>
@@ -929,23 +1259,45 @@ export default function Community() {
                 />
 
                 <div className="community-composer__footer">
-                  <label className="community-topic-control community-topic-control--composer">
-                    <span>Topic</span>
-                    <select
-                      className="community-select"
-                      value={selectedCategory}
-                      onChange={(event) => setSelectedCategory(event.target.value)}
-                      disabled={isGuest || publishing}
-                      required
-                    >
-                      <option value="">Choose topic</option>
-                      {POST_CATEGORIES.map((category) => (
-                        <option key={category.key} value={category.key}>
-                          {category.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                  <div className="community-composer__fields">
+                    <label className="community-topic-control community-topic-control--composer">
+                      <span>Topic</span>
+                      <select
+                        className="community-select"
+                        value={selectedCategory}
+                        onChange={(event) => setSelectedCategory(event.target.value)}
+                        disabled={isGuest || publishing}
+                        required
+                      >
+                        <option value="">Choose topic</option>
+                        {POST_CATEGORIES.map((category) => (
+                          <option key={category.key} value={category.key}>
+                            {category.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="community-topic-control community-topic-control--module">
+                      <span>Module / tag</span>
+                      <input
+                        className="community-input"
+                        value={moduleDraft}
+                        onChange={(event) => setModuleDraft(event.target.value.slice(0, 40))}
+                        placeholder="e.g. COM2129"
+                        disabled={isGuest || publishing}
+                      />
+                    </label>
+                    {POST_TEMPLATES[selectedCategory] && (
+                      <button
+                        className="community-template-button"
+                        onClick={handleUseTemplate}
+                        type="button"
+                        disabled={isGuest || publishing}
+                      >
+                        Use template
+                      </button>
+                    )}
+                  </div>
                   <div className="community-composer__actions">
                     <span className={postCharactersLeft < 80 ? "community-limit community-limit--low" : "community-limit"}>
                       {postCharactersLeft}
@@ -1007,25 +1359,66 @@ export default function Community() {
                 {filteredPosts.map((post) => {
                   const category = categoryByKey[post.category] || categoryByKey.general;
                   const engagement = engagementByPost[post.id] || {};
-                  const comments = engagement.comments || [];
                   const isEditing = editingPostId === post.id;
                   const isSaved = savedPostIds.has(post.id);
                   const canManagePost = user?.uid === post.authorId || isCommunityAdmin;
+                  const academicLine = getAuthorAcademicLine(post);
+                  const likeCount = getPostLikeCount(post, engagement);
+                  const commentCount = getPostCommentCount(post, engagement);
+                  const questionStatus =
+                    post.category === "questions" ? (post.isAnswered ? "Answered" : "Unanswered") : "";
 
                   return (
                     <article className="community-post" key={post.id}>
                       <div className="community-post__header">
                         <div className="community-author">
-                          <Avatar name={post.authorName} photoURL={post.authorPhotoURL} />
+                          <CommunityAvatar
+                            name={post.authorName}
+                            photoURL={post.authorPhotoURL}
+                            avatarSeed={post.authorAvatarSeed}
+                            avatarStyle={post.authorAvatarStyle}
+                          />
                           <div>
                             <h3>{post.authorName || "Gradiate Student"}</h3>
                             <p>{formatCommunityDate(post.createdAt)}</p>
+                            {academicLine && <small className="community-author__academic">{academicLine}</small>}
                           </div>
                         </div>
                         <div className="community-post__meta">
+                          {post.pinned && (
+                            <span className="community-status-badge community-status-badge--pinned">
+                              <FaThumbtack /> Pinned
+                            </span>
+                          )}
+                          {post.isOfficial && (
+                            <span className="community-status-badge community-status-badge--official">
+                              <FaBullhorn /> Official Gradiate
+                            </span>
+                          )}
                           <span className={`community-category-pill community-category-pill--${category.tone}`}>
                             {category.label}
                           </span>
+                          {post.moduleCode && (
+                            <span className="community-module-badge">{post.moduleCode}</span>
+                          )}
+                          {questionStatus && (
+                            <span
+                              className={`community-answer-badge ${
+                                post.isAnswered ? "community-answer-badge--answered" : "community-answer-badge--unanswered"
+                              }`}
+                            >
+                              {questionStatus}
+                            </span>
+                          )}
+                          <button
+                            className="community-icon-button"
+                            onClick={() => navigate(createCommunityPostPath(post.id))}
+                            type="button"
+                            aria-label="Open post"
+                            title="Open post"
+                          >
+                            <FaExternalLinkAlt />
+                          </button>
                           {!isGuest && (
                             <button
                               className="community-icon-button"
@@ -1051,7 +1444,7 @@ export default function Community() {
                           {!isGuest && user?.uid !== post.authorId && (
                             <button
                               className="community-icon-button"
-                              onClick={() => submitReport({ targetType: "post", post })}
+                              onClick={() => openReportModal({ targetType: "post", post })}
                               type="button"
                               aria-label="Report post"
                               title="Report post"
@@ -1102,8 +1495,22 @@ export default function Community() {
                                     {editCategory.label}
                                   </option>
                                 ))}
-                              </select>
-                            </label>
+                                </select>
+                              </label>
+                              <label className="community-topic-control community-topic-control--module">
+                                <span>Module / tag</span>
+                                <input
+                                  className="community-input"
+                                  value={editDraft.moduleCode}
+                                  onChange={(event) =>
+                                    setEditDraft((current) => ({
+                                      ...current,
+                                      moduleCode: event.target.value.slice(0, 40),
+                                    }))
+                                  }
+                                  placeholder="e.g. COM2129"
+                                />
+                              </label>
                             <div className="community-composer__actions">
                               <button
                                 className="community-soft-button"
@@ -1134,82 +1541,52 @@ export default function Community() {
                           type="button"
                         >
                           {engagement.likedByMe ? <FaHeart /> : <FaRegHeart />}
-                          {engagement.likeCount || 0}
+                          {likeCount}
                         </button>
                         <span className="community-action community-action--static">
-                          <FaCommentDots /> {comments.length}
+                          <FaCommentDots /> {commentCount}
                         </span>
-                      </div>
-
-                      <div className="community-comments">
-                        {comments.map((comment) => {
-                          const canDeleteComment =
-                            user?.uid === comment.authorId || user?.uid === post.authorId || isCommunityAdmin;
-
-                          return (
-                            <div className="community-comment" key={comment.id}>
-                              <Avatar
-                                name={comment.authorName}
-                                photoURL={comment.authorPhotoURL}
-                                size="sm"
-                              />
-                              <div className="community-comment__body">
-                                <div className="community-comment__head">
-                                  <strong>{comment.authorName || "Student"}</strong>
-                                  <span>{formatCommunityDate(comment.createdAt)}</span>
-                                </div>
-                                <p>{comment.content}</p>
-                              </div>
-                              {!isGuest && user?.uid !== comment.authorId && (
-                                <button
-                                  className="community-icon-button community-icon-button--quiet"
-                                  onClick={() => submitReport({ targetType: "comment", post, comment })}
-                                  type="button"
-                                  aria-label="Report comment"
-                                  title="Report comment"
-                                >
-                                  <FaFlag />
-                                </button>
-                              )}
-                              {canDeleteComment && (
-                                <button
-                                  className="community-icon-button community-icon-button--quiet"
-                                  onClick={() => handleDeleteComment(post.id, comment.id)}
-                                  type="button"
-                                  aria-label="Delete comment"
-                                  title="Delete comment"
-                                  disabled={busyPostId === post.id}
-                                >
-                                  <FaTrash />
-                                </button>
-                              )}
-                            </div>
-                          );
-                        })}
-
-                        <div className="community-comment-form">
-                          <input
-                            value={commentDrafts[post.id] || ""}
-                            onChange={(event) =>
-                              setCommentDrafts((current) => ({
-                                ...current,
-                                [post.id]: event.target.value.slice(0, MAX_COMMENT_LENGTH),
-                              }))
-                            }
-                            placeholder={isGuest ? "Sign in to comment" : "Write a comment"}
-                            disabled={isGuest || busyPostId === post.id}
-                          />
+                        <span className="community-action community-action--static">
+                          <FaBookmark /> {post.saveCount || 0}
+                        </span>
+                        {isCommunityAdmin && (
                           <button
-                            onClick={() => handleCreateComment(post)}
+                            className="community-action"
+                            onClick={() => handleToggleOfficial(post)}
                             type="button"
-                            disabled={isGuest || busyPostId === post.id || !(commentDrafts[post.id] || "").trim()}
-                            aria-label="Post comment"
-                            title="Post comment"
+                            disabled={busyPostId === post.id}
                           >
-                            <FaPaperPlane />
+                            <FaBullhorn /> {post.isOfficial ? "Unofficial" : "Official"}
                           </button>
-                        </div>
+                        )}
+                        {isCommunityAdmin && (
+                          <button
+                            className="community-action"
+                            onClick={() => handleTogglePinned(post)}
+                            type="button"
+                            disabled={busyPostId === post.id}
+                          >
+                            <FaThumbtack /> {post.pinned ? "Unpin" : "Pin"}
+                          </button>
+                        )}
                       </div>
+
+                      <CommunityComments
+                        post={post}
+                        engagement={engagement}
+                        isExpanded={Boolean(expandedCommentsByPost[post.id])}
+                        isGuest={isGuest}
+                        user={user}
+                        isCommunityAdmin={isCommunityAdmin}
+                        busyPostId={busyPostId}
+                        draft={commentDrafts[post.id] || ""}
+                        onToggleComments={handleToggleComments}
+                        onDraftChange={handleCommentDraftChange}
+                        onCreateComment={handleCreateComment}
+                        onDeleteComment={handleDeleteComment}
+                        onReport={openReportModal}
+                        onMarkAnswer={handleMarkAnswer}
+                      />
                     </article>
                   );
                 })}
@@ -1217,13 +1594,19 @@ export default function Community() {
             ) : (
               <div className="community-empty">
                 {activeView === "saved" && savedPostItems.length
-                  ? "Saved posts outside the latest feed will still appear in your profile activity."
+                  ? "Those saved posts could not load right now. Try again in a moment."
                   : "No posts match this view yet."}
               </div>
             )}
           </div>
         </section>
       </main>
+      <CommunityReportModal
+        reportDraft={reportDraft}
+        submitting={reportSubmitting}
+        onClose={() => setReportDraft(null)}
+        onSubmit={submitReport}
+      />
     </>
   );
 }
