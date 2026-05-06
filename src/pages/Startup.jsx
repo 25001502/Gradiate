@@ -24,6 +24,7 @@ import {
   FaHandHoldingUsd,
   FaUniversity,
 } from "react-icons/fa";
+import SEO from '../components/SEO';
 
 export default function Startup() {
   const navigate = useNavigate();
@@ -31,6 +32,9 @@ export default function Startup() {
 
   return (
     <div>
+      <SEO
+        canonical="/"
+      />
       <nav className="navbar-responsive">
         <div className="navbar-container">
           <a

@@ -21,13 +21,18 @@ import {
 } from "@fortawesome/free-brands-svg-icons";
 
 import { useNavigate } from "react-router-dom";
+import SEO from '../components/SEO';
 
 const About = () => {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   return (
     <>
-      {/* Navigation Bar */}
+      <SEO
+        title="About Us"
+        canonical="/about"
+        description="Meet the Gradiate team — on a mission to connect South African students with the bursaries, scholarships and opportunities they deserve."
+      />
       <nav className="navbar-responsive">
         <div className="navbar-container">
           <a

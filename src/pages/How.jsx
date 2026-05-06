@@ -12,6 +12,7 @@ import image9 from '../images/graduate-matches.jpg';
 import image10 from '../images/notifications-screen.jpg';
 import image11 from '../images/video-thumbnail.jpg';    
 import SmartImage from '../components/SmartImage';
+import SEO from '../components/SEO';
 import {FaSearch, FaBullseye, FaBolt, FaRoad, FaHandsHelping, FaUserGraduate, FaUserTie, FaCheck, FaClock, FaPlay,
         
         FaRobot,
@@ -43,6 +44,11 @@ const How = () => {
     const [menuOpen, setMenuOpen] = useState(false);
     return (
         <>
+            <SEO
+              title="How It Works"
+              canonical="/how-it-works"
+              description="Learn how Gradiate helps South African students discover and apply for bursaries, scholarships and student opportunities in just a few simple steps."
+            />
             {/* Navigation Bar */}
             <nav className="navbar-responsive">
         <div className="navbar-container">

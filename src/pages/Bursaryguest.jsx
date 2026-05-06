@@ -10,6 +10,7 @@ import {
   FaCalendarAlt,
 } from "react-icons/fa";
 import { PUBLIC_BURSARIES } from "../data/mockBursaries";
+import SEO from '../components/SEO';
 
 const Bursaryguest = () => {
   const navigate = useNavigate();
@@ -17,6 +18,11 @@ const Bursaryguest = () => {
 
   return (
     <>
+      <SEO
+        title="Browse Bursaries & Scholarships"
+        canonical="/bursaries"
+        description="Explore bursaries and scholarships available to South African students. Search by field of study, deadline and provider to find funding that's right for you."
+      />
       <nav className="navbar-responsive">
         <div className="navbar-container">
           <a

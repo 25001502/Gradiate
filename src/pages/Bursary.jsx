@@ -225,6 +225,7 @@ const getDeadlinePill = (deadlineText) => {
     color: "#166534",
   };
 };
+import SEO from '../components/SEO';
 
 export default function Bursary() {
   const [search, setSearch] = useState("");
@@ -448,6 +449,11 @@ export default function Bursary() {
 
   return (
     <div>
+      <SEO
+        title="Bursary Dashboard"
+        canonical="/bursary"
+        description="Browse and filter the latest bursaries available to South African students on Gradiate's bursary dashboard. Search by field of study and province."
+      />
       <nav className="navbar-responsive">
         <div className="navbar-container">
           <a

@@ -161,6 +161,7 @@ const subjectLogoMap = {
   Tshivenda: { icon: FaLanguage, background: "#fff1f2", color: "#be123c" },
   "Business Studies": { icon: FaBriefcase, background: "#f0fdf4", color: "#166534" },
 };
+import SEO from '../components/SEO';
 
 export default function Practise() {
   const [openIndex, setOpenIndex] = useState(null);
@@ -378,6 +379,11 @@ export default function Practise() {
 
   return (
     <div>
+      <SEO
+        title="Practice & Interview Prep"
+        canonical="/practice"
+        description="Prepare for bursary interviews and assessments with Gradiate's practice tools. Ace your next scholarship application with guided prep for South African students."
+      />
       <nav className="navbar-responsive">
         <div className="navbar-container">
           <a

@@ -23,6 +23,7 @@ import {
 } from "react-icons/fa";
 
 import toast, { Toaster } from "react-hot-toast";
+import SEO from './components/SEO';
 
 const PASSWORD_RULES = [
   {
@@ -209,6 +210,11 @@ export default function AuthForm() {
 
   return (
     <>
+      <SEO
+        title="Sign In"
+        canonical="/auth"
+        noindex
+      />
       <Toaster position="top-center" />
 
       {/* NAVBAR */}

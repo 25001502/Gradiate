@@ -4,6 +4,7 @@ import {FaTwitter,
         FaInstagram,
         FaLinkedin,FaFacebookF,FaMapMarkerAlt,FaUniversity,FaGraduationCap} from 'react-icons/fa';
 import { PUBLIC_PROGRAMS } from "../data/mockPrograms";
+import SEO from '../components/SEO';
 
 
 const Programsguest = () => {
@@ -14,6 +15,11 @@ const Programsguest = () => {
     
     return (
         <>
+            <SEO
+              title="Browse Graduate Programs"
+              canonical="/programs"
+              description="Discover graduate programs, learnerships and student opportunities available to South African students. Find the program that matches your career goals on Gradiate."
+            />
             <nav className="navbar-responsive">
         <div className="navbar-container">
           <a

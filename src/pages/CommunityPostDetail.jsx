@@ -44,6 +44,7 @@ import {
   getPostCommentCount,
   getPostLikeCount,
 } from "../lib/communityHelpers";
+import SEO from '../components/SEO';
 
 export default function CommunityPostDetail() {
   const { postId } = useParams();
@@ -503,6 +504,12 @@ export default function CommunityPostDetail() {
 
   return (
     <>
+      <SEO
+        title={post ? `${String(post.content || '').slice(0, 60).trim()}${post.content?.length > 60 ? '...' : ''}` : 'Community Post'}
+        canonical={`/community/post/${postId}`}
+        description={post ? String(post.content || '').slice(0, 160).trim() : 'Student discussion on Gradiate Community.'}
+        type="article"
+      />
       <nav className="navbar-responsive">
         <div className="navbar-container">
           <a className="logo" href="#" style={{ fontWeight: 700, fontSize: "1.5rem", color: "#2c3e50", textDecoration: "none" }}>

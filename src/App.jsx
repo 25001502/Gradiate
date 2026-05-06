@@ -1,5 +1,5 @@
-import { lazy, Suspense, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Startup from './pages/Startup';
 import { useAuth } from './context/useAuth';
 import { legacyRouteRedirects, routes } from './lib/routes';
@@ -15,26 +15,6 @@ const Profile = lazy(() => import('./pages/Profile'));
 const Bursary = lazy(() => import('./pages/Bursary'));
 const Community = lazy(() => import('./pages/Community'));
 const CommunityPostDetail = lazy(() => import('./pages/CommunityPostDetail'));
-
-function CanonicalTagManager() {
-  const location = useLocation();
-
-  useEffect(() => {
-    const baseUrl = import.meta.env.VITE_SITE_URL || 'https://gradiate.co.za';
-    const canonicalHref = `${baseUrl}${location.pathname}`;
-    let canonical = document.querySelector('link[rel="canonical"]');
-
-    if (!canonical) {
-      canonical = document.createElement('link');
-      canonical.setAttribute('rel', 'canonical');
-      document.head.appendChild(canonical);
-    }
-
-    canonical.setAttribute('href', canonicalHref);
-  }, [location.pathname]);
-
-  return null;
-}
 
 function ProtectedProfileRoute() {
   const { user } = useAuth();
@@ -69,7 +49,6 @@ function App() {
 
   return (
     <Router>
-      <CanonicalTagManager />
       <Suspense fallback={<RouteFallback />}>
         <Routes>
           <Route path={routes.home} element={<Startup />} />

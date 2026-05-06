@@ -69,6 +69,7 @@ import {
   normalizeModuleCode,
   sortCommunityPosts,
 } from "../lib/communityHelpers";
+import SEO from '../components/SEO';
 
 export default function Community() {
   const { user } = useAuth();
@@ -975,6 +976,11 @@ export default function Community() {
 
   return (
     <>
+      <SEO
+        title="Student Community"
+        canonical="/community"
+        description="Join the Gradiate student community. Ask questions, share advice and connect with fellow South African students applying for bursaries and scholarships."
+      />
       <nav className="navbar-responsive">
         <div className="navbar-container">
           <a className="logo" href="#" style={{ fontWeight: 700, fontSize: "1.5rem", color: "#2c3e50", textDecoration: "none" }}>

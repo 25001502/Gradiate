@@ -212,6 +212,7 @@ function formatDateLabel(dateInput) {
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
+import SEO from '../components/SEO';
 export default function Aplication() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -556,6 +557,11 @@ export default function Aplication() {
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div>
+      <SEO
+        title="Application Tracker"
+        canonical="/application"
+        description="Track all your bursary and scholarship applications in one place. Stay on top of deadlines and manage your South African student funding applications with Gradiate."
+      />
       {/* Navbar */}
       <nav className="navbar-responsive">
         <div className="navbar-container">

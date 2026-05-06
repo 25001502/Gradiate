@@ -39,6 +39,7 @@ import { auth } from "../lib/firebase/auth";
 import { db } from "../lib/firebase/firestore";
 import { routes } from "../lib/routes";
 import { createCommunityPostPath } from "../lib/communityHelpers";
+import SEO from '../components/SEO';
 
 const PASSWORD_RULES = [
   { key: "length", label: "At least 8 characters", test: (value) => value.length >= 8 },
@@ -815,6 +816,11 @@ const Profile = () => {
 
   return (
     <>
+      <SEO
+        title="My Profile"
+        canonical="/profile"
+        noindex
+      />
       <nav className="navbar-responsive">
         <div className="navbar-container">
           <a
