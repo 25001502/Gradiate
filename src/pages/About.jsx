@@ -31,7 +31,7 @@ const About = () => {
       <SEO
         title="About Us"
         canonical="/about"
-        description="Meet the Gradiate team — on a mission to connect South African students with the bursaries, scholarships and opportunities they deserve."
+        description="Meet the Gradiate team  on a mission to connect South African students with the bursaries, scholarships and University they deserve."
       />
       <nav className="navbar-responsive">
         <div className="navbar-container">
