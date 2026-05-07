@@ -382,7 +382,7 @@ export default function Practise() {
       <SEO
         title="Practice & Interview Prep"
         canonical="/practice"
-        description="Prepare for bursary interviews and assessments with Gradiate's practice tools. Ace your next scholarship application with guided prep for South African students."
+        description="Access past exam papers, practice questions, and study resources to improve your performance and prepare effectively for your exams."
       />
       <nav className="navbar-responsive">
         <div className="navbar-container">
