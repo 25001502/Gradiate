@@ -47,7 +47,7 @@ const How = () => {
             <SEO
               title="How It Works"
               canonical="/how-it-works"
-              description="Learn how Gradiate helps South African students discover and apply for bursaries, scholarships and student opportunities in just a few simple steps."
+              description="Learn how Gradiate helps South African students discover and apply for bursaries, scholarships and University opportunities in just a few simple steps."
             />
             {/* Navigation Bar */}
             <nav className="navbar-responsive">
