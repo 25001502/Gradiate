@@ -18,7 +18,7 @@ const Programsguest = () => {
             <SEO
               title="Browse Graduate Programs"
               canonical="/programs"
-              description="Discover graduate programs, learnerships and student opportunities available to South African students. Find the program that matches your career goals on Gradiate."
+              description="Discover graduate programs, learnerships and University opportunities available to South African students. Find the program that matches your career goals on Gradiate."
             />
             <nav className="navbar-responsive">
         <div className="navbar-container">
