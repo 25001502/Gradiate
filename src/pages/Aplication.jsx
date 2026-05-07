@@ -560,7 +560,7 @@ export default function Aplication() {
       <SEO
         title="Application Tracker"
         canonical="/application"
-        description="Track all your bursary and scholarship applications in one place. Stay on top of deadlines and manage your South African student funding applications with Gradiate."
+        description="Track and manage your university and bursary applications with Gradiate. Stay organized, meet deadlines, and improve your chances of success."
       />
       {/* Navbar */}
       <nav className="navbar-responsive">
