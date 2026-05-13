@@ -1093,7 +1093,7 @@ export default function Community() {
         </div>
       </nav>
 
-      <main className="dashboard-page community-page">
+      <main className="dashboard-page">
         <header className="dashboard-welcome community-hero">
           <div>
             <p className="community-kicker">
