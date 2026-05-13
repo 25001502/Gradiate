@@ -74,7 +74,7 @@ import SEO from '../components/SEO';
 export default function Community() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [ setMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [posts, setPosts] = useState([]);
   const [engagementByPost, setEngagementByPost] = useState({});
@@ -1064,32 +1064,9 @@ export default function Community() {
                 </div>
               )}
             </div>
-            <button
-              className="burger"
-              onClick={() => {
-                setMenuOpen((open) => !open);
-                setNotificationsOpen(false);
-              }}
-              aria-label="Toggle menu"
-              type="button"
-            >
-              <span className="burger-bar"></span>
-              <span className="burger-bar"></span>
-              <span className="burger-bar"></span>
-            </button>
+            
           </div>
-          {menuOpen && (
-            <div className="burger-menu">
-              <a onClick={() => navigate(routes.home)}>Home</a>
-              <a onClick={() => navigate(routes.application)}>Application</a>
-              <a onClick={() => navigate(routes.practice)}>Practise</a>
-              <a onClick={() => navigate(routes.bursaryDashboard)}>Bursaries</a>
-              <a className="active">Community</a>
-              <a onClick={() => navigate(isGuest ? routes.auth : routes.profile)}>
-                {isGuest ? "Sign In / Create Account" : "My Profile"}
-              </a>
-            </div>
-          )}
+          
         </div>
       </nav>
 

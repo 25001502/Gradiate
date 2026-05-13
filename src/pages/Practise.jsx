@@ -168,7 +168,7 @@ export default function Practise() {
   const [search, setSearch] = useState("");
   const [gradeFilter, setGradeFilter] = useState("all");
   const [curriculumFilter, setCurriculumFilter] = useState("all");
-  const [menuOpen, setMenuOpen] = useState(false);
+  
   const [activeTab, setActiveTab] = useState("all"); // "all" | "saved"
   const [savedSubjects, setSavedSubjects] = useState(() => {
     try {
@@ -178,17 +178,10 @@ export default function Practise() {
     }
   });
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user,  } = useAuth();
   const isGuest = !user?.uid;
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate("/");
-    } catch (error) {
-      console.error("Failed to logout", error);
-    }
-  };
+  
 
   const subjectToKey = (subjectName) =>
     subjectName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -398,41 +391,7 @@ export default function Practise() {
           >
             Grad<span style={{ color: "#3498db" }}>iate</span>
           </a>
-          <div className="nav-actions">
-            <button
-              className="burger"
-              onClick={() => setMenuOpen((open) => !open)}
-              aria-label="Toggle menu"
-            >
-              <span className="burger-bar"></span>
-              <span className="burger-bar"></span>
-              <span className="burger-bar"></span>
-            </button>
-          </div>
-          {menuOpen && (
-            <div className="burger-menu">
-              {isGuest ? (
-                <a onClick={() => navigate(routes.auth)}>Sign In / Create Account</a>
-              ) : (
-                <a onClick={() => navigate(routes.profile)}>
-                  {user?.displayName || user?.email || "Guest"}
-                </a>
-              )}
-              <a onClick={() => navigate(routes.application)}>Application</a>
-              <a onClick={() => navigate(routes.bursaryDashboard)}>Bursaries</a>
-              <a onClick={() => navigate(routes.community)}>Community</a>
-              {!isGuest && (
-                <a
-                  onClick={async () => {
-                    setMenuOpen(false);
-                    await handleLogout();
-                  }}
-                >
-                  Logout
-                </a>
-              )}
-            </div>
-          )}
+          
         </div>
       </nav>
 

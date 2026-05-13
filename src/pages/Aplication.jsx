@@ -214,7 +214,7 @@ function formatDateLabel(dateInput) {
 // ── Component ────────────────────────────────────────────────────────────────
 import SEO from '../components/SEO';
 export default function Aplication() {
-  const [menuOpen, setMenuOpen] = useState(false);
+  
   const [search, setSearch] = useState("");
   const [bookmarks, setBookmarks] = useState(() => {
     try {
@@ -229,18 +229,10 @@ export default function Aplication() {
   const [compareIds, setCompareIds] = useState([]);
  
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user,  } = useAuth();
   const isGuest = !user?.uid;
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate("/");
-    } catch (error) {
-      console.error("Failed to logout", error);
-    }
-  };
-
+  
   const buildBookmarkPayload = useCallback((universityId, overrides = {}) => {
     const uni = UNIVERSITIES.find((item) => item.id === universityId);
     if (!uni) {
@@ -544,43 +536,7 @@ export default function Aplication() {
           >
             Grad<span style={{ color: "#3498db" }}>iate</span>
           </a>
-          <div className="nav-actions">
-            <button
-              className="burger"
-              onClick={() => setMenuOpen((open) => !open)}
-              aria-label="Toggle menu"
-            >
-              <span className="burger-bar"></span>
-              <span className="burger-bar"></span>
-              <span className="burger-bar"></span>
-            </button>
-          </div>
-          {menuOpen && (
-            <div className="burger-menu">
-              {isGuest ? (
-                <a onClick={() => navigate(routes.auth)}>Sign In / Create Account</a>
-              ) : (
-                <a onClick={() => navigate(routes.profile)}>
-                  {user?.displayName || user?.email || "Guest"}
-                </a>
-              )}
-              <a onClick={() => navigate(routes.practice)}>Practise</a>
-              <a onClick={() => navigate(routes.community)}>Community</a>
-              <a onClick={() => navigate(routes.bursaryDashboard)} className="active">
-                Bursaries
-              </a>
-              {!isGuest && (
-                <a
-                  onClick={async () => {
-                    setMenuOpen(false);
-                    await handleLogout();
-                  }}
-                >
-                  Logout
-                </a>
-              )}
-            </div>
-          )}
+          
         </div>
       </nav>
 
