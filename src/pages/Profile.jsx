@@ -957,12 +957,7 @@ const Profile = () => {
             <p className="dashboard-stat__value dashboard-stat__value--green">{unreadCommunityNotifications}</p>
             <p className="dashboard-stat__label">Community Alerts</p>
           </div>
-          <div className="dashboard-stat">
-            <p className="dashboard-stat__value" style={{ color: emailVerified ? "#10b981" : "#f59e0b" }}>
-              {emailVerified ? "Verified" : "Pending"}
-            </p>
-            <p className="dashboard-stat__label">Email Status</p>
-          </div>
+          
         </div>
 
         <div className="dashboard-tabs">
