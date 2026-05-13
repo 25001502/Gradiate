@@ -1126,9 +1126,7 @@ export default function Community() {
           <button className="dashboard-shortcut" onClick={() => navigate(routes.bursaryDashboard)} type="button">
             <FaGraduationCap /> Bursaries
           </button>
-          <button className="dashboard-shortcut" onClick={() => navigate(routes.home)} type="button">
-            <FaHome /> Home
-          </button>
+          
         </div>
 
         <div className="dashboard-stats">
