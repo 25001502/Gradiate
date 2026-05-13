@@ -227,7 +227,7 @@ export default function Aplication() {
   const [savedFolderFilter, setSavedFolderFilter] = useState("all");
   const [bookmarkMeta, setBookmarkMeta] = useState({});
   const [compareIds, setCompareIds] = useState([]);
-  const [alertsEnabled, setAlertsEnabled] = useState(false);
+ 
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const isGuest = !user?.uid;
@@ -450,40 +450,7 @@ export default function Aplication() {
     });
   };
 
-  const sendDeadlineReminders = async () => {
-    if (isGuest) {
-      navigate("/auth");
-      return;
-    }
-
-    if (!("Notification" in window)) {
-      return;
-    }
-
-    const permission = await Notification.requestPermission();
-    if (permission !== "granted") {
-      return;
-    }
-
-    const upcoming = bookmarks
-      .map((id) => {
-        const deadline = bookmarkMeta[id]?.deadline || UNIVERSITY_DEADLINES[id];
-        const days = deadline ? daysUntil(deadline) : null;
-        return { id, days, deadline, reminderEnabled: bookmarkMeta[id]?.reminderEnabled !== false };
-      })
-      .filter((item) => item.deadline && item.days !== null && item.days >= 0 && item.days <= 14 && item.reminderEnabled);
-
-    upcoming.forEach((item) => {
-      const uni = UNIVERSITIES.find((u) => u.id === item.id);
-      if (!uni) {
-        return;
-      }
-
-      new Notification("Application Deadline Reminder", {
-        body: `${uni.name} closes in ${item.days} day${item.days === 1 ? "" : "s"}.`,
-      });
-    });
-  };
+  
 
   const filteredUnis = useMemo(() => {
     let list = UNIVERSITIES;
@@ -660,20 +627,7 @@ export default function Aplication() {
           <button className="dashboard-shortcut" onClick={() => navigate(routes.community)}>
             <FaUsers /> Community
           </button>
-          <button
-            className="dashboard-shortcut"
-            onClick={() => {
-              if (isGuest) {
-                navigate(routes.auth);
-                return;
-              }
-
-              setAlertsEnabled((prev) => !prev);
-              sendDeadlineReminders();
-            }}
-          >
-            <FaBell /> {alertsEnabled ? "Reminders On" : "Enable Reminders"}
-          </button>
+          
           
         </div>
 
