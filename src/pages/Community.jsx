@@ -1097,7 +1097,7 @@ export default function Community() {
         <header className="dashboard-welcome community-hero">
           <div>
             <p className="community-kicker">
-              <FaUsers /> Student Community
+              <FaUsers /> Community
             </p>
             <h1 className="dashboard-welcome__greeting">
               Learn together, <span>move smarter</span>
@@ -1106,14 +1106,7 @@ export default function Community() {
               Ask questions, share bursary leads, trade study tips, and celebrate progress with other students.
             </p>
           </div>
-          <button
-            className="community-primary-action"
-            onClick={() => navigate(isGuest ? routes.auth : routes.profile)}
-            type="button"
-          >
-            {isGuest ? <FaSignInAlt /> : <FaUserCircle />}
-            {isGuest ? "Join the conversation" : "View profile"}
-          </button>
+          
         </header>
 
         <div className="dashboard-shortcuts">
