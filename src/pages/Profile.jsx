@@ -915,13 +915,13 @@ const Profile = () => {
 
         <div className="dashboard-shortcuts">
 
-          <button className="dashboard-shortcut" onClick={() => setActiveTab("overview")}>
-            <FaUserCircle /> Overview
+
+
+          <button className="dashboard-shortcut" onClick={() => navigate(routes.application)}>
+            <FaHome /> Home
           </button>
 
-          <button className="dashboard-shortcut" onClick={() => setActiveTab("edit")}>
-            <FaPencilAlt /> Edit Profile
-          </button>
+          
 
           <button className="dashboard-shortcut" onClick={() => setActiveTab("security")}>
             <FaShieldAlt /> Security
@@ -931,13 +931,9 @@ const Profile = () => {
             <FaComments /> Community Activity
           </button>
 
-          <button className="dashboard-shortcut" onClick={() => navigate(routes.application)}>
-            <FaHome /> Home
-          </button>
+          
 
-          <button className="dashboard-shortcut" onClick={() => navigate(routes.community)}>
-            <FaUsers /> Community
-          </button>
+          
           
           <button className="dashboard-shortcut" onClick={handleLogout}>
             <FaSignOutAlt /> Logout
