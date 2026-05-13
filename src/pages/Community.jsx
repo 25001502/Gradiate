@@ -1231,7 +1231,7 @@ export default function Community() {
               <ul>
                 <li>Be respectful.</li>
                 <li>Do not share fake bursaries.</li>
-                <li>Do not post private banking details.</li>
+                <li>Prioritize Respectful Language</li>
                 <li>Give clear answers when helping others.</li>
                 <li>Report harmful or misleading content.</li>
               </ul>
@@ -1282,12 +1282,12 @@ export default function Community() {
                       </select>
                     </label>
                     <label className="community-topic-control community-topic-control--module">
-                      <span>Module / tag</span>
+                      <span>Subject / tag</span>
                       <input
                         className="community-input"
                         value={moduleDraft}
                         onChange={(event) => setModuleDraft(event.target.value.slice(0, 40))}
-                        placeholder="e.g. COM2129"
+                        placeholder="e.g. Math"
                         disabled={isGuest || publishing}
                       />
                     </label>
