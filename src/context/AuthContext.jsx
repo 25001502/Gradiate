@@ -9,8 +9,11 @@ const getSessionStartKey = (uid) => `gradiate_session_started_at_${uid}`;
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminData, setAdminData] = useState(null);
   const [loading, setLoading] = useState(true);
   const userDocUnsubscribeRef = useRef(null);
+  const adminDocUnsubscribeRef = useRef(null);
 
   const logout = async () => {
     await signOut(auth);
@@ -23,8 +26,15 @@ export const AuthProvider = ({ children }) => {
         userDocUnsubscribeRef.current = null;
       }
 
+      if (adminDocUnsubscribeRef.current) {
+        adminDocUnsubscribeRef.current();
+        adminDocUnsubscribeRef.current = null;
+      }
+
       if (!currentUser) {
         setUser(null);
+        setIsAdmin(false);
+        setAdminData(null);
         setLoading(false);
         return;
       }
@@ -66,18 +76,31 @@ export const AuthProvider = ({ children }) => {
           });
         }
       });
+
+      adminDocUnsubscribeRef.current = onSnapshot(doc(db, 'admins', currentUser.uid), (snapshot) => {
+        if (snapshot.exists()) {
+          setIsAdmin(true);
+          setAdminData(snapshot.data());
+        } else {
+          setIsAdmin(false);
+          setAdminData(null);
+        }
+      });
     });
 
     return () => {
       if (userDocUnsubscribeRef.current) {
         userDocUnsubscribeRef.current();
       }
+      if (adminDocUnsubscribeRef.current) {
+        adminDocUnsubscribeRef.current();
+      }
       unsubscribe();
     };
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, logout }}>
+    <AuthContext.Provider value={{ user, isAdmin, adminData, logout }}>
       {!loading && children}
     </AuthContext.Provider>
   );

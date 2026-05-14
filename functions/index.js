@@ -2,6 +2,7 @@
 import * as functions from "firebase-functions";
 import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
+import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import cors from "cors";
 import express from "express";
 
@@ -28,6 +29,29 @@ if (!getApps().length) {
 }
 
 const adminAuth = getAuth();
+const adminDb = getFirestore();
+
+// ---------------------------------------------------------------------------
+// Admin middleware — verifies the caller's ID token and checks admins/{uid}
+// ---------------------------------------------------------------------------
+async function requireAdmin(req, res, next) {
+  try {
+    const authHeader = req.headers.authorization || "";
+    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+    if (!token) return res.status(401).json({ error: "Missing auth token." });
+
+    const decoded = await adminAuth.verifyIdToken(token);
+    const adminDoc = await adminDb.collection("admins").doc(decoded.uid).get();
+    if (!adminDoc.exists) return res.status(403).json({ error: "Admin access required." });
+
+    req.adminUid = decoded.uid;
+    req.adminData = adminDoc.data();
+    next();
+  } catch (err) {
+    console.error("requireAdmin:", err.message);
+    return res.status(401).json({ error: "Invalid or expired auth token." });
+  }
+}
 
 
 
@@ -93,5 +117,187 @@ api.post("/send-verification", async (req, res) => {
 });
 
 export const apiRouter = functions.https.onRequest(api);
+
+// ---------------------------------------------------------------------------
+// Admin endpoints
+// ---------------------------------------------------------------------------
+
+// POST /api/admin/announce — broadcast in-app notification to all users
+api.post("/admin/announce", requireAdmin, async (req, res) => {
+  try {
+    const { title, message } = req.body || {};
+    if (!title || typeof title !== "string" || title.trim().length === 0) {
+      return res.status(400).json({ error: "Announcement title is required." });
+    }
+    if (!message || typeof message !== "string" || message.trim().length === 0) {
+      return res.status(400).json({ error: "Announcement message is required." });
+    }
+
+    const adminUser = await adminAuth.getUser(req.adminUid);
+
+    // Page through all users and write a notification for each
+    let pageToken;
+    let recipientCount = 0;
+    const batchSize = 400; // Firestore batch limit is 500
+
+    do {
+      const listResult = await adminAuth.listUsers(1000, pageToken);
+      pageToken = listResult.pageToken;
+
+      // Write in chunks of batchSize to stay under Firestore batch limits
+      for (let i = 0; i < listResult.users.length; i += batchSize) {
+        const chunk = listResult.users.slice(i, i + batchSize);
+        const batch = adminDb.batch();
+
+        for (const targetUser of chunk) {
+          if (targetUser.disabled) continue;
+          const notifRef = adminDb
+            .collection("users")
+            .doc(targetUser.uid)
+            .collection("notifications")
+            .doc();
+
+          batch.set(notifRef, {
+            recipientId: targetUser.uid,
+            actorId: req.adminUid,
+            actorName: adminUser.displayName || "Gradiate Admin",
+            actorPhotoURL: adminUser.photoURL || "",
+            type: "adminAnnouncement",
+            title: title.trim(),
+            message: message.trim(),
+            read: false,
+            createdAt: FieldValue.serverTimestamp(),
+          });
+          recipientCount++;
+        }
+
+        await batch.commit();
+      }
+    } while (pageToken);
+
+    // Audit log
+    await adminDb.collection("adminAuditLog").add({
+      action: "announce",
+      adminUid: req.adminUid,
+      title: title.trim(),
+      message: message.trim(),
+      recipientCount,
+      createdAt: FieldValue.serverTimestamp(),
+    });
+
+    return res.status(200).json({ success: true, recipientCount });
+  } catch (err) {
+    console.error("POST /admin/announce:", err.message);
+    return res.status(500).json({ error: err.message || "Failed to send announcement." });
+  }
+});
+
+// GET /api/admin/users — list all Firebase Auth users
+api.get("/admin/users", requireAdmin, async (req, res) => {
+  try {
+    const users = [];
+    let pageToken;
+
+    do {
+      const result = await adminAuth.listUsers(1000, pageToken);
+      pageToken = result.pageToken;
+      for (const u of result.users) {
+        users.push({
+          uid: u.uid,
+          email: u.email || null,
+          displayName: u.displayName || null,
+          photoURL: u.photoURL || null,
+          disabled: u.disabled,
+          createdAt: u.metadata.creationTime || null,
+          lastSignIn: u.metadata.lastSignInTime || null,
+        });
+      }
+    } while (pageToken);
+
+    // Most-recent first
+    users.sort((a, b) => (b.createdAt || "") > (a.createdAt || "") ? 1 : -1);
+
+    return res.status(200).json({ users });
+  } catch (err) {
+    console.error("GET /admin/users:", err.message);
+    return res.status(500).json({ error: err.message || "Failed to list users." });
+  }
+});
+
+// POST /api/admin/force-signout/:targetUid — invalidate all sessions for a user
+api.post("/admin/force-signout/:targetUid", requireAdmin, async (req, res) => {
+  try {
+    const { targetUid } = req.params;
+    if (!targetUid) return res.status(400).json({ error: "targetUid is required." });
+
+    // Write globalSignOutAt so AuthContext triggers client-side sign-out
+    await adminDb.collection("users").doc(targetUid).set(
+      { globalSignOutAt: FieldValue.serverTimestamp() },
+      { merge: true }
+    );
+
+    // Also revoke refresh tokens (belt & suspenders)
+    await adminAuth.revokeRefreshTokens(targetUid);
+
+    await adminDb.collection("adminAuditLog").add({
+      action: "forceSignOut",
+      adminUid: req.adminUid,
+      targetUid,
+      createdAt: FieldValue.serverTimestamp(),
+    });
+
+    return res.status(200).json({ success: true });
+  } catch (err) {
+    console.error("POST /admin/force-signout:", err.message);
+    return res.status(500).json({ error: err.message || "Failed to force sign-out." });
+  }
+});
+
+// POST /api/admin/disable-user/:targetUid
+api.post("/admin/disable-user/:targetUid", requireAdmin, async (req, res) => {
+  try {
+    const { targetUid } = req.params;
+    if (!targetUid) return res.status(400).json({ error: "targetUid is required." });
+    if (targetUid === req.adminUid) {
+      return res.status(400).json({ error: "Cannot disable your own account." });
+    }
+
+    await adminAuth.updateUser(targetUid, { disabled: true });
+
+    await adminDb.collection("adminAuditLog").add({
+      action: "disableUser",
+      adminUid: req.adminUid,
+      targetUid,
+      createdAt: FieldValue.serverTimestamp(),
+    });
+
+    return res.status(200).json({ success: true });
+  } catch (err) {
+    console.error("POST /admin/disable-user:", err.message);
+    return res.status(500).json({ error: err.message || "Failed to disable user." });
+  }
+});
+
+// POST /api/admin/enable-user/:targetUid
+api.post("/admin/enable-user/:targetUid", requireAdmin, async (req, res) => {
+  try {
+    const { targetUid } = req.params;
+    if (!targetUid) return res.status(400).json({ error: "targetUid is required." });
+
+    await adminAuth.updateUser(targetUid, { disabled: false });
+
+    await adminDb.collection("adminAuditLog").add({
+      action: "enableUser",
+      adminUid: req.adminUid,
+      targetUid,
+      createdAt: FieldValue.serverTimestamp(),
+    });
+
+    return res.status(200).json({ success: true });
+  } catch (err) {
+    console.error("POST /admin/enable-user:", err.message);
+    return res.status(500).json({ error: err.message || "Failed to enable user." });
+  }
+});
 
 

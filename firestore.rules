@@ -5,9 +5,17 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function isAppAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
     function isCommunityAdmin() {
       return signedIn()
-        && exists(/databases/$(database)/documents/communityAdmins/$(request.auth.uid));
+        && (
+          exists(/databases/$(database)/documents/communityAdmins/$(request.auth.uid))
+          || isAppAdmin()
+        );
     }
 
     function hasField(data, field) {
@@ -327,28 +335,59 @@ service cloud.firestore {
     match /users/{userId}/notifications/{notificationId} {
       allow read, delete: if signedIn() && request.auth.uid == userId;
       allow create: if signedIn()
-        && request.resource.data.keys().hasOnly([
-          'recipientId',
-          'actorId',
-          'actorName',
-          'actorPhotoURL',
-          'type',
-          'postId',
-          'postPreview',
-          'commentId',
-          'commentPreview',
-          'read',
-          'createdAt'
-        ])
-        && validCommunityNotification(userId, request.resource.data)
-        && request.resource.data.commentId is string
-        && request.resource.data.commentPreview is string
-        && request.resource.data.commentPreview.size() <= 180;
+        && (
+          // Standard community notifications (like, comment)
+          (
+            request.resource.data.keys().hasOnly([
+              'recipientId',
+              'actorId',
+              'actorName',
+              'actorPhotoURL',
+              'type',
+              'postId',
+              'postPreview',
+              'commentId',
+              'commentPreview',
+              'read',
+              'createdAt'
+            ])
+            && validCommunityNotification(userId, request.resource.data)
+            && request.resource.data.commentId is string
+            && request.resource.data.commentPreview is string
+            && request.resource.data.commentPreview.size() <= 180
+          )
+          // Admin broadcast notifications — written by Cloud Functions (Admin SDK bypasses rules)
+          // This branch covers client-side admin writes as a fallback
+          || (
+            isAppAdmin()
+            && request.resource.data.type == 'adminAnnouncement'
+            && request.resource.data.recipientId == userId
+            && request.resource.data.read == false
+            && request.resource.data.createdAt == request.time
+          )
+        );
       allow update: if signedIn()
         && request.auth.uid == userId
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'readAt'])
         && request.resource.data.read == true
         && request.resource.data.readAt == request.time;
+    }
+
+    match /admins/{adminId} {
+      allow read: if signedIn() && (request.auth.uid == adminId || isAppAdmin());
+      allow create, update, delete: if isAppAdmin();
+    }
+
+    match /adminAnnouncements/{announcementId} {
+      allow read: if isAppAdmin();
+      allow create: if isAppAdmin();
+      allow update, delete: if isAppAdmin();
+    }
+
+    match /adminAuditLog/{logId} {
+      allow read: if isAppAdmin();
+      allow create: if isAppAdmin();
+      allow update, delete: if false;
     }
 
     match /communityAdmins/{adminId} {

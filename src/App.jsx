@@ -15,6 +15,7 @@ const Profile = lazy(() => import('./pages/Profile'));
 const Bursary = lazy(() => import('./pages/Bursary'));
 const Community = lazy(() => import('./pages/Community'));
 const CommunityPostDetail = lazy(() => import('./pages/CommunityPostDetail'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 
 function ProtectedProfileRoute() {
   const { user } = useAuth();
@@ -24,6 +25,20 @@ function ProtectedProfileRoute() {
   }
 
   return <Profile />;
+}
+
+function ProtectedAdminRoute() {
+  const { user, isAdmin } = useAuth();
+
+  if (!user?.uid) {
+    return <Navigate to={routes.auth} replace />;
+  }
+
+  if (!isAdmin) {
+    return <Navigate to={routes.home} replace />;
+  }
+
+  return <AdminDashboard />;
 }
 
 function RouteFallback() {
@@ -63,6 +78,7 @@ function App() {
           <Route path={routes.bursaryDashboard} element={<Bursary />} />
           <Route path={routes.community} element={<Community />} />
           <Route path={routes.communityPost} element={<CommunityPostDetail />} />
+          <Route path={routes.admin} element={<ProtectedAdminRoute />} />
 
           {legacyRoutes.map(([legacyPath, canonicalPath]) => (
             <Route

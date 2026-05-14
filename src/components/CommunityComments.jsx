@@ -1,5 +1,6 @@
 import { FaCheck, FaCommentDots, FaFlag, FaPaperPlane, FaTrash } from "react-icons/fa";
 import CommunityAvatar from "./CommunityAvatar";
+import AdminBadge from "./AdminBadge";
 import {
   formatCommunityDate,
   getAuthorAcademicLine,
@@ -65,6 +66,7 @@ export default function CommunityComments({
                   <div className="community-comment__body">
                     <div className="community-comment__head">
                       <strong>{comment.authorName || "Student"}</strong>
+                      {comment.authorIsAdmin && <AdminBadge />}
                       <span>{formatCommunityDate(comment.createdAt)}</span>
                     </div>
                     {commentAcademicLine && (

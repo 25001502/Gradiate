@@ -11,6 +11,7 @@ export const routes = {
   bursaryDashboard: '/bursary',
   community: '/community',
   communityPost: '/community/post/:postId',
+  admin: '/admin',
 };
 
 export const legacyRouteRedirects = {

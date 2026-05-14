@@ -46,6 +46,7 @@ import {
 import CommunityAvatar from "../components/CommunityAvatar";
 import CommunityComments from "../components/CommunityComments";
 import CommunityReportModal from "../components/CommunityReportModal";
+import AdminBadge from "../components/AdminBadge";
 import { useAuth } from "../context/useAuth";
 import { db } from "../lib/firebase/firestore";
 import { routes } from "../lib/routes";
@@ -72,7 +73,7 @@ import {
 import SEO from '../components/SEO';
 
 export default function Community() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [ setMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -196,7 +197,7 @@ export default function Community() {
     );
 
     const adminUnsubscribe = onSnapshot(doc(db, "communityAdmins", user.uid), (snapshot) => {
-      setIsCommunityAdmin(snapshot.exists());
+      setIsCommunityAdmin(snapshot.exists() || isAdmin);
     });
 
     return () => {
@@ -205,7 +206,7 @@ export default function Community() {
       notificationsUnsubscribe();
       adminUnsubscribe();
     };
-  }, [user?.uid]);
+  }, [user?.uid, isAdmin]);
 
   useEffect(() => {
     if (!isCommunityAdmin && activeView === "reports") {
@@ -434,7 +435,7 @@ export default function Community() {
     setError("");
 
     try {
-      const authorSnapshot = getAuthorSnapshot(user, userProfile || {});
+      const authorSnapshot = getAuthorSnapshot(user, userProfile || {}, isAdmin);
 
       await addDoc(collection(db, "communityPosts"), {
         ...authorSnapshot,
@@ -528,7 +529,7 @@ export default function Community() {
       const batch = writeBatch(db);
       const commentRef = doc(collection(db, "communityPosts", postId, "comments"));
       const postRef = doc(db, "communityPosts", postId);
-      const authorSnapshot = getAuthorSnapshot(user, userProfile || {});
+      const authorSnapshot = getAuthorSnapshot(user, userProfile || {}, isAdmin);
 
       batch.set(commentRef, {
         ...authorSnapshot,
@@ -1353,7 +1354,10 @@ export default function Community() {
                             avatarStyle={post.authorAvatarStyle}
                           />
                           <div>
-                            <h3>{post.authorName || "Gradiate Student"}</h3>
+                            <h3>
+                              {post.authorName || "Gradiate Student"}
+                              {post.authorIsAdmin && <AdminBadge />}
+                            </h3>
                             <p>{formatCommunityDate(post.createdAt)}</p>
                             {academicLine && <small className="community-author__academic">{academicLine}</small>}
                           </div>

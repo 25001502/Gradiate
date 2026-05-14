@@ -30,6 +30,7 @@ import {
 import CommunityAvatar from "../components/CommunityAvatar";
 import CommunityComments from "../components/CommunityComments";
 import CommunityReportModal from "../components/CommunityReportModal";
+import AdminBadge from "../components/AdminBadge";
 import { useAuth } from "../context/useAuth";
 import { db } from "../lib/firebase/firestore";
 import { routes } from "../lib/routes";
@@ -49,7 +50,7 @@ import SEO from '../components/SEO';
 export default function CommunityPostDetail() {
   const { postId } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [post, setPost] = useState(null);
   const [engagement, setEngagement] = useState({ comments: [] });
   const [savedByMe, setSavedByMe] = useState(false);
@@ -136,7 +137,7 @@ export default function CommunityPostDetail() {
       setUserProfile(snapshot.exists() ? snapshot.data() : null);
     });
     const adminUnsubscribe = onSnapshot(doc(db, "communityAdmins", user.uid), (snapshot) => {
-      setIsCommunityAdmin(snapshot.exists());
+      setIsCommunityAdmin(snapshot.exists() || isAdmin);
     });
     const likeUnsubscribe = onSnapshot(doc(db, "communityPosts", postId, "likes", user.uid), (snapshot) => {
       setEngagement((current) => ({ ...current, likedByMe: snapshot.exists() }));
@@ -151,7 +152,7 @@ export default function CommunityPostDetail() {
       likeUnsubscribe();
       savedUnsubscribe();
     };
-  }, [postId, user?.uid]);
+  }, [postId, user?.uid, isAdmin]);
 
   const addNotificationToBatch = (batch, targetPost, type, extra = {}) => {
     if (!targetPost.authorId || targetPost.authorId === user?.uid) {
@@ -287,7 +288,7 @@ export default function CommunityPostDetail() {
     const content = commentDraft.trim().slice(0, MAX_COMMENT_LENGTH);
     const batch = writeBatch(db);
     const commentRef = doc(collection(db, "communityPosts", post.id, "comments"));
-    const authorSnapshot = getAuthorSnapshot(user, userProfile || {});
+    const authorSnapshot = getAuthorSnapshot(user, userProfile || {}, isAdmin);
 
     setBusyPostId(post.id);
     setError("");
@@ -535,7 +536,10 @@ export default function CommunityPostDetail() {
                   avatarStyle={post.authorAvatarStyle}
                 />
                 <div>
-                  <h3>{post.authorName || "Gradiate Student"}</h3>
+                  <h3>
+                    {post.authorName || "Gradiate Student"}
+                    {post.authorIsAdmin && <AdminBadge />}
+                  </h3>
                   <p>{formatCommunityDate(post.createdAt)}</p>
                   {academicLine && <small className="community-author__academic">{academicLine}</small>}
                 </div>

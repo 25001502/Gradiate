@@ -27,6 +27,7 @@ import {
 import {
   FaBell,
   FaBookmark,
+  FaBullhorn,
   FaComments,
   FaPencilAlt,
   FaSignOutAlt,
@@ -39,6 +40,8 @@ import { auth } from "../lib/firebase/auth";
 import { db } from "../lib/firebase/firestore";
 import { routes } from "../lib/routes";
 import { createCommunityPostPath } from "../lib/communityHelpers";
+import AdminBadge from "../components/AdminBadge";
+import { useAuth } from "../context/useAuth";
 import SEO from '../components/SEO';
 
 const PASSWORD_RULES = [
@@ -216,6 +219,7 @@ const inferAvatarKeyFromUrl = (url = "") => {
 };
 
 const Profile = () => {
+  const { isAdmin } = useAuth();
   const verificationEndpoint =
     import.meta.env.VITE_SEND_VERIFICATION_ENDPOINT || "/api/send-verification";
 
@@ -921,7 +925,11 @@ const Profile = () => {
             <FaHome /> Home
           </button>
 
-          
+          {isAdmin && (
+            <button className="dashboard-shortcut dashboard-shortcut--admin" onClick={() => navigate(routes.admin)}>
+              <FaShieldAlt /> Admin Dashboard
+            </button>
+          )}
 
           <button className="dashboard-shortcut" onClick={() => setActiveTab("security")}>
             <FaShieldAlt /> Security
@@ -988,7 +996,10 @@ const Profile = () => {
                 <div style={profileUi.heroIdentityWrap}>
                   <img src={avatarUrl || avDefault} alt="Avatar" style={profileUi.heroAvatar} />
                   <div>
-                    <h3 className="uni-card__name" style={{ marginBottom: 4 }}>{user.displayName || "User"}</h3>
+                    <h3 className="uni-card__name" style={{ marginBottom: 4 }}>
+                      {user.displayName || "User"}
+                      {isAdmin && <AdminBadge style={{ marginLeft: 8 }} />}
+                    </h3>
                     <p className="uni-card__location" style={{ marginBottom: 0 }}>{profileData.location || "Add your location"}</p>
                     <p style={profileUi.metaLine}>{user.email || "No email"}</p>
                   </div>
@@ -1351,7 +1362,7 @@ const Profile = () => {
                         }}
                         onClick={async () => {
                           await markCommunityNotificationRead(notification.id);
-                          if (notification.postId) {
+                          if (notification.postId && notification.type !== "adminAnnouncement") {
                             navigate(createCommunityPostPath(notification.postId));
                           }
                         }}
@@ -1359,8 +1370,17 @@ const Profile = () => {
                       >
                         <strong style={profileUi.communityItemTitle}>{notification.actorName || "A student"}</strong>
                         <span style={profileUi.communityItemText}>
-                          {notification.type === "comment" ? "commented on" : "liked"} your post
+                          {notification.type === "adminAnnouncement"
+                            ? `: ${notification.title || "New announcement"}`
+                            : notification.type === "comment"
+                            ? "commented on"
+                            : "liked"}{notification.type !== "adminAnnouncement" ? " your post" : ""}
                         </span>
+                        {notification.type === "adminAnnouncement" && notification.message && (
+                          <span style={{ ...profileUi.communityItemText, fontStyle: "italic", color: "#4b5563" }}>
+                            {notification.message}
+                          </span>
+                        )}
                         <span style={profileUi.communityItemMeta}>{formatCommunityDate(notification.createdAt)}</span>
                       </button>
                     ))

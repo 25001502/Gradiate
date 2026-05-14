@@ -88,7 +88,7 @@ export function normalizeModuleCode(value) {
   return String(value || "").trim().replace(/\s+/g, " ").slice(0, 40).toUpperCase();
 }
 
-export function getAuthorSnapshot(user, profile = {}) {
+export function getAuthorSnapshot(user, profile = {}, isAdmin = false) {
   const authorName = getDisplayName(user);
   const avatarSeed = profile.avatarSeed || user?.uid || "";
   const avatarStyle = profile.avatarStyle || DEFAULT_AVATAR_STYLE;
@@ -102,6 +102,7 @@ export function getAuthorSnapshot(user, profile = {}) {
     authorUniversity: String(profile.university || "").trim(),
     authorProgram: String(profile.program || "").trim(),
     authorYearOfStudy: String(profile.yearOfStudy || "").trim(),
+    authorIsAdmin: Boolean(isAdmin),
   };
 }
 
