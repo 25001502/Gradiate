@@ -58,7 +58,8 @@ service cloud.firestore {
         && optionalString(data, 'authorAvatarStyle', 40)
         && optionalString(data, 'authorUniversity', 120)
         && optionalString(data, 'authorProgram', 140)
-        && optionalString(data, 'authorYearOfStudy', 60);
+          && optionalString(data, 'authorYearOfStudy', 60)
+          && optionalBool(data, 'authorIsAdmin');
     }
 
     function validCommunityPostBase(data) {
@@ -80,6 +81,7 @@ service cloud.firestore {
           'authorUniversity',
           'authorProgram',
           'authorYearOfStudy',
+          'authorIsAdmin',
           'category',
           'content',
           'moduleCode',
@@ -187,6 +189,7 @@ service cloud.firestore {
           'authorUniversity',
           'authorProgram',
           'authorYearOfStudy',
+          'authorIsAdmin',
           'category',
           'content',
           'moduleCode',
@@ -214,6 +217,7 @@ service cloud.firestore {
         && optionalBool(request.resource.data, 'isAnswered')
         && optionalBool(request.resource.data, 'isOfficial')
         && optionalBool(request.resource.data, 'pinned')
+        && optionalBool(request.resource.data, 'authorIsAdmin')
         && optionalString(request.resource.data, 'acceptedCommentId', 120)
         && optionalString(request.resource.data, 'acceptedAnswerPreview', 180)
         && optionalString(request.resource.data, 'acceptedAnswerAuthorId', 120)
@@ -232,6 +236,7 @@ service cloud.firestore {
           'authorUniversity',
           'authorProgram',
           'authorYearOfStudy',
+          'authorIsAdmin',
           'content',
           'createdAt'
         ])

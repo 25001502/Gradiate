@@ -28,10 +28,14 @@ function ProtectedProfileRoute() {
 }
 
 function ProtectedAdminRoute() {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, adminLoading } = useAuth();
 
   if (!user?.uid) {
     return <Navigate to={routes.auth} replace />;
+  }
+
+  if (adminLoading) {
+    return null;
   }
 
   if (!isAdmin) {

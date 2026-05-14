@@ -12,6 +12,7 @@ export const AuthProvider = ({ children }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminData, setAdminData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [adminLoading, setAdminLoading] = useState(true);
   const userDocUnsubscribeRef = useRef(null);
   const adminDocUnsubscribeRef = useRef(null);
 
@@ -35,6 +36,7 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
         setIsAdmin(false);
         setAdminData(null);
+        setAdminLoading(false);
         setLoading(false);
         return;
       }
@@ -85,6 +87,7 @@ export const AuthProvider = ({ children }) => {
           setIsAdmin(false);
           setAdminData(null);
         }
+        setAdminLoading(false);
       });
     });
 
@@ -100,7 +103,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isAdmin, adminData, logout }}>
+    <AuthContext.Provider value={{ user, isAdmin, adminData, adminLoading, logout }}>
       {!loading && children}
     </AuthContext.Provider>
   );
