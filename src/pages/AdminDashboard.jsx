@@ -24,6 +24,9 @@ import {
   deleteDoc,
   doc,
   getCountFromServer,
+  serverTimestamp,
+  getDocs,
+  writeBatch,
 } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
 
@@ -301,6 +304,16 @@ function UsersTab() {
                   <div className="admin-user-meta">
                     UID: <span className="admin-user-uid">{u.uid}</span>
                   </div>
+                  {u.createdAt && (
+                    <div className="admin-user-meta">
+                      Joined: {new Date(u.createdAt).toLocaleDateString('en-ZA', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    </div>
+                  )}
+                  {u.lastSignIn && (
+                    <div className="admin-user-meta">
+                      Last seen: {new Date(u.lastSignIn).toLocaleDateString('en-ZA', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="admin-user-actions">
@@ -363,6 +376,7 @@ function CommunityTab() {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('open');
+  const [busy, setBusy] = useState(null);
 
   useEffect(() => {
     const q = query(
@@ -381,31 +395,55 @@ function CommunityTab() {
   }, []);
 
   const handleReview = async (reportId) => {
+    setBusy(reportId);
     try {
       await updateDoc(doc(db, 'communityReports', reportId), {
         status: 'reviewed',
-        reviewedAt: new Date(),
-        reviewedBy: auth.currentUser?.uid || '',
+        reviewedAt: serverTimestamp(),
+        reviewedBy: auth.currentUser.uid,
       });
-      toast.success('Report marked as reviewed.');
-    } catch {
+      toast.success('Report dismissed.');
+    } catch (err) {
+      console.error('Failed to dismiss report:', err);
       toast.error('Failed to update report.');
+    } finally {
+      setBusy(null);
     }
   };
 
-  const handleRemove = async (reportId, postId) => {
+  const handleRemove = async (report) => {
+    const contentLabel = report.targetType === 'comment' ? 'comment' : 'post';
+    if (!window.confirm(`Remove this ${contentLabel} and resolve the report? This cannot be undone.`)) {
+      return;
+    }
+    setBusy(report.id);
     try {
-      if (postId) {
-        await deleteDoc(doc(db, 'communityPosts', postId));
+      if (report.targetType === 'comment' && report.postId && report.targetId) {
+        // Remove just the offending comment
+        await deleteDoc(doc(db, 'communityPosts', report.postId, 'comments', report.targetId));
+      } else if (report.postId) {
+        // Remove the post together with all its subcollections
+        const [likesSnap, commentsSnap] = await Promise.all([
+          getDocs(collection(db, 'communityPosts', report.postId, 'likes')),
+          getDocs(collection(db, 'communityPosts', report.postId, 'comments')),
+        ]);
+        const cleanupBatch = writeBatch(db);
+        likesSnap.docs.forEach((d) => cleanupBatch.delete(d.ref));
+        commentsSnap.docs.forEach((d) => cleanupBatch.delete(d.ref));
+        await cleanupBatch.commit();
+        await deleteDoc(doc(db, 'communityPosts', report.postId));
       }
-      await updateDoc(doc(db, 'communityReports', reportId), {
+      await updateDoc(doc(db, 'communityReports', report.id), {
         status: 'removed',
-        reviewedAt: new Date(),
-        reviewedBy: auth.currentUser?.uid || '',
+        reviewedAt: serverTimestamp(),
+        reviewedBy: auth.currentUser.uid,
       });
-      toast.success('Post removed and report resolved.');
-    } catch {
-      toast.error('Failed to remove post.');
+      toast.success(`${contentLabel.charAt(0).toUpperCase() + contentLabel.slice(1)} removed and report resolved.`);
+    } catch (err) {
+      console.error('Failed to remove reported content:', err);
+      toast.error('Failed to remove content. Please try again.');
+    } finally {
+      setBusy(null);
     }
   };
 
@@ -454,14 +492,17 @@ function CommunityTab() {
                   <button
                     className="admin-btn admin-btn--sm admin-btn--ghost"
                     onClick={() => handleReview(r.id)}
+                    disabled={busy === r.id}
                   >
-                    <FaEye /> Dismiss
+                    {busy === r.id ? <FaSpinner className="admin-spin" /> : <FaEye />} Dismiss
                   </button>
                   <button
                     className="admin-btn admin-btn--sm admin-btn--danger"
-                    onClick={() => handleRemove(r.id, r.postId)}
+                    onClick={() => handleRemove(r)}
+                    disabled={busy === r.id}
                   >
-                    <FaTrash /> Remove Post
+                    {busy === r.id ? <FaSpinner className="admin-spin" /> : <FaTrash />}
+                    {' '}{r.targetType === 'comment' ? 'Remove Comment' : 'Remove Post'}
                   </button>
                 </div>
               )}
