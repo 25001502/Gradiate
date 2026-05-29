@@ -4031,6 +4031,7 @@ body {
   border: 1px solid #cbd5e1;
   background: #fff;
   color: #334155;
+  text-decoration: none;
 }
 
 .community-soft-button:hover {

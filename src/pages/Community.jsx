@@ -77,7 +77,7 @@ const SAVED_POSTS_LIMIT = 100;
 export default function Community() {
   const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
-  const [ setMenuOpen] = useState(false);
+  const [, setMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [posts, setPosts] = useState([]);
   const [engagementByPost, setEngagementByPost] = useState({});

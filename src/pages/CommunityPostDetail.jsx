@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   collection,
   deleteDoc,
@@ -494,9 +494,9 @@ export default function CommunityPostDetail() {
     return (
       <main className="dashboard-page community-page community-detail-page">
         <div className="community-detail-shell">
-          <button className="community-soft-button" onClick={() => navigate(routes.community)} type="button">
+          <Link className="community-soft-button" to={routes.community}>
             <FaArrowLeft /> Back to Community
-          </button>
+          </Link>
           <div className="community-empty">This community post was not found.</div>
         </div>
       </main>
@@ -516,9 +516,9 @@ export default function CommunityPostDetail() {
           <a className="logo" href="#" style={{ fontWeight: 700, fontSize: "1.5rem", color: "#2c3e50", textDecoration: "none" }}>
             Grad<span style={{ color: "#3498db" }}>iate</span>
           </a>
-          <button className="community-soft-button" onClick={() => navigate(routes.community)} type="button">
+          <Link className="community-soft-button" to={routes.community}>
             <FaArrowLeft /> Back to Community
-          </button>
+          </Link>
         </div>
       </nav>
 
