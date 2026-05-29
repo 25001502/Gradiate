@@ -1,16 +1,15 @@
 import { disableNetwork, enableNetwork } from 'firebase/firestore';
 import { db } from './firestore';
 
-let targetNetworkEnabled = true;
 let networkUpdate = Promise.resolve();
 
 const setFirestoreNetworkEnabled = (enabled) => {
-  targetNetworkEnabled = enabled;
+  const action = enabled ? 'enable' : 'disable';
 
   networkUpdate = networkUpdate
     .catch(() => {})
     .then(async () => {
-      if (targetNetworkEnabled) {
+      if (enabled) {
         await enableNetwork(db);
         return;
       }
@@ -18,10 +17,7 @@ const setFirestoreNetworkEnabled = (enabled) => {
       await disableNetwork(db);
     })
     .catch((error) => {
-      console.warn(
-        `Failed to ${targetNetworkEnabled ? 'enable' : 'disable'} Firestore network`,
-        error
-      );
+      console.warn(`Failed to ${action} Firestore network`, error);
     });
 
   return networkUpdate;

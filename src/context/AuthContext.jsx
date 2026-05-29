@@ -3,7 +3,6 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { auth } from '../lib/firebase/auth';
 import { db } from '../lib/firebase/firestore';
-import { startFirestoreNetworkLifecycle } from '../lib/firebase/networkLifecycle';
 import { AuthContext } from './auth-context';
 
 const getSessionStartKey = (uid) => `gradiate_session_started_at_${uid}`;
@@ -20,8 +19,6 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     await signOut(auth);
   };
-
-  useEffect(() => startFirestoreNetworkLifecycle(), []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {

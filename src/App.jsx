@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Startup from './pages/Startup';
 import { useAuth } from './context/useAuth';
+import { useFirestoreNetworkLifecycle } from './lib/firebase/useFirestoreNetworkLifecycle';
 import { legacyRouteRedirects, routes } from './lib/routes';
 
 const AuthForm = lazy(() => import('./AuthForm'));
@@ -64,6 +65,8 @@ function RouteFallback() {
 
 
 function App() {
+  useFirestoreNetworkLifecycle();
+
   const legacyRoutes = Object.entries(legacyRouteRedirects);
 
   return (
