@@ -72,6 +72,8 @@ import {
 } from "../lib/communityHelpers";
 import SEO from '../components/SEO';
 
+const SAVED_POSTS_LIMIT = 100;
+
 export default function Community() {
   const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
@@ -164,13 +166,22 @@ export default function Community() {
       return undefined;
     }
 
+    let cancelled = false;
+
     const profileUnsubscribe = onSnapshot(doc(db, "users", user.uid), (snapshot) => {
       setUserProfile(snapshot.exists() ? snapshot.data() : null);
     });
 
-    const savedUnsubscribe = onSnapshot(
-      collection(db, "users", user.uid, "savedCommunityPosts"),
-      (snapshot) => {
+    async function loadSavedPosts() {
+      try {
+        const snapshot = await getDocs(
+          query(collection(db, "users", user.uid, "savedCommunityPosts"), limit(SAVED_POSTS_LIMIT))
+        );
+
+        if (cancelled) {
+          return;
+        }
+
         const ids = new Set();
         const items = snapshot.docs.map((savedDoc) => {
           ids.add(savedDoc.id);
@@ -179,8 +190,14 @@ export default function Community() {
 
         setSavedPostIds(ids);
         setSavedPostItems(items);
+      } catch (savedError) {
+        if (!cancelled) {
+          console.error("Failed to load saved community posts", savedError);
+        }
       }
-    );
+    }
+
+    loadSavedPosts();
 
     const notificationsUnsubscribe = onSnapshot(
       query(
@@ -201,8 +218,8 @@ export default function Community() {
     });
 
     return () => {
+      cancelled = true;
       profileUnsubscribe();
-      savedUnsubscribe();
       notificationsUnsubscribe();
       adminUnsubscribe();
     };
@@ -225,7 +242,7 @@ export default function Community() {
   }, [isGuest]);
 
   useEffect(() => {
-    if (!isCommunityAdmin) {
+    if (!isCommunityAdmin || activeView !== "reports") {
       setReports([]);
       return undefined;
     }
@@ -242,7 +259,7 @@ export default function Community() {
         ...reportDoc.data(),
       })));
     });
-  }, [isCommunityAdmin]);
+  }, [activeView, isCommunityAdmin]);
 
   useEffect(() => {
     const trackedPostIds = trackedPostIdsKey ? trackedPostIdsKey.split("|") : [];
@@ -254,21 +271,46 @@ export default function Community() {
     }
 
     const unsubscribeFns = [];
+    let cancelled = false;
 
     if (user?.uid) {
-      trackedPostIds.forEach((postId) => {
-        const likeRef = doc(db, "communityPosts", postId, "likes", user.uid);
-        unsubscribeFns.push(
-          onSnapshot(likeRef, (snapshot) => {
-            setEngagementByPost((current) => ({
-              ...current,
-              [postId]: {
-                ...current[postId],
-                likedByMe: snapshot.exists(),
-              },
-            }));
-          })
-        );
+      Promise.all(
+        trackedPostIds.map(async (postId) => {
+          const snapshot = await getDoc(doc(db, "communityPosts", postId, "likes", user.uid));
+          return [postId, snapshot.exists()];
+        })
+      )
+        .then((likedEntries) => {
+          if (cancelled) {
+            return;
+          }
+
+          setEngagementByPost((current) => {
+            const next = { ...current };
+            likedEntries.forEach(([postId, likedByMe]) => {
+              next[postId] = {
+                ...next[postId],
+                likedByMe,
+              };
+            });
+            return next;
+          });
+        })
+        .catch((likeError) => {
+          if (!cancelled) {
+            console.error("Failed to load post like status", likeError);
+          }
+        });
+    } else if (trackedPostIds.length) {
+      setEngagementByPost((current) => {
+        const next = { ...current };
+        trackedPostIds.forEach((postId) => {
+          next[postId] = {
+            ...next[postId],
+            likedByMe: false,
+          };
+        });
+        return next;
       });
     }
 
@@ -295,7 +337,10 @@ export default function Community() {
       );
     });
 
-    return () => unsubscribeFns.forEach((unsubscribe) => unsubscribe());
+    return () => {
+      cancelled = true;
+      unsubscribeFns.forEach((unsubscribe) => unsubscribe());
+    };
   }, [expandedCommentsKey, trackedPostIdsKey, user?.uid]);
 
   useEffect(() => {
@@ -498,6 +543,13 @@ export default function Community() {
       }
 
       await batch.commit();
+      setEngagementByPost((current) => ({
+        ...current,
+        [post.id]: {
+          ...current[post.id],
+          likedByMe: !engagement.likedByMe,
+        },
+      }));
     } catch (likeError) {
       console.error("Failed to update like", likeError);
       setError("Your reaction could not be saved.");
@@ -569,6 +621,13 @@ export default function Community() {
     try {
       if (post.missing) {
         await deleteDoc(savedRef);
+        setSavedPostIds((current) => {
+          const next = new Set(current);
+          next.delete(post.id);
+          return next;
+        });
+        setSavedPostItems((current) => current.filter((savedPost) => (savedPost.postId || savedPost.id) !== post.id));
+        setSavedFullPosts((current) => current.filter((savedPost) => savedPost.id !== post.id));
         return;
       }
 
@@ -609,6 +668,32 @@ export default function Community() {
       }
 
       await batch.commit();
+      if (savedPostIds.has(post.id)) {
+        setSavedPostIds((current) => {
+          const next = new Set(current);
+          next.delete(post.id);
+          return next;
+        });
+        setSavedPostItems((current) => current.filter((savedPost) => (savedPost.postId || savedPost.id) !== post.id));
+        setSavedFullPosts((current) => current.filter((savedPost) => savedPost.id !== post.id));
+      } else {
+        const savedItem = {
+          id: post.id,
+          postId: post.id,
+          authorId: post.authorId || "",
+          authorName: post.authorName || "Gradiate Student",
+          category: post.category || "general",
+          contentPreview: String(post.content || "").slice(0, 180),
+          createdAt: post.createdAt,
+          isAnswered: Boolean(post.isAnswered),
+          moduleCode: post.moduleCode || "",
+          savedAt: new Date(),
+        };
+
+        setSavedPostIds((current) => new Set(current).add(post.id));
+        setSavedPostItems((current) => [savedItem, ...current]);
+        setSavedFullPosts((current) => [{ ...post }, ...current.filter((savedPost) => savedPost.id !== post.id)]);
+      }
     } catch (saveError) {
       console.error("Failed to update saved post", saveError);
       setError("That post could not be saved right now.");

@@ -19,13 +19,13 @@ import {
   collection,
   query,
   orderBy,
-  onSnapshot,
   updateDoc,
   deleteDoc,
   doc,
   getCountFromServer,
   serverTimestamp,
   getDocs,
+  limit,
   writeBatch,
 } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
@@ -39,6 +39,7 @@ import { routes } from '../lib/routes';
 import SEO from '../components/SEO';
 
 const ADMIN_API = import.meta.env.VITE_ADMIN_API_BASE || '/api/admin';
+const ADMIN_REPORTS_LIMIT = 100;
 
 async function getAdminToken() {
   const token = await auth.currentUser?.getIdToken();
@@ -378,21 +379,28 @@ function CommunityTab() {
   const [filter, setFilter] = useState('open');
   const [busy, setBusy] = useState(null);
 
-  useEffect(() => {
+  const loadReports = useCallback(async () => {
+    setLoading(true);
     const q = query(
       collection(db, 'communityReports'),
-      orderBy('createdAt', 'desc')
+      orderBy('createdAt', 'desc'),
+      limit(ADMIN_REPORTS_LIMIT)
     );
-    const unsub = onSnapshot(
-      q,
-      (snap) => {
-        setReports(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-        setLoading(false);
-      },
-      () => setLoading(false)
-    );
-    return unsub;
+
+    try {
+      const snap = await getDocs(q);
+      setReports(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+    } catch (err) {
+      console.error('Failed to load community reports:', err);
+      toast.error('Failed to load reports.');
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadReports();
+  }, [loadReports]);
 
   const handleReview = async (reportId) => {
     setBusy(reportId);
@@ -402,6 +410,11 @@ function CommunityTab() {
         reviewedAt: serverTimestamp(),
         reviewedBy: auth.currentUser.uid,
       });
+      setReports((current) =>
+        current.map((report) =>
+          report.id === reportId ? { ...report, status: 'reviewed' } : report
+        )
+      );
       toast.success('Report dismissed.');
     } catch (err) {
       console.error('Failed to dismiss report:', err);
@@ -438,6 +451,11 @@ function CommunityTab() {
         reviewedAt: serverTimestamp(),
         reviewedBy: auth.currentUser.uid,
       });
+      setReports((current) =>
+        current.map((item) =>
+          item.id === report.id ? { ...item, status: 'removed' } : item
+        )
+      );
       toast.success(`${contentLabel.charAt(0).toUpperCase() + contentLabel.slice(1)} removed and report resolved.`);
     } catch (err) {
       console.error('Failed to remove reported content:', err);
@@ -451,7 +469,12 @@ function CommunityTab() {
 
   return (
     <div className="admin-tab-content">
-      <h2 className="admin-section-title">Community Reports</h2>
+      <div className="admin-users-header">
+        <h2 className="admin-section-title">Community Reports</h2>
+        <button className="admin-btn admin-btn--sm" onClick={loadReports} disabled={loading}>
+          {loading ? <FaSpinner className="admin-spin" /> : 'Refresh'}
+        </button>
+      </div>
       <div className="admin-filter-row">
         {['open', 'reviewed', 'removed', 'all'].map((f) => (
           <button

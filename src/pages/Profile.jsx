@@ -16,7 +16,6 @@ import {
   getDoc,
   getDocs,
   limit,
-  onSnapshot,
   orderBy,
   query,
   setDoc,
@@ -343,44 +342,49 @@ const Profile = () => {
       return undefined;
     }
 
-    const postsUnsubscribe = onSnapshot(
-      query(collection(db, "communityPosts"), where("authorId", "==", user.uid), limit(8)),
-      (snapshot) => {
-        setCommunityPosts(sortByNewestCommunityDate(snapshot.docs.map((postDoc) => ({
+    let cancelled = false;
+
+    async function loadCommunitySummary() {
+      try {
+        const [postsSnapshot, savedSnapshot, notificationsSnapshot] = await Promise.all([
+          getDocs(query(collection(db, "communityPosts"), where("authorId", "==", user.uid), limit(8))),
+          getDocs(query(collection(db, "users", user.uid, "savedCommunityPosts"), limit(8))),
+          getDocs(
+            query(
+              collection(db, "users", user.uid, "notifications"),
+              orderBy("createdAt", "desc"),
+              limit(8)
+            )
+          ),
+        ]);
+
+        if (cancelled) {
+          return;
+        }
+
+        setCommunityPosts(sortByNewestCommunityDate(postsSnapshot.docs.map((postDoc) => ({
           id: postDoc.id,
           ...postDoc.data(),
         }))));
-      }
-    );
-
-    const savedUnsubscribe = onSnapshot(
-      collection(db, "users", user.uid, "savedCommunityPosts"),
-      (snapshot) => {
-        setSavedCommunityPosts(sortByNewestCommunityDate(
-          snapshot.docs.map((savedDoc) => ({ id: savedDoc.id, ...savedDoc.data() })),
-          "savedAt"
-        ));
-      }
-    );
-
-    const notificationsUnsubscribe = onSnapshot(
-      query(
-        collection(db, "users", user.uid, "notifications"),
-        orderBy("createdAt", "desc"),
-        limit(8)
-      ),
-      (snapshot) => {
-        setCommunityNotifications(snapshot.docs.map((notificationDoc) => ({
+        setSavedCommunityPosts(savedSnapshot.docs.map((savedDoc) => ({
+          id: savedDoc.id,
+          ...savedDoc.data(),
+        })));
+        setCommunityNotifications(notificationsSnapshot.docs.map((notificationDoc) => ({
           id: notificationDoc.id,
           ...notificationDoc.data(),
         })));
+      } catch (summaryError) {
+        if (!cancelled) {
+          console.error("Failed to load profile community summary", summaryError);
+        }
       }
-    );
+    }
+
+    loadCommunitySummary();
 
     return () => {
-      postsUnsubscribe();
-      savedUnsubscribe();
-      notificationsUnsubscribe();
+      cancelled = true;
     };
   }, [user?.uid]);
 
