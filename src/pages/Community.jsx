@@ -65,8 +65,11 @@ import {
   getAuthorAcademicLine,
   getAuthorSnapshot,
   getDisplayName,
+  getNotificationActionText,
+  getNotificationPreview,
   getPostCommentCount,
   getPostLikeCount,
+  isAdminAnnouncementNotification,
   normalizeModuleCode,
   sortCommunityPosts,
 } from "../lib/communityHelpers";
@@ -1146,15 +1149,17 @@ export default function Community() {
                           onClick={async () => {
                             await markNotificationRead(notification);
                             setNotificationsOpen(false);
-                            navigate(createCommunityPostPath(notification.postId));
+                            if (notification.postId && !isAdminAnnouncementNotification(notification)) {
+                              navigate(createCommunityPostPath(notification.postId));
+                            }
                           }}
                           type="button"
                         >
                           <FaBell />
                           <span>
                             <strong>{notification.actorName || "A student"}</strong>{" "}
-                            {notification.type === "comment" ? "commented on" : "liked"} your post
-                            <small>{notification.commentPreview || notification.postPreview}</small>
+                            {getNotificationActionText(notification)}
+                            <small>{getNotificationPreview(notification)}</small>
                           </span>
                         </button>
                       ))}

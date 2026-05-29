@@ -132,6 +132,47 @@ export function getPostSaveCount(post = {}) {
   return Number.isFinite(post.saveCount) ? post.saveCount : 0;
 }
 
+export function isAdminAnnouncementNotification(notification = {}) {
+  const hasPostTarget = Boolean(notification.postId);
+  const hasAnnouncementText = Boolean(
+    notification.title ||
+      notification.message ||
+      (!hasPostTarget && notification.postPreview && notification.type !== "comment")
+  );
+
+  return (
+    notification.type === "adminAnnouncement" ||
+    notification.notificationType === "adminAnnouncement" ||
+    notification.type === "announcement" ||
+    notification.category === "announcement" ||
+    hasAnnouncementText
+  );
+}
+
+export function getNotificationActionText(notification = {}) {
+  if (isAdminAnnouncementNotification(notification)) {
+    return `sent an announcement${notification.title ? `: ${notification.title}` : ""}`;
+  }
+
+  if (notification.type === "comment") {
+    return "commented on your post";
+  }
+
+  if (notification.type === "like" && notification.postId) {
+    return "liked your post";
+  }
+
+  return "sent you a notification";
+}
+
+export function getNotificationPreview(notification = {}) {
+  if (isAdminAnnouncementNotification(notification)) {
+    return notification.message || "";
+  }
+
+  return notification.commentPreview || notification.postPreview || "";
+}
+
 export function sortCommunityPosts(posts, sortKey, engagementByPost = {}) {
   const sorted = [...posts];
 

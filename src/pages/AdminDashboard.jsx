@@ -70,7 +70,12 @@ async function callAdminAPI(path, method = 'GET', body = null) {
     },
     body: body ? JSON.stringify(body) : undefined,
   });
-  const data = await res.json();
+
+  const contentType = res.headers.get('content-type') || '';
+  const data = contentType.includes('application/json')
+    ? await res.json()
+    : { error: await res.text() };
+
   if (!res.ok) throw new Error(data.error || `Request failed: ${res.status}`);
   return data;
 }

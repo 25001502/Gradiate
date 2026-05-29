@@ -163,8 +163,14 @@ api.post("/admin/announce", requireAdmin, async (req, res) => {
             actorName: adminUser.displayName || "Gradiate Admin",
             actorPhotoURL: adminUser.photoURL || "",
             type: "adminAnnouncement",
+            notificationType: "adminAnnouncement",
+            category: "announcement",
             title: title.trim(),
             message: message.trim(),
+            postId: null,
+            postPreview: "",
+            commentId: "",
+            commentPreview: "",
             read: false,
             createdAt: FieldValue.serverTimestamp(),
           });
@@ -299,5 +305,4 @@ api.post("/admin/enable-user/:targetUid", requireAdmin, async (req, res) => {
     return res.status(500).json({ error: err.message || "Failed to enable user." });
   }
 });
-
 

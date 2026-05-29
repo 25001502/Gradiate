@@ -38,7 +38,12 @@ import {
 import { auth } from "../lib/firebase/auth";
 import { db } from "../lib/firebase/firestore";
 import { routes } from "../lib/routes";
-import { createCommunityPostPath } from "../lib/communityHelpers";
+import {
+  createCommunityPostPath,
+  getNotificationActionText,
+  getNotificationPreview,
+  isAdminAnnouncementNotification,
+} from "../lib/communityHelpers";
 import AdminBadge from "../components/AdminBadge";
 import { useAuth } from "../context/useAuth";
 import SEO from '../components/SEO';
@@ -1366,7 +1371,7 @@ const Profile = () => {
                         }}
                         onClick={async () => {
                           await markCommunityNotificationRead(notification.id);
-                          if (notification.postId && notification.type !== "adminAnnouncement") {
+                          if (notification.postId && !isAdminAnnouncementNotification(notification)) {
                             navigate(createCommunityPostPath(notification.postId));
                           }
                         }}
@@ -1374,15 +1379,11 @@ const Profile = () => {
                       >
                         <strong style={profileUi.communityItemTitle}>{notification.actorName || "A student"}</strong>
                         <span style={profileUi.communityItemText}>
-                          {notification.type === "adminAnnouncement"
-                            ? `: ${notification.title || "New announcement"}`
-                            : notification.type === "comment"
-                            ? "commented on"
-                            : "liked"}{notification.type !== "adminAnnouncement" ? " your post" : ""}
+                          {getNotificationActionText(notification)}
                         </span>
-                        {notification.type === "adminAnnouncement" && notification.message && (
+                        {getNotificationPreview(notification) && (
                           <span style={{ ...profileUi.communityItemText, fontStyle: "italic", color: "#4b5563" }}>
-                            {notification.message}
+                            {getNotificationPreview(notification)}
                           </span>
                         )}
                         <span style={profileUi.communityItemMeta}>{formatCommunityDate(notification.createdAt)}</span>
