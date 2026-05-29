@@ -41,6 +41,19 @@ import SEO from '../components/SEO';
 const ADMIN_API = import.meta.env.VITE_ADMIN_API_BASE || '/api/admin';
 const ADMIN_REPORTS_LIMIT = 100;
 
+function getReportTarget(report = {}) {
+  const isCommentReport = report.targetType === 'comment' || Boolean(report.commentId);
+  const commentId = report.commentId || (isCommentReport ? report.targetId : '');
+  const postId = report.postId || (!isCommentReport ? report.targetId : '');
+
+  return {
+    type: isCommentReport ? 'comment' : 'post',
+    label: isCommentReport ? 'comment' : 'post',
+    postId,
+    commentId,
+  };
+}
+
 async function getAdminToken() {
   const token = await auth.currentUser?.getIdToken();
   if (!token) throw new Error('Not authenticated');
@@ -425,26 +438,32 @@ function CommunityTab() {
   };
 
   const handleRemove = async (report) => {
-    const contentLabel = report.targetType === 'comment' ? 'comment' : 'post';
+    const target = getReportTarget(report);
+    const contentLabel = target.label;
     if (!window.confirm(`Remove this ${contentLabel} and resolve the report? This cannot be undone.`)) {
       return;
     }
     setBusy(report.id);
     try {
-      if (report.targetType === 'comment' && report.postId && report.targetId) {
+      if (target.type === 'comment') {
+        if (!target.postId || !target.commentId) {
+          throw new Error('Comment report is missing postId or commentId.');
+        }
         // Remove just the offending comment
-        await deleteDoc(doc(db, 'communityPosts', report.postId, 'comments', report.targetId));
-      } else if (report.postId) {
+        await deleteDoc(doc(db, 'communityPosts', target.postId, 'comments', target.commentId));
+      } else if (target.postId) {
         // Remove the post together with all its subcollections
         const [likesSnap, commentsSnap] = await Promise.all([
-          getDocs(collection(db, 'communityPosts', report.postId, 'likes')),
-          getDocs(collection(db, 'communityPosts', report.postId, 'comments')),
+          getDocs(collection(db, 'communityPosts', target.postId, 'likes')),
+          getDocs(collection(db, 'communityPosts', target.postId, 'comments')),
         ]);
         const cleanupBatch = writeBatch(db);
         likesSnap.docs.forEach((d) => cleanupBatch.delete(d.ref));
         commentsSnap.docs.forEach((d) => cleanupBatch.delete(d.ref));
         await cleanupBatch.commit();
-        await deleteDoc(doc(db, 'communityPosts', report.postId));
+        await deleteDoc(doc(db, 'communityPosts', target.postId));
+      } else {
+        throw new Error('Post report is missing postId.');
       }
       await updateDoc(doc(db, 'communityReports', report.id), {
         status: 'removed',
@@ -495,42 +514,46 @@ function CommunityTab() {
         <p className="admin-empty">No {filter} reports.</p>
       ) : (
         <div className="admin-report-list">
-          {filtered.map((r) => (
-            <div key={r.id} className={`admin-report-card admin-report-card--${r.status}`}>
-              <div className="admin-report-meta">
-                <span className={`admin-report-status admin-report-status--${r.status}`}>
-                  {r.status}
-                </span>
-                <span className="admin-report-type">{r.targetType}</span>
-                <span className="admin-report-reason">{r.reason}</span>
-              </div>
-              <p className="admin-report-preview">
-                &ldquo;{r.contentPreview}&rdquo;
-              </p>
-              <div className="admin-report-reporter">
-                Reported by <strong>{r.reporterName}</strong>
-              </div>
-              {r.status === 'open' && (
-                <div className="admin-report-actions">
-                  <button
-                    className="admin-btn admin-btn--sm admin-btn--ghost"
-                    onClick={() => handleReview(r.id)}
-                    disabled={busy === r.id}
-                  >
-                    {busy === r.id ? <FaSpinner className="admin-spin" /> : <FaEye />} Dismiss
-                  </button>
-                  <button
-                    className="admin-btn admin-btn--sm admin-btn--danger"
-                    onClick={() => handleRemove(r)}
-                    disabled={busy === r.id}
-                  >
-                    {busy === r.id ? <FaSpinner className="admin-spin" /> : <FaTrash />}
-                    {' '}{r.targetType === 'comment' ? 'Remove Comment' : 'Remove Post'}
-                  </button>
+          {filtered.map((r) => {
+            const target = getReportTarget(r);
+
+            return (
+              <div key={r.id} className={`admin-report-card admin-report-card--${r.status}`}>
+                <div className="admin-report-meta">
+                  <span className={`admin-report-status admin-report-status--${r.status}`}>
+                    {r.status}
+                  </span>
+                  <span className="admin-report-type">{target.label}</span>
+                  <span className="admin-report-reason">{r.reason}</span>
                 </div>
-              )}
-            </div>
-          ))}
+                <p className="admin-report-preview">
+                  &ldquo;{r.contentPreview}&rdquo;
+                </p>
+                <div className="admin-report-reporter">
+                  Reported by <strong>{r.reporterName}</strong>
+                </div>
+                {r.status === 'open' && (
+                  <div className="admin-report-actions">
+                    <button
+                      className="admin-btn admin-btn--sm admin-btn--ghost"
+                      onClick={() => handleReview(r.id)}
+                      disabled={busy === r.id}
+                    >
+                      {busy === r.id ? <FaSpinner className="admin-spin" /> : <FaEye />} Dismiss
+                    </button>
+                    <button
+                      className="admin-btn admin-btn--sm admin-btn--danger"
+                      onClick={() => handleRemove(r)}
+                      disabled={busy === r.id}
+                    >
+                      {busy === r.id ? <FaSpinner className="admin-spin" /> : <FaTrash />}
+                      {' '}Remove {target.label.charAt(0).toUpperCase() + target.label.slice(1)}
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
