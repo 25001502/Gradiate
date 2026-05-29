@@ -4867,6 +4867,7 @@ body {
   position: absolute;
   top: calc(100% + 0.75rem);
   right: 0;
+  z-index: 110;
   width: min(340px, calc(100vw - 32px));
   max-height: 430px;
   overflow-y: auto;
@@ -4914,6 +4915,11 @@ body {
   cursor: pointer;
   padding: 0.78rem;
   text-align: left;
+}
+
+.community-notification > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .community-notification-list--popover .community-notification {
@@ -5139,8 +5145,13 @@ body {
   }
 
   .community-notification-popover {
-    right: -58px;
-    width: min(330px, calc(100vw - 24px));
+    position: fixed;
+    top: 72px;
+    right: 12px;
+    left: 12px;
+    width: auto;
+    max-height: calc(100dvh - 96px);
+    border-radius: 14px;
   }
 
   .community-shell {
