@@ -70,6 +70,18 @@ export default function CommunityPostDetail() {
   const commentCount = getPostCommentCount(post || {}, engagement);
   const canManagePost = post && (user?.uid === post.authorId || isCommunityAdmin);
   const questionStatus = post?.category === "questions" ? (post.isAnswered ? "Answered" : "Unanswered") : "";
+  const postAvatarProps =
+    post && user?.uid === post.authorId
+      ? {
+          photoURL: userProfile?.photoURL || user?.photoURL || "",
+          avatarSeed: userProfile?.avatarSeed || user.uid,
+          avatarStyle: userProfile?.avatarStyle,
+        }
+      : {
+          photoURL: post?.authorPhotoURL,
+          avatarSeed: post?.authorAvatarSeed,
+          avatarStyle: post?.authorAvatarStyle,
+        };
 
   const commentsEngagement = useMemo(
     () => ({
@@ -531,9 +543,9 @@ export default function CommunityPostDetail() {
               <div className="community-author">
                 <CommunityAvatar
                   name={post.authorName}
-                  photoURL={post.authorPhotoURL}
-                  avatarSeed={post.authorAvatarSeed}
-                  avatarStyle={post.authorAvatarStyle}
+                  photoURL={postAvatarProps.photoURL}
+                  avatarSeed={postAvatarProps.avatarSeed}
+                  avatarStyle={postAvatarProps.avatarStyle}
                 />
                 <div>
                   <h3>

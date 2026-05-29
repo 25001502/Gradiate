@@ -130,6 +130,21 @@ export default function Community() {
   const trimmedPostDraft = postDraft.trim();
   const postCharactersLeft = MAX_POST_LENGTH - postDraft.length;
   const mobileViewSortValue = activeView === "feed" ? `sort:${activeSort}` : `view:${activeView}`;
+  const getPostAvatarProps = (post) => {
+    if (user?.uid && post.authorId === user.uid) {
+      return {
+        photoURL: userProfile?.photoURL || user?.photoURL || "",
+        avatarSeed: userProfile?.avatarSeed || user.uid,
+        avatarStyle: userProfile?.avatarStyle,
+      };
+    }
+
+    return {
+      photoURL: post.authorPhotoURL,
+      avatarSeed: post.authorAvatarSeed,
+      avatarStyle: post.authorAvatarStyle,
+    };
+  };
 
   useEffect(() => {
     const postsQuery = query(
@@ -1419,6 +1434,7 @@ export default function Community() {
                 {filteredPosts.map((post) => {
                   const category = categoryByKey[post.category] || categoryByKey.general;
                   const engagement = engagementByPost[post.id] || {};
+                  const avatarProps = getPostAvatarProps(post);
                   const isEditing = editingPostId === post.id;
                   const isSaved = savedPostIds.has(post.id);
                   const canManagePost = user?.uid === post.authorId || isCommunityAdmin;
@@ -1434,9 +1450,9 @@ export default function Community() {
                         <div className="community-author">
                           <CommunityAvatar
                             name={post.authorName}
-                            photoURL={post.authorPhotoURL}
-                            avatarSeed={post.authorAvatarSeed}
-                            avatarStyle={post.authorAvatarStyle}
+                            photoURL={avatarProps.photoURL}
+                            avatarSeed={avatarProps.avatarSeed}
+                            avatarStyle={avatarProps.avatarStyle}
                           />
                           <div>
                             <h3>
