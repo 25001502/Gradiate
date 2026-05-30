@@ -6,6 +6,7 @@ import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import cors from "cors";
 import express from "express";
 
+import { createHash } from "node:crypto";
 import process from "node:process";
 import { Resend } from "resend";
 
@@ -59,6 +60,184 @@ const api = express();
 api.use(cors({ origin: true }));
 api.use(express.json());
 
+const EMAIL_VERIFICATION_COOLDOWN_MS = 5 * 60 * 1000;
+const VERIFICATION_RATE_LIMITS = {
+  emailDailyMax: 5,
+  connectionWindowMs: 15 * 60 * 1000,
+  connectionWindowMax: 3,
+  connectionDailyMax: 10,
+  clientWindowMs: 60 * 60 * 1000,
+  clientWindowMax: 3,
+  clientDailyMax: 8,
+};
+
+class RateLimitError extends Error {
+  constructor(message, retryAfterSeconds, code = "rate_limited") {
+    super(message);
+    this.name = "RateLimitError";
+    this.retryAfterSeconds = retryAfterSeconds;
+    this.code = code;
+  }
+}
+
+function hashValue(value) {
+  return createHash("sha256").update(String(value)).digest("hex");
+}
+
+function normalizeEmail(email) {
+  return String(email || "").trim().toLowerCase();
+}
+
+function getRequestIp(req) {
+  const forwardedFor = req.headers["x-forwarded-for"];
+  const rawForwardedFor = Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor;
+  return String(rawForwardedFor || req.ip || req.socket?.remoteAddress || "unknown")
+    .split(",")[0]
+    .trim() || "unknown";
+}
+
+function normalizeClientId(clientId) {
+  const normalized = String(clientId || "").trim();
+  if (!normalized || normalized.length > 128) {
+    return null;
+  }
+  return normalized;
+}
+
+function getUtcDayKey(nowMs) {
+  return new Date(nowMs).toISOString().slice(0, 10);
+}
+
+function getNextUtcDayMs(nowMs) {
+  const now = new Date(nowMs);
+  return Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1);
+}
+
+function secondsUntil(targetMs, nowMs) {
+  return Math.max(1, Math.ceil((targetMs - nowMs) / 1000));
+}
+
+function getRateState(snapshot, config, nowMs, dayKey) {
+  const data = snapshot.exists ? snapshot.data() : {};
+  const dayCount = data.dayKey === dayKey ? Number(data.dayCount) || 0 : 0;
+  const lastSentAtMs = Number(data.lastSentAtMs) || 0;
+
+  let windowStartMs = nowMs;
+  let windowCount = 0;
+  if (config.windowMs) {
+    const existingWindowStartMs = Number(data.windowStartMs) || 0;
+    const existingWindowActive =
+      existingWindowStartMs > 0 && nowMs - existingWindowStartMs < config.windowMs;
+
+    windowStartMs = existingWindowActive ? existingWindowStartMs : nowMs;
+    windowCount = existingWindowActive ? Number(data.windowCount) || 0 : 0;
+  }
+
+  return {
+    dayCount,
+    lastSentAtMs,
+    windowStartMs,
+    windowCount,
+  };
+}
+
+function assertRateLimit(config, state, nowMs) {
+  if (
+    config.cooldownMs &&
+    state.lastSentAtMs &&
+    nowMs - state.lastSentAtMs < config.cooldownMs
+  ) {
+    throw new RateLimitError(
+      "Please wait before requesting another verification email.",
+      secondsUntil(state.lastSentAtMs + config.cooldownMs, nowMs),
+      "cooldown"
+    );
+  }
+
+  if (config.dailyMax && state.dayCount >= config.dailyMax) {
+    throw new RateLimitError(
+      "Too many verification email requests today. Please try again later.",
+      secondsUntil(getNextUtcDayMs(nowMs), nowMs)
+    );
+  }
+
+  if (
+    config.windowMs &&
+    config.windowMax &&
+    state.windowCount >= config.windowMax
+  ) {
+    throw new RateLimitError(
+      "Too many verification email requests. Please wait before trying again.",
+      secondsUntil(state.windowStartMs + config.windowMs, nowMs)
+    );
+  }
+}
+
+async function enforceVerificationRateLimit({ emailHash, connectionHash, clientHash, uid, reason }) {
+  const nowMs = Date.now();
+  const dayKey = getUtcDayKey(nowMs);
+  const rateLimitCollection = adminDb.collection("verificationRateLimits");
+  const configs = [
+    {
+      kind: "email",
+      ref: rateLimitCollection.doc(`email_${emailHash}`),
+      cooldownMs: EMAIL_VERIFICATION_COOLDOWN_MS,
+      dailyMax: VERIFICATION_RATE_LIMITS.emailDailyMax,
+    },
+    {
+      kind: "connection",
+      ref: rateLimitCollection.doc(`connection_${connectionHash}`),
+      windowMs: VERIFICATION_RATE_LIMITS.connectionWindowMs,
+      windowMax: VERIFICATION_RATE_LIMITS.connectionWindowMax,
+      dailyMax: VERIFICATION_RATE_LIMITS.connectionDailyMax,
+    },
+  ];
+
+  if (clientHash) {
+    configs.push({
+      kind: "client",
+      ref: rateLimitCollection.doc(`client_${clientHash}`),
+      windowMs: VERIFICATION_RATE_LIMITS.clientWindowMs,
+      windowMax: VERIFICATION_RATE_LIMITS.clientWindowMax,
+      dailyMax: VERIFICATION_RATE_LIMITS.clientDailyMax,
+    });
+  }
+
+  await adminDb.runTransaction(async (transaction) => {
+    const snapshots = await Promise.all(configs.map((config) => transaction.get(config.ref)));
+    const states = snapshots.map((snapshot, index) =>
+      getRateState(snapshot, configs[index], nowMs, dayKey)
+    );
+
+    configs.forEach((config, index) => {
+      assertRateLimit(config, states[index], nowMs);
+    });
+
+    configs.forEach((config, index) => {
+      const state = states[index];
+      const nextData = {
+        kind: config.kind,
+        dayKey,
+        dayCount: state.dayCount + 1,
+        lastSentAtMs: nowMs,
+        updatedAt: FieldValue.serverTimestamp(),
+        lastReason: reason,
+      };
+
+      if (uid) {
+        nextData.uidHash = hashValue(uid);
+      }
+
+      if (config.windowMs) {
+        nextData.windowStartMs = state.windowStartMs;
+        nextData.windowCount = state.windowCount + 1;
+      }
+
+      transaction.set(config.ref, nextData, { merge: true });
+    });
+  });
+}
+
 function verificationEmailTemplate(verificationLink) {
   return `
   <div style="font-family:Arial,Helvetica,sans-serif;background:#f6f8fb;padding:24px;color:#1f2937;">
@@ -77,40 +256,105 @@ function verificationEmailTemplate(verificationLink) {
   </div>`;
 }
 
-api.post("/send-verification", async (req, res) => {
+api.post(["/send-verification", "/api/send-verification"], async (req, res) => {
   try {
-    const { email, idToken } = req.body || {};
-    if (!email || typeof email !== "string") {
+    const { email, idToken, clientId, reason } = req.body || {};
+    const normalizedEmail = normalizeEmail(email);
+    const safeReason = String(reason || "manual").trim().slice(0, 32) || "manual";
+
+    if (
+      !normalizedEmail ||
+      typeof email !== "string" ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)
+    ) {
       return res.status(400).json({ error: "A valid email is required." });
     }
 
+    let decodedUid = null;
     if (idToken) {
       const decodedToken = await adminAuth.verifyIdToken(idToken);
-      if (decodedToken.email && decodedToken.email !== email) {
+      decodedUid = decodedToken.uid;
+      if (decodedToken.email && normalizeEmail(decodedToken.email) !== normalizedEmail) {
         return res.status(403).json({ error: "Email mismatch for authenticated user." });
       }
     }
-
-    const verificationLink = await adminAuth.generateEmailVerificationLink(email, {
-      url: process.env.VERIFICATION_CONTINUE_URL || "https://gradiate.co.za/auth",
-      handleCodeInApp: false,
-    });
 
     const resendApiKey = process.env.RESEND_API_KEY;
     if (!resendApiKey) {
       return res.status(500).json({ error: "RESEND_API_KEY is not configured." });
     }
 
+    const authUser = await adminAuth.getUserByEmail(normalizedEmail).catch((error) => {
+      if (error.code === "auth/user-not-found") {
+        return null;
+      }
+      throw error;
+    });
+
+    if (!authUser) {
+      return res.status(200).json({ success: true, skipped: true });
+    }
+
+    if (authUser.emailVerified) {
+      return res.status(200).json({ success: true, alreadyVerified: true });
+    }
+
+    const emailHash = hashValue(normalizedEmail);
+    const connectionHash = hashValue(getRequestIp(req));
+    const normalizedClientId = normalizeClientId(clientId);
+    const clientHash = normalizedClientId ? hashValue(normalizedClientId) : null;
+
+    await enforceVerificationRateLimit({
+      emailHash,
+      connectionHash,
+      clientHash,
+      uid: decodedUid || authUser.uid,
+      reason: safeReason,
+    });
+
+    const verificationLink = await adminAuth.generateEmailVerificationLink(normalizedEmail, {
+      url: process.env.VERIFICATION_CONTINUE_URL || "https://gradiate.co.za/auth",
+      handleCodeInApp: false,
+    });
+
     const resend = new Resend(resendApiKey);
     await resend.emails.send({
       from: process.env.RESEND_FROM_EMAIL || "Gradiate <noreply@gradiate.co.za>",
-      to: email,
+      to: normalizedEmail,
       subject: "Verify your Gradiate account",
       html: verificationEmailTemplate(verificationLink),
     });
 
-    return res.status(200).json({ success: true });
+    try {
+      await adminDb.collection("verificationEmailRequests").add({
+        emailHash,
+        connectionHash,
+        clientHash: clientHash || null,
+        uidHash: hashValue(authUser.uid),
+        reason: safeReason,
+        status: "sent",
+        createdAt: FieldValue.serverTimestamp(),
+      });
+    } catch (logError) {
+      console.error("Failed to write verification email audit log:", logError.message);
+    }
+
+    return res.status(200).json({
+      success: true,
+      cooldownSeconds: Math.ceil(EMAIL_VERIFICATION_COOLDOWN_MS / 1000),
+    });
   } catch (error) {
+    if (error instanceof RateLimitError || error.name === "RateLimitError") {
+      return res
+        .status(429)
+        .set("Retry-After", String(error.retryAfterSeconds))
+        .json({
+          error: error.message,
+          code: error.code,
+          retryAfterSeconds: error.retryAfterSeconds,
+        });
+    }
+
     console.error("Error in /api/send-verification:", error);
     return res.status(500).json({ error: error.message || "Failed to send verification email." });
   }

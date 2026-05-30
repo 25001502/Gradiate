@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   createUserWithEmailAndPassword,
@@ -53,6 +53,49 @@ const PASSWORD_RULES = [
   },
 ];
 
+const VERIFICATION_CLIENT_ID_KEY = "gradiate_verification_client_id";
+const VERIFICATION_COOLDOWN_KEY = "gradiate_verification_resend_available_at";
+
+const createFallbackClientId = () =>
+  `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+
+const getVerificationClientId = () => {
+  try {
+    const existingClientId = window.localStorage.getItem(VERIFICATION_CLIENT_ID_KEY);
+    if (existingClientId) {
+      return existingClientId;
+    }
+
+    const newClientId =
+      window.crypto && typeof window.crypto.randomUUID === "function"
+        ? window.crypto.randomUUID()
+        : createFallbackClientId();
+
+    window.localStorage.setItem(VERIFICATION_CLIENT_ID_KEY, newClientId);
+    return newClientId;
+  } catch {
+    return createFallbackClientId();
+  }
+};
+
+const getStoredVerificationCooldown = () => {
+  try {
+    return Number(window.localStorage.getItem(VERIFICATION_COOLDOWN_KEY)) || 0;
+  } catch {
+    return 0;
+  }
+};
+
+const formatCooldown = (milliseconds) => {
+  const totalSeconds = Math.max(0, Math.ceil(milliseconds / 1000));
+  if (totalSeconds >= 60) {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = String(totalSeconds % 60).padStart(2, "0");
+    return `${minutes}:${seconds}`;
+  }
+  return `${totalSeconds}s`;
+};
+
 const getPasswordStrength = (password = "") => {
   const checks = PASSWORD_RULES.map((rule) => ({
     key: rule.key,
@@ -103,10 +146,48 @@ export default function AuthForm() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [pendingVerificationEmail, setPendingVerificationEmail] = useState("");
+  const [resendingVerification, setResendingVerification] = useState(false);
+  const [resendAvailableAt, setResendAvailableAt] = useState(getStoredVerificationCooldown);
+  const [resendNow, setResendNow] = useState(Date.now());
   const passwordStrength = useMemo(() => getPasswordStrength(password), [password]);
   const navigate = useNavigate();
+  const resendCooldownMs = Math.max(0, resendAvailableAt - resendNow);
 
-  const sendCustomVerificationEmail = async (targetEmail) => {
+  useEffect(() => {
+    if (resendAvailableAt <= Date.now()) {
+      return undefined;
+    }
+
+    const timerId = window.setInterval(() => {
+      const now = Date.now();
+      setResendNow(now);
+      if (now >= resendAvailableAt) {
+        window.clearInterval(timerId);
+      }
+    }, 1000);
+
+    return () => window.clearInterval(timerId);
+  }, [resendAvailableAt]);
+
+  const saveVerificationCooldown = (seconds) => {
+    const cooldownSeconds = Number(seconds);
+    if (!Number.isFinite(cooldownSeconds) || cooldownSeconds <= 0) {
+      return;
+    }
+
+    const nextAvailableAt = Date.now() + cooldownSeconds * 1000;
+    setResendNow(Date.now());
+    setResendAvailableAt(nextAvailableAt);
+
+    try {
+      window.localStorage.setItem(VERIFICATION_COOLDOWN_KEY, String(nextAvailableAt));
+    } catch {
+      // Local storage can be blocked; server-side throttling still applies.
+    }
+  };
+
+  const sendCustomVerificationEmail = async (targetEmail, reason = "manual") => {
     const idToken = auth.currentUser ? await auth.currentUser.getIdToken() : null;
     const response = await fetch(verificationEndpoint, {
       method: "POST",
@@ -116,16 +197,30 @@ export default function AuthForm() {
       body: JSON.stringify({
         email: targetEmail,
         idToken,
+        clientId: getVerificationClientId(),
+        reason,
       }),
     });
 
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
+      if (data.retryAfterSeconds) {
+        saveVerificationCooldown(data.retryAfterSeconds);
+      }
       if (response.status === 404) {
         throw new Error("Verification service is unavailable. Start Firebase Functions emulator or deploy functions.");
       }
+      if (response.status === 429) {
+        throw new Error(data.error || "Please wait before requesting another verification email.");
+      }
       throw new Error(data.error || "Failed to send verification email.");
     }
+
+    if (data.cooldownSeconds) {
+      saveVerificationCooldown(data.cooldownSeconds);
+    }
+
+    return data;
   };
 
   // Email/password handlers
@@ -154,15 +249,13 @@ export default function AuthForm() {
       if (isLogin) {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         if (!userCredential.user.emailVerified) {
-          toast.error("Please verify your email before logging in.");
-          try {
-            await sendCustomVerificationEmail(userCredential.user.email);
-            toast.success("Verification email re-sent!");
-          } finally {
-            await signOut(auth);
-          }
+          const unverifiedEmail = userCredential.user.email || email.trim();
+          setPendingVerificationEmail(unverifiedEmail);
+          toast.error("Your email is not verified. Check your inbox or request a new verification email.");
+          await signOut(auth);
           return;
         }
+        setPendingVerificationEmail("");
       } else {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         await updateProfile(userCredential.user, { displayName: username });
@@ -181,8 +274,10 @@ export default function AuthForm() {
           },
           { merge: true }
         );
+        const createdEmail = userCredential.user.email || email.trim();
+        setPendingVerificationEmail(createdEmail);
         try {
-          await sendCustomVerificationEmail(userCredential.user.email);
+          await sendCustomVerificationEmail(createdEmail, "signup");
           toast.success("Verification email sent! Please verify before logging in.");
         } finally {
           await signOut(auth);
@@ -194,6 +289,35 @@ export default function AuthForm() {
       toast.error(error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendVerificationEmail = async () => {
+    const targetEmail = pendingVerificationEmail || email.trim();
+    if (!targetEmail) {
+      toast.error("Enter your email first.");
+      return;
+    }
+
+    const remainingCooldownMs = Math.max(0, resendAvailableAt - Date.now());
+    if (remainingCooldownMs > 0) {
+      toast.error(`Please wait ${formatCooldown(remainingCooldownMs)} before requesting another email.`);
+      return;
+    }
+
+    setPendingVerificationEmail(targetEmail);
+    setResendingVerification(true);
+    try {
+      const result = await sendCustomVerificationEmail(targetEmail, "manual");
+      if (result.alreadyVerified) {
+        toast.success("Email is already verified. You can log in now.");
+      } else {
+        toast.success("Verification email sent. Check your inbox.");
+      }
+    } catch (error) {
+      toast.error(error.message || "Failed to send verification email.");
+    } finally {
+      setResendingVerification(false);
     }
   };
 
@@ -375,6 +499,25 @@ export default function AuthForm() {
                   ? "Need an account? Sign up"
                   : "Already have an account? Log in"}
               </button>
+              {pendingVerificationEmail && (
+                <div className="verification-resend-card" role="status">
+                  <span>
+                    Not verified? Check <strong>{pendingVerificationEmail}</strong>.
+                  </span>
+                  <button
+                    type="button"
+                    className="auth-link-btn auth-link-btn-secondary verification-resend-button"
+                    onClick={handleResendVerificationEmail}
+                    disabled={loading || resendingVerification || resendCooldownMs > 0}
+                  >
+                    {resendingVerification
+                      ? "Sending..."
+                      : resendCooldownMs > 0
+                        ? `Resend in ${formatCooldown(resendCooldownMs)}`
+                        : "Resend verification email"}
+                  </button>
+                </div>
+              )}
              
               
               
@@ -755,6 +898,38 @@ export default function AuthForm() {
     color: #2563eb;
   }
 
+  .verification-resend-card {
+    width: 100%;
+    display: grid;
+    gap: 0.45rem;
+    text-align: left;
+    border: 1px solid #dbeafe;
+    border-radius: 12px;
+    background: #f8fbff;
+    padding: 0.72rem 0.8rem;
+    color: #475569;
+    font-size: 0.82rem;
+    line-height: 1.35;
+  }
+
+  .verification-resend-card strong {
+    color: #0f172a;
+    word-break: break-word;
+  }
+
+  .verification-resend-button {
+    align-self: start;
+    justify-self: start;
+    padding: 0;
+  }
+
+  .verification-resend-button:disabled {
+    color: #94a3b8;
+    cursor: not-allowed;
+    border-color: transparent;
+    transform: none;
+  }
+
   .auth-link-btn {
     transition: color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
   }
@@ -794,6 +969,11 @@ export default function AuthForm() {
     }
     .login-form label {
       font-size: 0.97rem !important;
+    }
+
+    .verification-resend-button {
+      padding: 0 !important;
+      font-size: 0.88rem !important;
     }
   }
 `}</style>
