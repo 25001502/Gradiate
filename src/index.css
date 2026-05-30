@@ -71,6 +71,88 @@
         gap: 0.5rem;
     }
 }
+
+.pwa-install-prompt {
+  position: fixed;
+  right: 1rem;
+  bottom: calc(1rem + env(safe-area-inset-bottom));
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: min(420px, calc(100vw - 2rem));
+  padding: 0.85rem;
+  border: 1px solid #bfdbfe;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.18);
+}
+
+.pwa-install-prompt strong {
+  display: block;
+  margin-bottom: 0.18rem;
+  color: #0f172a;
+  font-size: 0.95rem;
+}
+
+.pwa-install-prompt p {
+  margin: 0;
+  color: #475569;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.pwa-install-prompt__actions {
+  display: flex;
+  gap: 0.45rem;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.pwa-install-prompt__primary,
+.pwa-install-prompt__secondary {
+  min-height: 38px;
+  border-radius: 10px;
+  padding: 0 0.85rem;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pwa-install-prompt__primary {
+  border: 0;
+  background: #2563eb;
+  color: #fff;
+}
+
+.pwa-install-prompt__secondary {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #334155;
+}
+
+@media (max-width: 560px) {
+  .pwa-install-prompt {
+    right: 0.75rem;
+    left: 0.75rem;
+    bottom: calc(0.75rem + env(safe-area-inset-bottom));
+    width: auto;
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+
+  .pwa-install-prompt__actions {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .pwa-install-prompt__primary,
+  .pwa-install-prompt__secondary {
+    flex: 1;
+  }
+}
 /* Login form styles */
 .login-container {
   max-width: 350px;

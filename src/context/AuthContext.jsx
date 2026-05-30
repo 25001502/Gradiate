@@ -41,6 +41,15 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
+      if (!currentUser.emailVerified) {
+        setUser(null);
+        setIsAdmin(false);
+        setAdminData(null);
+        setAdminLoading(false);
+        setLoading(false);
+        return;
+      }
+
       setUser(currentUser);
       setLoading(false);
 

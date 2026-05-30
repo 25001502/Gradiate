@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Startup from './pages/Startup';
+import PwaInstallPrompt from './components/PwaInstallPrompt';
 import { useAuth } from './context/useAuth';
 import { useFirestoreNetworkLifecycle } from './lib/firebase/useFirestoreNetworkLifecycle';
 import { legacyRouteRedirects, routes } from './lib/routes';
@@ -18,10 +19,14 @@ const Community = lazy(() => import('./pages/Community'));
 const CommunityPostDetail = lazy(() => import('./pages/CommunityPostDetail'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 
+function isVerifiedUser(user) {
+  return Boolean(user?.uid && user.emailVerified);
+}
+
 function ProtectedProfileRoute() {
   const { user } = useAuth();
 
-  if (!user?.uid) {
+  if (!isVerifiedUser(user)) {
     return <Navigate to={routes.auth} replace />;
   }
 
@@ -31,7 +36,7 @@ function ProtectedProfileRoute() {
 function ProtectedAdminRoute() {
   const { user, isAdmin, adminLoading } = useAuth();
 
-  if (!user?.uid) {
+  if (!isVerifiedUser(user)) {
     return <Navigate to={routes.auth} replace />;
   }
 
@@ -70,35 +75,38 @@ function App() {
   const legacyRoutes = Object.entries(legacyRouteRedirects);
 
   return (
-    <Router>
-      <Suspense fallback={<RouteFallback />}>
-        <Routes>
-          <Route path={routes.home} element={<Startup />} />
-          <Route path={routes.auth} element={<AuthForm />} />
-          <Route path={routes.application} element={<Application />} />
-          <Route path={routes.bursaries} element={<Bursaryguest />} />
-          <Route path={routes.programs} element={<ProgramsGuest />} />
-          <Route path={routes.howItWorks} element={<How />} />
-          <Route path={routes.about} element={<About />} />
-          <Route path={routes.practice} element={<Practise />} />
-          <Route path={routes.profile} element={<ProtectedProfileRoute />} />
-          <Route path={routes.bursaryDashboard} element={<Bursary />} />
-          <Route path={routes.community} element={<Community />} />
-          <Route path={routes.communityPost} element={<CommunityPostDetail />} />
-          <Route path={routes.admin} element={<ProtectedAdminRoute />} />
+    <>
+      <Router>
+        <Suspense fallback={<RouteFallback />}>
+          <Routes>
+            <Route path={routes.home} element={<Startup />} />
+            <Route path={routes.auth} element={<AuthForm />} />
+            <Route path={routes.application} element={<Application />} />
+            <Route path={routes.bursaries} element={<Bursaryguest />} />
+            <Route path={routes.programs} element={<ProgramsGuest />} />
+            <Route path={routes.howItWorks} element={<How />} />
+            <Route path={routes.about} element={<About />} />
+            <Route path={routes.practice} element={<Practise />} />
+            <Route path={routes.profile} element={<ProtectedProfileRoute />} />
+            <Route path={routes.bursaryDashboard} element={<Bursary />} />
+            <Route path={routes.community} element={<Community />} />
+            <Route path={routes.communityPost} element={<CommunityPostDetail />} />
+            <Route path={routes.admin} element={<ProtectedAdminRoute />} />
 
-          {legacyRoutes.map(([legacyPath, canonicalPath]) => (
-            <Route
-              key={legacyPath}
-              path={legacyPath}
-              element={<Navigate to={canonicalPath} replace />}
-            />
-          ))}
+            {legacyRoutes.map(([legacyPath, canonicalPath]) => (
+              <Route
+                key={legacyPath}
+                path={legacyPath}
+                element={<Navigate to={canonicalPath} replace />}
+              />
+            ))}
 
-          <Route path="*" element={<Navigate to={routes.home} replace />} />
-        </Routes>
-      </Suspense>
-    </Router>
+            <Route path="*" element={<Navigate to={routes.home} replace />} />
+          </Routes>
+        </Suspense>
+      </Router>
+      <PwaInstallPrompt />
+    </>
   );
 }
 

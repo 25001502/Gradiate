@@ -155,8 +155,12 @@ export default function AuthForm() {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         if (!userCredential.user.emailVerified) {
           toast.error("Please verify your email before logging in.");
-          await sendCustomVerificationEmail(userCredential.user.email);
-          toast.success("Verification email re-sent!");
+          try {
+            await sendCustomVerificationEmail(userCredential.user.email);
+            toast.success("Verification email re-sent!");
+          } finally {
+            await signOut(auth);
+          }
           return;
         }
       } else {
@@ -177,8 +181,12 @@ export default function AuthForm() {
           },
           { merge: true }
         );
-        await sendCustomVerificationEmail(userCredential.user.email);
-        toast.success("Verification email sent! Please verify before logging in.");
+        try {
+          await sendCustomVerificationEmail(userCredential.user.email);
+          toast.success("Verification email sent! Please verify before logging in.");
+        } finally {
+          await signOut(auth);
+        }
         return;
       }
       navigate(routes.application);
