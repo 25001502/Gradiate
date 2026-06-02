@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 const DISMISS_KEY = 'gradiate_pwa_install_dismissed_at';
+const IOS_DISMISS_KEY = 'gradiate_pwa_ios_install_dismissed_at';
 const DISMISS_FOR_MS = 7 * 24 * 60 * 60 * 1000;
 
 function isStandaloneDisplayMode() {
@@ -10,18 +11,27 @@ function isStandaloneDisplayMode() {
   );
 }
 
-function wasRecentlyDismissed() {
+function isIosDevice() {
+  const userAgent = window.navigator.userAgent || '';
+  const platform = window.navigator.platform || '';
+  const isModernIpad =
+    platform === 'MacIntel' && Number(window.navigator.maxTouchPoints) > 1;
+
+  return /iPhone|iPad|iPod/i.test(userAgent) || isModernIpad;
+}
+
+function wasRecentlyDismissed(key = DISMISS_KEY) {
   try {
-    const dismissedAt = Number(localStorage.getItem(DISMISS_KEY));
+    const dismissedAt = Number(localStorage.getItem(key));
     return Boolean(dismissedAt && Date.now() - dismissedAt < DISMISS_FOR_MS);
   } catch {
     return false;
   }
 }
 
-function rememberDismissal() {
+function rememberDismissal(key = DISMISS_KEY) {
   try {
-    localStorage.setItem(DISMISS_KEY, Date.now().toString());
+    localStorage.setItem(key, Date.now().toString());
   } catch {
     // Storage can be unavailable in private browsing.
   }
@@ -31,22 +41,37 @@ export default function PwaInstallPrompt() {
   const [installPrompt, setInstallPrompt] = useState(null);
   const [updateRegistration, setUpdateRegistration] = useState(null);
   const [isHidden, setIsHidden] = useState(() => wasRecentlyDismissed());
+  const [isIosInstructionHidden, setIsIosInstructionHidden] = useState(() =>
+    wasRecentlyDismissed(IOS_DISMISS_KEY)
+  );
+  const [isIosInstallCandidate, setIsIosInstallCandidate] = useState(false);
 
   const canShowInstall = Boolean(installPrompt) && !isHidden;
   const canShowUpdate = Boolean(updateRegistration);
-  const isVisible = canShowInstall || canShowUpdate;
+  const canShowIosInstall =
+    isIosInstallCandidate && !isIosInstructionHidden && !canShowInstall && !canShowUpdate;
+  const isVisible = canShowInstall || canShowUpdate || canShowIosInstall;
 
   const title = useMemo(
-    () => (canShowUpdate ? 'Update Gradiate' : 'Install Gradiate'),
-    [canShowUpdate]
+    () => {
+      if (canShowUpdate) return 'Update Gradiate';
+      if (canShowIosInstall) return 'Install Gradiate on iPhone';
+      return 'Install Gradiate';
+    },
+    [canShowIosInstall, canShowUpdate]
   );
   const body = useMemo(
-    () =>
-      canShowUpdate
-        ? 'A fresh version is ready.'
-        : 'Add Gradiate to your home screen for a faster app-like experience.',
-    [canShowUpdate]
+    () => {
+      if (canShowUpdate) return 'A fresh version is ready.';
+      if (canShowIosInstall) return 'Tap Share in Safari, then Add to Home Screen.';
+      return 'Add Gradiate to your home screen for a faster app-like experience.';
+    },
+    [canShowIosInstall, canShowUpdate]
   );
+
+  useEffect(() => {
+    setIsIosInstallCandidate(isIosDevice() && !isStandaloneDisplayMode());
+  }, []);
 
   useEffect(() => {
     if (isStandaloneDisplayMode()) {
@@ -82,6 +107,12 @@ export default function PwaInstallPrompt() {
   }, []);
 
   const handleInstall = async () => {
+    if (canShowIosInstall) {
+      rememberDismissal(IOS_DISMISS_KEY);
+      setIsIosInstructionHidden(true);
+      return;
+    }
+
     if (canShowUpdate) {
       const waitingWorker = updateRegistration.waiting;
 
@@ -113,6 +144,12 @@ export default function PwaInstallPrompt() {
   };
 
   const handleDismiss = () => {
+    if (canShowIosInstall) {
+      rememberDismissal(IOS_DISMISS_KEY);
+      setIsIosInstructionHidden(true);
+      return;
+    }
+
     if (!canShowUpdate) {
       rememberDismissal();
       setIsHidden(true);
@@ -133,7 +170,7 @@ export default function PwaInstallPrompt() {
       </div>
       <div className="pwa-install-prompt__actions">
         <button className="pwa-install-prompt__primary" type="button" onClick={handleInstall}>
-          {canShowUpdate ? 'Refresh' : 'Install'}
+          {canShowUpdate ? 'Refresh' : canShowIosInstall ? 'Got it' : 'Install'}
         </button>
         <button className="pwa-install-prompt__secondary" type="button" onClick={handleDismiss}>
           Later
