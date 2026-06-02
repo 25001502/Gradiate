@@ -19,7 +19,6 @@ import {
 } from "firebase/firestore";
 import {
   FaBell,
-  FaBookOpen,
   FaBookmark,
   FaBullhorn,
   FaCheck,
@@ -27,9 +26,7 @@ import {
   FaEdit,
   FaExternalLinkAlt,
   FaFlag,
-  FaGraduationCap,
   FaHeart,
-  FaHome,
   FaPaperPlane,
   FaRegBookmark,
   FaRegHeart,
@@ -39,8 +36,6 @@ import {
   FaTimes,
   FaThumbtack,
   FaTrash,
-  FaUniversity,
-  FaUserCircle,
   FaUsers,
 } from "react-icons/fa";
 import CommunityAvatar from "../components/CommunityAvatar";
@@ -1191,19 +1186,6 @@ export default function Community() {
           </div>
           
         </header>
-
-        <div className="dashboard-shortcuts">
-          <button className="dashboard-shortcut" onClick={() => navigate(routes.application)} type="button">
-            <FaUniversity /> Application
-          </button>
-          <button className="dashboard-shortcut" onClick={() => navigate(routes.practice)} type="button">
-            <FaBookOpen /> Past Papers
-          </button>
-          <button className="dashboard-shortcut" onClick={() => navigate(routes.bursaryDashboard)} type="button">
-            <FaGraduationCap /> Bursaries
-          </button>
-          
-        </div>
 
         <div className="dashboard-stats">
           <div className="dashboard-stat">

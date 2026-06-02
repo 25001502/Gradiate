@@ -10,7 +10,6 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { db } from "../lib/firebase/firestore";
-import { routes } from "../lib/routes";
 import {
   FaTwitter,
   FaInstagram,
@@ -21,14 +20,8 @@ import {
   FaRegBookmark,
   FaExternalLinkAlt,
   FaMapMarkerAlt,
-  FaUserCircle,
-  FaPencilAlt,
-  FaGraduationCap,
-  FaBell,
   FaBalanceScale,
   FaClock,
-  FaSignOutAlt,
-  FaUsers,
 } from "react-icons/fa";
 
 // ── University data ──────────────────────────────────────────────────────────
@@ -564,27 +557,6 @@ export default function Aplication() {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-        </div>
-
-        {/* Quick Nav Shortcuts */}
-        <div className="dashboard-shortcuts">
-          <button
-            className="dashboard-shortcut"
-            onClick={() => navigate(isGuest ? routes.auth : routes.profile)}
-          >
-            <FaUserCircle /> {isGuest ? "Sign In / Create Account" : "My Profile"}
-          </button>
-          <button className="dashboard-shortcut" onClick={() => navigate(routes.practice)}>
-            <FaPencilAlt /> Past Papers
-          </button>
-          <button className="dashboard-shortcut" onClick={() => navigate(routes.bursaryDashboard)}>
-            <FaGraduationCap /> Bursaries
-          </button>
-          <button className="dashboard-shortcut" onClick={() => navigate(routes.community)}>
-            <FaUsers /> Community
-          </button>
-          
-          
         </div>
 
         {/* Stats */}

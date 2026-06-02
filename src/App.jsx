@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Startup from './pages/Startup';
+import BottomNavigation from './components/BottomNavigation';
 import PwaInstallPrompt from './components/PwaInstallPrompt';
 import { useAuth } from './context/useAuth';
 import { useFirestoreNetworkLifecycle } from './lib/firebase/useFirestoreNetworkLifecycle';
@@ -68,42 +69,63 @@ function RouteFallback() {
   );
 }
 
+function shouldShowBottomNavigation(pathname) {
+  return (
+    pathname === routes.application ||
+    pathname === routes.practice ||
+    pathname === routes.bursaryDashboard ||
+    pathname === routes.profile ||
+    pathname === routes.community ||
+    pathname.startsWith('/community/post/')
+  );
+}
 
-function App() {
-  useFirestoreNetworkLifecycle();
+function AppRoutes() {
+  const { pathname } = useLocation();
 
   const legacyRoutes = Object.entries(legacyRouteRedirects);
 
   return (
     <>
+      <Suspense fallback={<RouteFallback />}>
+        <Routes>
+          <Route path={routes.home} element={<Startup />} />
+          <Route path={routes.auth} element={<AuthForm />} />
+          <Route path={routes.application} element={<Application />} />
+          <Route path={routes.bursaries} element={<Bursaryguest />} />
+          <Route path={routes.programs} element={<ProgramsGuest />} />
+          <Route path={routes.howItWorks} element={<How />} />
+          <Route path={routes.about} element={<About />} />
+          <Route path={routes.practice} element={<Practise />} />
+          <Route path={routes.profile} element={<ProtectedProfileRoute />} />
+          <Route path={routes.bursaryDashboard} element={<Bursary />} />
+          <Route path={routes.community} element={<Community />} />
+          <Route path={routes.communityPost} element={<CommunityPostDetail />} />
+          <Route path={routes.admin} element={<ProtectedAdminRoute />} />
+
+          {legacyRoutes.map(([legacyPath, canonicalPath]) => (
+            <Route
+              key={legacyPath}
+              path={legacyPath}
+              element={<Navigate to={canonicalPath} replace />}
+            />
+          ))}
+
+          <Route path="*" element={<Navigate to={routes.home} replace />} />
+        </Routes>
+      </Suspense>
+      {shouldShowBottomNavigation(pathname) && <BottomNavigation />}
+    </>
+  );
+}
+
+function App() {
+  useFirestoreNetworkLifecycle();
+
+  return (
+    <>
       <Router>
-        <Suspense fallback={<RouteFallback />}>
-          <Routes>
-            <Route path={routes.home} element={<Startup />} />
-            <Route path={routes.auth} element={<AuthForm />} />
-            <Route path={routes.application} element={<Application />} />
-            <Route path={routes.bursaries} element={<Bursaryguest />} />
-            <Route path={routes.programs} element={<ProgramsGuest />} />
-            <Route path={routes.howItWorks} element={<How />} />
-            <Route path={routes.about} element={<About />} />
-            <Route path={routes.practice} element={<Practise />} />
-            <Route path={routes.profile} element={<ProtectedProfileRoute />} />
-            <Route path={routes.bursaryDashboard} element={<Bursary />} />
-            <Route path={routes.community} element={<Community />} />
-            <Route path={routes.communityPost} element={<CommunityPostDetail />} />
-            <Route path={routes.admin} element={<ProtectedAdminRoute />} />
-
-            {legacyRoutes.map(([legacyPath, canonicalPath]) => (
-              <Route
-                key={legacyPath}
-                path={legacyPath}
-                element={<Navigate to={canonicalPath} replace />}
-              />
-            ))}
-
-            <Route path="*" element={<Navigate to={routes.home} replace />} />
-          </Routes>
-        </Suspense>
+        <AppRoutes />
       </Router>
       <PwaInstallPrompt />
     </>

@@ -10,7 +10,6 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { db } from "../lib/firebase/firestore";
-import { routes } from "../lib/routes";
 import {
   FaTwitter,
   FaInstagram,
@@ -20,15 +19,12 @@ import {
   FaBookmark,
   FaRegBookmark,
   FaExternalLinkAlt,
-  FaUserCircle,
-  FaPencilAlt,
   FaGraduationCap,
   FaClock,
   FaBalanceScale,
   FaMapMarkerAlt,
   FaUniversity,
   FaFilter,
-  FaUsers,
 } from "react-icons/fa";
 
 const makeBursary = (
@@ -486,24 +482,6 @@ export default function Bursary() {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-        </div>
-
-        <div className="dashboard-shortcuts">
-          <button
-            className="dashboard-shortcut"
-            onClick={() => navigate(isGuest ? routes.auth : routes.profile)}
-          >
-            <FaUserCircle /> {isGuest ? "Sign In / Create Account" : "My Profile"}
-          </button>
-          <button className="dashboard-shortcut" onClick={() => navigate(routes.application)}>
-            <FaUniversity /> Application
-          </button>
-          <button className="dashboard-shortcut" onClick={() => navigate(routes.practice)}>
-            <FaPencilAlt /> Past Papers
-          </button>
-          <button className="dashboard-shortcut" onClick={() => navigate(routes.community)}>
-            <FaUsers /> Community
-          </button>
         </div>
 
         <div className="dashboard-stats">

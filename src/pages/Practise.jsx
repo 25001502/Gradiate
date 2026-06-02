@@ -10,7 +10,6 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { db } from "../lib/firebase/firestore";
-import { routes } from "../lib/routes";
 import DashboardSection from "../components/DashboardSection";
 import {
   FaTwitter,
@@ -20,9 +19,6 @@ import {
   FaBookmark,
   FaRegBookmark,
   FaExternalLinkAlt,
-  FaUserCircle,
-  FaPencilAlt,
-  FaGraduationCap,
   FaCalculator,
   FaFlask,
   FaLeaf,
@@ -33,8 +29,6 @@ import {
   FaCoins,
   FaLanguage,
   FaBriefcase,
-  FaUniversity,
-  FaUsers,
 } from "react-icons/fa";
 
 const subjects = [
@@ -402,29 +396,6 @@ export default function Practise() {
           searchPlaceholder="Search subjects, year, paper type, grade, or curriculum..."
           searchValue={search}
           onSearchChange={setSearch}
-          shortcuts={[
-            {
-              label: isGuest ? "Sign In / Create Account" : "My Profile",
-              icon: <FaUserCircle />,
-              onClick: () => navigate(isGuest ? routes.auth : routes.profile),
-            },
-            {
-              label: "Application",
-              icon: <FaUniversity />,
-              onClick: () => navigate(routes.application),
-            },
-            {
-              label: "Bursaries",
-              icon: <FaGraduationCap />,
-              onClick: () => navigate(routes.bursaryDashboard),
-            },
-            {
-              label: "Community",
-              icon: <FaUsers />,
-              onClick: () => navigate(routes.community),
-            },
-            
-          ]}
           stats={[
             {
               label: "Subjects",

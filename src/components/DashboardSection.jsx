@@ -7,7 +7,7 @@ export default function DashboardSection({
   searchPlaceholder,
   searchValue,
   onSearchChange,
-  shortcuts,
+  shortcuts = [],
   stats,
   tabs,
   activeTab,
@@ -33,17 +33,19 @@ export default function DashboardSection({
         </div>
       </div>
 
-      <div className="dashboard-shortcuts">
-        {shortcuts.map((item) => (
-          <button
-            key={item.label}
-            className="dashboard-shortcut"
-            onClick={item.onClick}
-          >
-            {item.icon} {item.label}
-          </button>
-        ))}
-      </div>
+      {shortcuts.length > 0 && (
+        <div className="dashboard-shortcuts">
+          {shortcuts.map((item) => (
+            <button
+              key={item.label}
+              className="dashboard-shortcut"
+              onClick={item.onClick}
+            >
+              {item.icon} {item.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="dashboard-stats">
         {stats.map((stat) => (

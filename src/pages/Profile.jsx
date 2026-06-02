@@ -28,12 +28,8 @@ import {
   FaBookmark,
   FaBullhorn,
   FaComments,
-  FaPencilAlt,
   FaSignOutAlt,
   FaShieldAlt,
-  FaUserCircle,
-  FaHome,
-  FaUsers,
 } from "react-icons/fa";
 import { auth } from "../lib/firebase/auth";
 import { db } from "../lib/firebase/firestore";
@@ -927,13 +923,6 @@ const Profile = () => {
         </header>
 
         <div className="dashboard-shortcuts">
-
-
-
-          <button className="dashboard-shortcut" onClick={() => navigate(routes.application)}>
-            <FaHome /> Home
-          </button>
-
           {isAdmin && (
             <button className="dashboard-shortcut dashboard-shortcut--admin" onClick={() => navigate(routes.admin)}>
               <FaShieldAlt /> Admin Dashboard
