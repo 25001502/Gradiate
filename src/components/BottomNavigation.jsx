@@ -40,8 +40,19 @@ export default function BottomNavigation() {
     { key: "profile", label: "Profile", to: user?.uid ? routes.profile : routes.auth, icon: FaUserCircle },
   ];
 
+  const activeIndex = Math.max(
+    items.findIndex((item) => isActivePath(pathname, item.key)),
+    0
+  );
+
   return (
-    <nav className="bottom-navigation" aria-label="Dashboard navigation">
+    <nav
+      className="bottom-navigation"
+      aria-label="Dashboard navigation"
+      style={{
+        "--active-index": activeIndex,
+      }}
+    >
       <ul className="bottom-navigation__list">
         {items.map((item) => {
           const Icon = item.icon;
