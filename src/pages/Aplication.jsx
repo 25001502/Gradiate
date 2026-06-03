@@ -31,9 +31,9 @@ const UNIVERSITIES = [
     name: "University of Venda",
     shortName: "Univen",
     location: "Thohoyandou, Limpopo",
-    logo: "https://www.univen.ac.za/docs/univen-logo.png",
+    logo: "/universities/univen.png",
     description:
-      "Known for its diverse programs and commitment to rural development. Find your path in science, education, law, and more.",
+      "Known for diverse programs and a strong commitment to rural development across science, education, law, and more.",
     applyUrl:
       "https://www.univen.ac.za/students/student-support-services/how-to-apply/",
   },
@@ -42,9 +42,9 @@ const UNIVERSITIES = [
     name: "University of Limpopo",
     shortName: "UL",
     location: "Mankweng, Limpopo",
-    logo: "https://edurank.org/assets/img/uni-logos/university-of-limpopo-logo.png",
+    logo: "/universities/ul.png",
     description:
-      "Strong programs in health sciences, agriculture, and education. Dedicated to empowering students from all backgrounds.",
+      "Offers focused programs in health sciences, agriculture, education, commerce, and humanities.",
     applyUrl: "https://www.ul.ac.za/tgsl/tgsl-programmes/",
   },
   {
@@ -52,9 +52,9 @@ const UNIVERSITIES = [
     name: "University of Johannesburg",
     shortName: "UJ",
     location: "Johannesburg, Gauteng",
-    logo: "https://public.flourish.studio/uploads/70accd09-8527-4e3a-8c5c-af8fed4825d2.png",
+    logo: "/universities/uj.svg",
     description:
-      "A vibrant urban university with a reputation for innovation and inclusivity. Explore a wide range of undergraduate and postgraduate programs.",
+      "A large urban university known for innovation, inclusivity, and a broad range of academic programs.",
     applyUrl: "https://www.uj.ac.za/admission-aid/undergraduate/",
   },
   {
@@ -62,9 +62,9 @@ const UNIVERSITIES = [
     name: "University of the Witwatersrand",
     shortName: "Wits",
     location: "Johannesburg, Gauteng",
-    logo: "https://th.bing.com/th/id/OIP.QF-zHDVgl2X_DmzSc_nc5wAAAA?r=0&rs=1&pid=ImgDetMain&cb=idpwebpc2",
+    logo: "/universities/wits.jpg",
     description:
-      "A leading research university in Africa, renowned for academic excellence and social impact. Ideal for world-class education.",
+      "A leading research university in Africa with strong academic depth across science, health, business, and the humanities.",
     applyUrl: "https://www.wits.ac.za/undergraduate/apply-to-wits/",
   },
   {
@@ -72,9 +72,9 @@ const UNIVERSITIES = [
     name: "Tshwane University of Technology",
     shortName: "TUT",
     location: "Pretoria, Gauteng",
-    logo: "https://wikisouthafrica.co.za/wp-content/uploads/2020/08/Tshwane-University-of-Technology-1024x986.png",
+    logo: "/universities/tut.svg",
     description:
-      "One of South Africa's largest residential universities, offering practical and career-focused programs in engineering, science, and the arts.",
+      "A major technology-focused university offering practical and career-oriented programs across several campuses.",
     applyUrl: "https://www.tut.ac.za/",
   },
   {
@@ -82,11 +82,213 @@ const UNIVERSITIES = [
     name: "University of Cape Town",
     shortName: "UCT",
     location: "Cape Town, Western Cape",
-    logo: "https://www.freelogovectors.net/wp-content/uploads/2021/04/university-of-cape-town-logo-freelogovectors.net_.png",
+    logo: "/universities/uct.png",
     description:
-      "Africa's top-ranked university, celebrated for its beautiful campus and academic leadership in science, business, and the humanities.",
+      "A highly ranked university with strong academic leadership in science, business, health sciences, and the humanities.",
     applyUrl:
       "https://uct.ac.za/students/applications-apply-undergraduate-qualifications/application-procedure",
+  },
+  {
+    id: "uwc",
+    name: "University of the Western Cape",
+    shortName: "UWC",
+    location: "Bellville, Western Cape",
+    logo: "/universities/uwc.png",
+    description:
+      "A public university with strong teaching and research across health, law, education, natural sciences, and social sciences.",
+    applyUrl: "https://www.uwc.ac.za/study/apply",
+  },
+  {
+    id: "su",
+    name: "Stellenbosch University",
+    shortName: "SU",
+    location: "Stellenbosch, Western Cape",
+    logo: "/universities/su.jpg",
+    description:
+      "A research-intensive university offering a wide range of undergraduate and postgraduate study options.",
+    applyUrl: "https://www.sun.ac.za/english/maties/apply",
+  },
+  {
+    id: "up",
+    name: "University of Pretoria",
+    shortName: "UP",
+    location: "Pretoria, Gauteng",
+    logo: "/universities/up.png",
+    description:
+      "A large research university with broad academic pathways in science, law, commerce, engineering, health, and humanities.",
+    applyUrl: "https://www.up.ac.za/online-application",
+  },
+  {
+    id: "ukzn",
+    name: "University of KwaZulu-Natal",
+    shortName: "UKZN",
+    location: "Durban and Pietermaritzburg, KwaZulu-Natal",
+    logo: "/universities/ukzn.png",
+    description:
+      "A multi-campus university serving KwaZulu-Natal with programs across health sciences, engineering, agriculture, law, and humanities.",
+    applyUrl: "https://ukzn.ac.za/apply-to-ukzn/",
+  },
+  {
+    id: "rhodes",
+    name: "Rhodes University",
+    shortName: "Rhodes",
+    location: "Makhanda, Eastern Cape",
+    logo: "/universities/rhodes.png",
+    description:
+      "A residential university known for close academic communities, humanities, science, journalism, commerce, and law.",
+    applyUrl: "https://www.ru.ac.za/admissiongateway/application/",
+  },
+  {
+    id: "unisa",
+    name: "University of South Africa",
+    shortName: "UNISA",
+    location: "Pretoria, Gauteng",
+    logo: "/universities/unisa.jpg",
+    description:
+      "South Africa's largest open distance learning university, serving students nationwide through flexible study options.",
+    applyUrl:
+      "https://www.unisa.ac.za/sites/corporate/default/Apply-for-admission",
+  },
+  {
+    id: "nwu",
+    name: "North-West University",
+    shortName: "NWU",
+    location: "Potchefstroom, North West",
+    logo: "/universities/nwu.svg",
+    description:
+      "A multi-campus university offering programs across education, commerce, health sciences, law, engineering, and humanities.",
+    applyUrl: "https://studies.nwu.ac.za/studies/apply",
+  },
+  {
+    id: "ufs",
+    name: "University of the Free State",
+    shortName: "UFS",
+    location: "Bloemfontein, Free State",
+    logo: "/universities/ufs.svg",
+    description:
+      "A comprehensive university with strong academic offerings across health sciences, law, natural sciences, education, and the humanities.",
+    applyUrl: "https://www.ufs.ac.za/prospective",
+  },
+  {
+    id: "nmu",
+    name: "Nelson Mandela University",
+    shortName: "NMU",
+    location: "Gqeberha, Eastern Cape",
+    logo: "/universities/nmu.svg",
+    description:
+      "A coastal university offering career-focused and research-led programs across multiple faculties.",
+    applyUrl: "https://www.mandela.ac.za/Study-at-Mandela/Apply",
+  },
+  {
+    id: "cput",
+    name: "Cape Peninsula University of Technology",
+    shortName: "CPUT",
+    location: "Cape Town, Western Cape",
+    logo: "/universities/cput.svg",
+    description:
+      "A technology university offering applied programs in engineering, business, informatics, design, health, and education.",
+    applyUrl: "https://www.cput.ac.za/study/apply",
+  },
+  {
+    id: "unizulu",
+    name: "University of Zululand",
+    shortName: "UNIZULU",
+    location: "KwaDlangezwa, KwaZulu-Natal",
+    logo: "/universities/unizulu.png",
+    description:
+      "A comprehensive university with programs in commerce, law, humanities, education, science, and agriculture.",
+    applyUrl: "https://www.unizulu.ac.za/apply/",
+  },
+  {
+    id: "vut",
+    name: "Vaal University of Technology",
+    shortName: "VUT",
+    location: "Vanderbijlpark, Gauteng",
+    logo: "/universities/vut.png",
+    description:
+      "A technology university focused on career-ready qualifications in engineering, applied sciences, management, and human sciences.",
+    applyUrl: "https://www.vut.ac.za/apply-to-vut/",
+  },
+  {
+    id: "cut",
+    name: "Central University of Technology",
+    shortName: "CUT",
+    location: "Bloemfontein, Free State",
+    logo: "/universities/cut.png",
+    description:
+      "A university of technology offering applied programs in engineering, health, management sciences, and humanities.",
+    applyUrl: "https://www.cut.ac.za/application-process",
+  },
+  {
+    id: "wsu",
+    name: "Walter Sisulu University",
+    shortName: "WSU",
+    location: "Mthatha, Eastern Cape",
+    logo: "/universities/wsu.png",
+    description:
+      "A multi-campus university serving the Eastern Cape with academic programs across health, business, education, science, and technology.",
+    applyUrl: "https://www.wsu.ac.za/index.php/apply-now",
+  },
+  {
+    id: "ump",
+    name: "University of Mpumalanga",
+    shortName: "UMP",
+    location: "Mbombela, Mpumalanga",
+    logo: "/universities/ump.svg",
+    description:
+      "A growing university offering programs linked to agriculture, education, hospitality, development studies, and science.",
+    applyUrl: "https://www.ump.ac.za/Study-with-us/Application-Process",
+  },
+  {
+    id: "spu",
+    name: "Sol Plaatje University",
+    shortName: "SPU",
+    location: "Kimberley, Northern Cape",
+    logo: "/universities/spu.svg",
+    description:
+      "A young university in the Northern Cape with programs in education, humanities, natural sciences, data science, and management.",
+    applyUrl: "https://www.spu.ac.za/index.php/how-to-apply/",
+  },
+  {
+    id: "dut",
+    name: "Durban University of Technology",
+    shortName: "DUT",
+    location: "Durban, KwaZulu-Natal",
+    logo: "/universities/dut.jpg",
+    description:
+      "A technology university offering applied programs across engineering, health sciences, management, arts, and accounting.",
+    applyUrl:
+      "https://www.dut.ac.za/student_portal/student_registration/how_to_apply/",
+  },
+  {
+    id: "smu",
+    name: "Sefako Makgatho Health Sciences University",
+    shortName: "SMU",
+    location: "Ga-Rankuwa, Gauteng",
+    logo: "/universities/smu.png",
+    description:
+      "A health sciences university focused on medicine, dentistry, pharmacy, nursing, public health, and related sciences.",
+    applyUrl: "https://www.smu.ac.za/students/apply/",
+  },
+  {
+    id: "ufh",
+    name: "University of Fort Hare",
+    shortName: "UFH",
+    location: "Alice, Eastern Cape",
+    logo: "/universities/ufh.png",
+    description:
+      "A historic university offering programs across education, law, management, social sciences, agriculture, and health sciences.",
+    applyUrl: "https://www.ufh.ac.za/apply",
+  },
+  {
+    id: "mut",
+    name: "Mangosuthu University of Technology",
+    shortName: "MUT",
+    location: "Umlazi, KwaZulu-Natal",
+    logo: "/universities/mut.png",
+    description:
+      "A technology university offering career-focused programs in engineering, management sciences, and natural sciences.",
+    applyUrl: "https://www.mut.ac.za/study-at-mut/apply-to-mut/",
   },
 ];
 
@@ -94,16 +296,44 @@ const BOOKMARK_FOLDERS = ["General", "Dream", "Safe", "Applied"];
 
 const UNIVERSITY_DEADLINES = {
   univen: "2026-09-26",
-  ul: "2026-08-30",
+  ul: "2026-09-30",
   uj: "2026-10-31",
   wits: "2026-09-30",
   tut: "2026-09-30",
   uct: "2026-07-31",
+  uwc: "2026-09-30",
+  su: "2026-07-31",
+  up: "2026-08-31",
+  ukzn: "2026-09-30",
+  rhodes: "2026-09-30",
+  unisa: "2026-11-30",
+  nwu: "2026-08-31",
+  ufs: "2026-09-30",
+  nmu: "2026-09-30",
+  cput: "2026-09-30",
+  unizulu: "2026-09-30",
+  vut: "2026-09-30",
+  cut: "2026-09-30",
+  wsu: "2026-10-31",
+  ump: "2026-11-30",
+  spu: "2026-10-31",
+  dut: "2026-09-30",
+  smu: "2026-07-31",
+  ufh: "2026-10-31",
+  mut: "2026-09-30",
 };
 
 const UNIVERSITY_OPENING_DATES = {
   univen: "05-02",
   wits: "03-01",
+  unisa: "09-01",
+  cput: "05-01",
+  unizulu: "05-01",
+  vut: "05-01",
+  spu: "04-20",
+  smu: "04-02",
+  ufh: "06-01",
+  mut: "01-01",
 };
 
 function daysUntil(dateString) {
