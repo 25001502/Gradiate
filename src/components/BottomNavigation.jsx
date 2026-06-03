@@ -65,7 +65,9 @@ export default function BottomNavigation() {
                 to={item.to}
                 aria-current={isActive ? "page" : undefined}
               >
-                <Icon className="bottom-navigation__icon" aria-hidden="true" />
+                <span className="bottom-navigation__icon-bubble" aria-hidden="true">
+                  <Icon className="bottom-navigation__icon" />
+                </span>
                 <span className="bottom-navigation__label">{item.label}</span>
               </Link>
             </li>
