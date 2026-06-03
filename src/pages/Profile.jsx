@@ -844,71 +844,8 @@ const Profile = () => {
           >
             Grad<span style={{ color: "#3498db" }}>iate</span>
           </a>
-          <div className="nav-actions">
-            <button
-              className="burger"
-              onClick={() => setMenuOpen((open) => !open)}
-              aria-label="Toggle menu"
-            >
-              <span className="burger-bar"></span>
-              <span className="burger-bar"></span>
-              <span className="burger-bar"></span>
-            </button>
-          </div>
-          {menuOpen && (
-            <div className="burger-menu" ref={menuRef}>
-              <a
-                onClick={() => {
-                  setMenuOpen(false);
-                  navigate(routes.application);
-                }}
-              >
-                Application
-              </a>
-              <a
-                onClick={() => {
-                  setMenuOpen(false);
-                  navigate(routes.practice);
-                }}
-              >
-                Practise
-              </a>
-              <a
-                onClick={() => {
-                  setMenuOpen(false);
-                  navigate(routes.community);
-                }}
-              >
-                Community
-              </a>
-              <a
-                onClick={() => {
-                  setMenuOpen(false);
-                  setActiveTab("overview");
-                }}
-                className="active"
-              >
-                Profile
-              </a>
-
-              <a
-                onClick={() => {
-                  setMenuOpen(false);
-                  alert("Sorry! this feature is not yet available")
-                }}
-              >
-                Bursaries
-              </a>
-              <a
-                onClick={() => {
-                  setMenuOpen(false);
-                  handleLogout();
-                }}
-              >
-                Logout
-              </a>
-            </div>
-          )}
+          
+          
         </div>
       </nav>
 
