@@ -818,10 +818,7 @@ const Profile = () => {
     );
 
   const stageLabel = profileData.academicStage === "highSchool" ? "High School" : "Tertiary";
-  const skillsCount = profileData.skills
-    ? profileData.skills.split(",").filter((skill) => skill.trim()).length
-    : 0;
-  const unreadCommunityNotifications = communityNotifications.filter((notification) => !notification.read).length;
+  
 
   return (
     <>
@@ -883,25 +880,7 @@ const Profile = () => {
           </button>
         </div>
 
-        <div className="dashboard-stats">
-          <div className="dashboard-stat">
-            <p className="dashboard-stat__value dashboard-stat__value--blue">{profileCompletion}%</p>
-            <p className="dashboard-stat__label">Profile Completion</p>
-          </div>
-          <div className="dashboard-stat">
-            <p className="dashboard-stat__value dashboard-stat__value--green">{skillsCount}</p>
-            <p className="dashboard-stat__label">Skills Tagged</p>
-          </div>
-          <div className="dashboard-stat">
-            <p className="dashboard-stat__value dashboard-stat__value--purple">{stageLabel}</p>
-            <p className="dashboard-stat__label">Academic Stage</p>
-          </div>
-          <div className="dashboard-stat">
-            <p className="dashboard-stat__value dashboard-stat__value--green">{unreadCommunityNotifications}</p>
-            <p className="dashboard-stat__label">Community Alerts</p>
-          </div>
-          
-        </div>
+        
 
         <div className="dashboard-tabs">
           <button

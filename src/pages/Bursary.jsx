@@ -484,20 +484,7 @@ export default function Bursary() {
           </div>
         </div>
 
-        <div className="dashboard-stats">
-          <div className="dashboard-stat">
-            <p className="dashboard-stat__value dashboard-stat__value--blue">{BURSARIES.length}</p>
-            <p className="dashboard-stat__label">Bursaries</p>
-          </div>
-          <div className="dashboard-stat">
-            <p className="dashboard-stat__value dashboard-stat__value--green">{ALL_FIELDS.length}</p>
-            <p className="dashboard-stat__label">Fields of Study</p>
-          </div>
-          <div className="dashboard-stat">
-            <p className="dashboard-stat__value dashboard-stat__value--purple">{bookmarks.length}</p>
-            <p className="dashboard-stat__label">Saved</p>
-          </div>
-        </div>
+        
 
         <div className="dashboard-tabs">
           <button

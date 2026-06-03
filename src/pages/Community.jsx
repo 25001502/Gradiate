@@ -436,14 +436,7 @@ export default function Community() {
     return sortCommunityPosts(matchingPosts, activeSort, engagementByPost);
   }, [activeCategory, activeSort, activeView, engagementByPost, posts, savedFullPosts, savedPostIds, search, user?.uid]);
 
-  const totalComments = useMemo(
-    () =>
-      posts.reduce(
-        (total, post) => total + getPostCommentCount(post, engagementByPost[post.id]),
-        0
-      ),
-    [engagementByPost, posts]
-  );
+  
   const unreadNotifications = useMemo(
     () => notifications.filter((notification) => !notification.read).length,
     [notifications]
@@ -1187,22 +1180,7 @@ export default function Community() {
           
         </header>
 
-        <div className="dashboard-stats">
-          <div className="dashboard-stat">
-            <p className="dashboard-stat__value dashboard-stat__value--blue">{posts.length}</p>
-            <p className="dashboard-stat__label">Posts</p>
-          </div>
-          <div className="dashboard-stat">
-            <p className="dashboard-stat__value dashboard-stat__value--green">{totalComments}</p>
-            <p className="dashboard-stat__label">Comments</p>
-          </div>
-          <div className="dashboard-stat">
-            <p className="dashboard-stat__value dashboard-stat__value--purple">
-              {activeCategory === "all" ? "All" : categoryByKey[activeCategory]?.label}
-            </p>
-            <p className="dashboard-stat__label">Viewing</p>
-          </div>
-        </div>
+        
 
         <section className="community-shell">
           <aside className="community-sidebar">

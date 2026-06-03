@@ -504,7 +504,7 @@ export default function Aplication() {
       .slice(0, 3);
   }, [bookmarks]);
 
-  const provinces = [...new Set(UNIVERSITIES.map((u) => u.location.split(", ").pop()))];
+  
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
@@ -559,27 +559,7 @@ export default function Aplication() {
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="dashboard-stats">
-          <div className="dashboard-stat">
-            <p className="dashboard-stat__value dashboard-stat__value--blue">
-              {UNIVERSITIES.length}
-            </p>
-            <p className="dashboard-stat__label">Universities</p>
-          </div>
-          <div className="dashboard-stat">
-            <p className="dashboard-stat__value dashboard-stat__value--green">
-              {provinces.length}
-            </p>
-            <p className="dashboard-stat__label">Provinces</p>
-          </div>
-          <div className="dashboard-stat">
-            <p className="dashboard-stat__value dashboard-stat__value--purple">
-              {bookmarks.length}
-            </p>
-            <p className="dashboard-stat__label">Saved</p>
-          </div>
-        </div>
+        
 
 
         {/* Tabs */}
