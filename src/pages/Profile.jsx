@@ -24,12 +24,21 @@ import {
   where,
 } from "firebase/firestore";
 import {
+  FaArrowLeft,
+  FaAddressCard,
   FaBell,
   FaBookmark,
-  FaBullhorn,
+  FaBriefcase,
+  FaChevronRight,
   FaComments,
+  FaEdit,
+  FaEnvelope,
+  FaMapMarkerAlt,
+  FaPhoneAlt,
+  FaShareAlt,
   FaSignOutAlt,
   FaShieldAlt,
+  FaUserGraduate,
 } from "react-icons/fa";
 import { auth } from "../lib/firebase/auth";
 import { db } from "../lib/firebase/firestore";
@@ -465,6 +474,36 @@ const Profile = () => {
     }
   };
 
+  const handleShareProfile = async () => {
+    const shareUrl = window.location.href;
+    const shareData = {
+      title: `${user?.displayName || "Student"} on Gradiate`,
+      text: "View my Gradiate profile.",
+      url: shareUrl,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        return;
+      }
+
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+        setSuccess("Profile link copied.");
+        return;
+      }
+
+      setError("Sharing is not available in this browser.");
+    } catch (err) {
+      if (err?.name === "AbortError") {
+        return;
+      }
+      console.error("Failed to share profile", err);
+      setError("Could not share profile right now.");
+    }
+  };
+
   const handleSignOutAllSessions = async () => {
     if (!user?.uid) return;
 
@@ -776,30 +815,6 @@ const Profile = () => {
     };
   }, [menuOpen, menuRef]);
 
-  const completionChecks = [
-    avatarUrl,
-    profileData.bio,
-    profileData.location,
-    profileData.phone,
-    profileData.careerGoal,
-    ...(profileData.academicStage === "highSchool"
-      ? [
-          profileData.highSchoolName,
-          profileData.highSchoolGrade,
-          profileData.highSchoolStatus,
-          profileData.matricYear,
-          profileData.highSchoolSubjects,
-        ]
-      : [
-          profileData.institution,
-          profileData.qualification,
-          profileData.gradYear,
-          profileData.skills,
-        ]),
-  ];
-  const completedCount = completionChecks.filter((item) => String(item).trim() !== "").length;
-  const profileCompletion = Math.round((completedCount / completionChecks.length) * 100);
-
   if (loading)
     return (
       <div className="loading-container">
@@ -817,7 +832,42 @@ const Profile = () => {
       <div style={{ padding: 20, textAlign: "center" }}>No user logged in.</div>
     );
 
-  const stageLabel = profileData.academicStage === "highSchool" ? "High School" : "Tertiary";
+  const profileSubtitle =
+    profileData.academicStage === "highSchool"
+      ? [profileData.highSchoolGrade, profileData.highSchoolName].filter(Boolean).join(" - ") ||
+        "High School Student"
+      : [profileData.qualification, profileData.institution].filter(Boolean).join(" - ") ||
+        "Tertiary Student";
+  const academicPreview =
+    profileData.academicStage === "highSchool"
+      ? [profileData.highSchoolName, profileData.highSchoolGrade, profileData.matricYear]
+          .filter(Boolean)
+          .join(" - ") || "Add your school, grade, and subjects"
+      : [profileData.institution, profileData.qualification, profileData.gradYear]
+          .filter(Boolean)
+          .join(" - ") || "Add your institution and qualification";
+  const careerPreview =
+    profileData.careerGoal || profileData.skills || "Add your preferred roles and skills";
+  const contactPreview =
+    [profileData.phone, profileData.location].filter(Boolean).join(" - ") || user.email || "Add contact details";
+  const firstName = (user.displayName || "Student").split(" ")[0];
+  const activeTabTitle = {
+    overview: "My Profile",
+    edit: "Edit Profile",
+    community: "Community",
+    security: "Security",
+  }[activeTab] || "My Profile";
+
+  const renderProfileRow = ({ icon, title, text, onClick }) => (
+    <button key={title} style={profileUi.profileRow} onClick={onClick} type="button">
+      <span style={profileUi.profileRowIcon}>{icon}</span>
+      <span style={profileUi.profileRowText}>
+        <strong style={profileUi.profileRowTitle}>{title}</strong>
+        <span style={profileUi.profileRowMeta}>{text}</span>
+      </span>
+      <FaChevronRight style={profileUi.profileRowChevron} />
+    </button>
+  );
   
 
   return (
@@ -827,167 +877,122 @@ const Profile = () => {
         canonical="/profile"
         noindex
       />
-      <nav className="navbar-responsive">
-        <div className="navbar-container">
-          <a
-            className="logo"
-            href="#"
-            style={{
-              fontWeight: 700,
-              fontSize: "1.5rem",
-              color: "#2c3e50",
-              textDecoration: "none",
-            }}
-          >
-            Grad<span style={{ color: "#3498db" }}>iate</span>
-          </a>
-          
-          
-        </div>
-      </nav>
+      <main className="dashboard-page" style={profileUi.page}>
+        <section style={profileUi.appShell}>
+          <header style={profileUi.blueHeader}>
+            <div style={profileUi.headerBar}>
+              {activeTab === "overview" ? (
+                <span style={profileUi.headerSpacer} aria-hidden="true" />
+              ) : (
+                <button
+                  style={profileUi.headerIconButton}
+                  onClick={() => setActiveTab("overview")}
+                  type="button"
+                  aria-label="Back to profile overview"
+                >
+                  <FaArrowLeft />
+                </button>
+              )}
+              <h1 style={profileUi.headerTitle}>{activeTabTitle}</h1>
+              {activeTab === "overview" ? (
+                <button
+                  style={profileUi.headerIconButton}
+                  onClick={handleLogout}
+                  type="button"
+                  aria-label="Sign out"
+                  title="Sign out"
+                >
+                  <FaSignOutAlt />
+                </button>
+              ) : (
+                <span style={profileUi.headerSpacer} aria-hidden="true" />
+              )}
+            </div>
+          </header>
 
-      <div className="dashboard-page">
-        <header className="dashboard-welcome">
-          <h1 className="dashboard-welcome__greeting">
-            Profile Hub for <span>{user.displayName || "Student"}</span>
-          </h1>
-          <p className="dashboard-welcome__sub">
-            Keep your profile, academic details, and security settings in one familiar dashboard flow.
-          </p>
-        </header>
-
-        <div className="dashboard-shortcuts">
-          {isAdmin && (
-            <button className="dashboard-shortcut dashboard-shortcut--admin" onClick={() => navigate(routes.admin)}>
-              <FaShieldAlt /> Admin Dashboard
-            </button>
-          )}
-
-          <button className="dashboard-shortcut" onClick={() => setActiveTab("security")}>
-            <FaShieldAlt /> Security
-          </button>
-
-          <button className="dashboard-shortcut" onClick={() => setActiveTab("community")}>
-            <FaComments /> Community Activity
-          </button>
-
-          
-
-          
-          
-          <button className="dashboard-shortcut" onClick={handleLogout}>
-            <FaSignOutAlt /> Logout
-          </button>
-        </div>
-
-        
-
-        <div className="dashboard-tabs">
-          <button
-            className={`dashboard-tab ${activeTab === "overview" ? "dashboard-tab--active" : ""}`}
-            onClick={() => setActiveTab("overview")}
-          >
-            Overview
-          </button>
-          <button
-            className={`dashboard-tab ${activeTab === "edit" ? "dashboard-tab--active" : ""}`}
-            onClick={() => setActiveTab("edit")}
-          >
-            Edit Profile
-          </button>
-          <button
-            className={`dashboard-tab ${activeTab === "security" ? "dashboard-tab--active" : ""}`}
-            onClick={() => setActiveTab("security")}
-          >
-            Security
-          </button>
-        </div>
-
-        {activeTab === "overview" && (
-          <div className="uni-grid">
-            <article className="uni-card">
-              <div className="uni-card__header" style={profileUi.heroHeader}>
-                <div style={profileUi.heroIdentityWrap}>
-                  <img src={avatarUrl || avDefault} alt="Avatar" style={profileUi.heroAvatar} />
-                  <div>
-                    <h3 className="uni-card__name" style={{ marginBottom: 4 }}>
-                      {user.displayName || "User"}
-                      {isAdmin && <AdminBadge style={{ marginLeft: 8 }} />}
-                    </h3>
-                    <p className="uni-card__location" style={{ marginBottom: 0 }}>{profileData.location || "Add your location"}</p>
-                    <p style={profileUi.metaLine}>{user.email || "No email"}</p>
+          <section style={profileUi.sheet}>
+            {activeTab === "overview" && (
+              <>
+                <article style={profileUi.identityCard}>
+                  <div style={profileUi.avatarFrame}>
+                    <img src={avatarUrl || avDefault} alt="Avatar" style={profileUi.heroAvatar} />
                   </div>
-                </div>
-                
-              </div>
-              <div className="uni-card__body">
-                <p className="uni-card__desc">
-                  {profileData.bio || "Add your short bio so opportunities can match your goals better."}
-                </p>
-                <div style={profileUi.progressRow}>
-                  <span style={profileUi.progressLabel}>Completion</span>
-                  <span style={profileUi.progressLabel}>{profileCompletion}%</span>
-                </div>
-                <div style={profileUi.progressTrack}>
-                  <div style={{ ...profileUi.progressFill, width: `${profileCompletion}%` }} />
-                </div>
-                <div className="uni-card__status-row" style={{ marginTop: 12 }}>
-                  <span className="uni-card__status-pill uni-card__status-pill--days">Stage: {stageLabel}</span>
-                  <span
-                    className="uni-card__status-pill"
-                    style={emailVerified ? profileUi.verifiedPill : profileUi.pendingPill}
-                  >
-                    {emailVerified ? "Email Verified" : "Email Not Verified"}
-                  </span>
-                </div>
-              </div>
-            </article>
+                  <h2 style={profileUi.profileName}>
+                    Hello {firstName}!
+                    {isAdmin && <AdminBadge style={{ marginLeft: 8 }} />}
+                  </h2>
+                  <p style={profileUi.profileRole}>{profileSubtitle}</p>
 
-            <article className="uni-card">
-              <div className="uni-card__body">
-                <h3 className="uni-card__name">Contact</h3>
-                <p className="uni-card__desc">Phone: {profileData.phone || "Not added"}</p>
-                <p className="uni-card__desc">Location: {profileData.location || "Not added"}</p>
-              </div>
-            </article>
+                  <div style={profileUi.contactStrip}>
+                    <span style={profileUi.contactChip}>
+                      <FaMapMarkerAlt /> {profileData.location || "Add location"}
+                    </span>
+                    <span style={profileUi.contactChip}>
+                      {profileData.phone ? <FaPhoneAlt /> : <FaEnvelope />}
+                      {profileData.phone || user.email || "Add contact"}
+                    </span>
+                  </div>
 
-            <article className="uni-card">
-              <div className="uni-card__body">
-                <h3 className="uni-card__name">Academic Profile</h3>
-                {profileData.academicStage === "highSchool" ? (
-                  <>
-                    <p className="uni-card__desc">School: {profileData.highSchoolName || "Not added"}</p>
-                    <p className="uni-card__desc">Grade: {profileData.highSchoolGrade || "Not added"}</p>
-                    <p className="uni-card__desc">Status: {profileData.highSchoolStatus || "Not added"}</p>
-                    <p className="uni-card__desc">Matric Year: {profileData.matricYear || "Not added"}</p>
-                    <p className="uni-card__desc">Subjects: {profileData.highSchoolSubjects || "Not added"}</p>
-                  </>
-                ) : (
-                  <>
-                    <p className="uni-card__desc">Institution: {profileData.institution || "Not added"}</p>
-                    <p className="uni-card__desc">Qualification: {profileData.qualification || "Not added"}</p>
-                    <p className="uni-card__desc">Graduation Year: {profileData.gradYear || "Not added"}</p>
-                  </>
-                )}
-              </div>
-            </article>
+                  <div style={profileUi.actionRow}>
+                    <button style={profileUi.outlineAction} onClick={() => setActiveTab("edit")} type="button">
+                      <FaEdit /> Edit
+                    </button>
+                    <button style={profileUi.outlineAction} onClick={handleShareProfile} type="button">
+                      <FaShareAlt /> Share
+                    </button>
+                  </div>
+                </article>
 
-            <article className="uni-card">
-              <div className="uni-card__body">
-                <h3 className="uni-card__name">Career Goals</h3>
-                <p className="uni-card__desc">{profileData.careerGoal || "Add your preferred roles and opportunities."}</p>
-                <p className="uni-card__desc">Skills: {profileData.skills || "No skills added"}</p>
-              </div>
-            </article>
-          </div>
-        )}
+                <section style={profileUi.rowGroup} aria-label="Profile sections">
+                  {renderProfileRow({
+                    icon: <FaUserGraduate />,
+                    title: "Academic Profile",
+                    text: academicPreview,
+                    onClick: () => setActiveTab("edit"),
+                  })}
+                  {renderProfileRow({
+                    icon: <FaBriefcase />,
+                    title: "Career Goals",
+                    text: careerPreview,
+                    onClick: () => setActiveTab("edit"),
+                  })}
+                  {renderProfileRow({
+                    icon: <FaAddressCard />,
+                    title: "Contact Details",
+                    text: contactPreview,
+                    onClick: () => setActiveTab("edit"),
+                  })}
+                  {renderProfileRow({
+                    icon: <FaComments />,
+                    title: "Community Activity",
+                    text: `${communityPosts.length} posts, ${savedCommunityPosts.length} saved posts`,
+                    onClick: () => setActiveTab("community"),
+                  })}
+                  {renderProfileRow({
+                    icon: <FaShieldAlt />,
+                    title: "Security Center",
+                    text: "Password, sessions, and account controls",
+                    onClick: () => setActiveTab("security"),
+                  })}
+                  {isAdmin &&
+                    renderProfileRow({
+                      icon: <FaShieldAlt />,
+                      title: "Admin Dashboard",
+                      text: "Manage Gradiate admin tools",
+                      onClick: () => navigate(routes.admin),
+                    })}
+                </section>
+              </>
+            )}
 
-        {activeTab === "edit" && (
-          <div className="uni-grid" style={{ gridTemplateColumns: "1fr" }}>
-            <article className="uni-card">
-              <div className="uni-card__body">
-                <h3 className="uni-card__name">Edit Profile</h3>
-                <p className="uni-card__desc">Update your details so recommendations stay accurate across the platform.</p>
+            {activeTab === "edit" && (
+              <article style={profileUi.panelCard}>
+                <div style={profileUi.panelIntro}>
+                  <h2 style={profileUi.panelTitle}>Edit Profile</h2>
+                  <p style={profileUi.panelText}>
+                    Update your details so recommendations stay accurate across the platform.
+                  </p>
+                </div>
 
                 <div style={profileUi.formGrid}>
                   <label style={profileUi.fieldWrap}>
@@ -1136,23 +1141,32 @@ const Profile = () => {
                 </label>
 
                 <div style={profileUi.avatarPickerWrap}>
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-                    <button className="uni-card__btn" onClick={() => setShowAvatarPicker((s) => !s)} type="button">
+                  <div style={profileUi.avatarActionRow}>
+                    <button
+                      style={profileUi.secondaryButton}
+                      onClick={() => setShowAvatarPicker((s) => !s)}
+                      type="button"
+                    >
                       Choose Avatar Style
                     </button>
                     <button
-                      className="uni-card__btn"
+                      style={profileUi.secondaryButton}
                       onClick={shuffleAvatarSeed}
                       type="button"
                       title="Shuffle to get a different look within the same style"
                     >
-                      🔀 Shuffle Look
+                      Shuffle Look
                     </button>
                   </div>
                   {showAvatarPicker && (
                     <div style={profileUi.avatarGrid}>
                       {avatarOptions.map((a) => (
-                        <button key={a.key} onClick={() => selectAvatar(a)} style={profileUi.avatarOptionBtn}>
+                        <button
+                          key={a.key}
+                          onClick={() => selectAvatar(a)}
+                          style={profileUi.avatarOptionBtn}
+                          type="button"
+                        >
                           <img
                             src={a.url}
                             alt={a.label}
@@ -1165,21 +1179,19 @@ const Profile = () => {
                               border: a.key === avatarStyle ? "2px solid #2563eb" : "2px solid transparent",
                             }}
                           />
-                          <p style={{ margin: "4px 0 0", fontSize: "0.7rem", color: "#64748b", textAlign: "center" }}>
-                            {a.label}
-                          </p>
+                          <p style={profileUi.avatarLabel}>{a.label}</p>
                         </button>
                       ))}
                     </div>
                   )}
                 </div>
 
-                <div className="uni-card__actions" style={{ marginTop: 16 }}>
-                  <button className="uni-card__btn uni-card__btn--primary" onClick={saveProfile}>
+                <div style={profileUi.formActions}>
+                  <button style={profileUi.primaryButton} onClick={saveProfile} type="button">
                     Save Changes
                   </button>
                   <button
-                    className="uni-card__btn uni-card__btn--secondary"
+                    style={profileUi.secondaryButton}
                     onClick={() => {
                       setAvatarKey(savedAvatarKey);
                       setAvatarUrl(savedAvatarUrl);
@@ -1191,130 +1203,118 @@ const Profile = () => {
                       setSuccess("");
                       setActiveTab("overview");
                     }}
+                    type="button"
                   >
                     Cancel
                   </button>
                 </div>
-              </div>
-            </article>
-          </div>
-        )}
+              </article>
+            )}
 
-        {activeTab === "community" && (
-          <div className="uni-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}>
-            <article className="uni-card">
-              <div className="uni-card__body">
-                <h3 className="uni-card__name">
-                  <FaComments /> My Posts
-                </h3>
-                <div style={profileUi.communityList}>
-                  {communityPosts.length ? (
-                    communityPosts.map((post) => (
-                      <div key={post.id} style={profileUi.communityItem}>
-                        <strong style={profileUi.communityItemTitle}>{post.category || "general"}</strong>
-                        <p style={profileUi.communityItemText}>{post.content}</p>
-                        <span style={profileUi.communityItemMeta}>{formatCommunityDate(post.createdAt)}</span>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="uni-card__desc" style={{ margin: 0 }}>
-                      No community posts yet.
-                    </p>
-                  )}
-                </div>
-                <button
-                  className="uni-card__btn uni-card__btn--primary"
-                  onClick={() => navigate(routes.community)}
-                  style={{ marginTop: 14, width: "fit-content" }}
-                >
-                  Open Community
-                </button>
-              </div>
-            </article>
+            {activeTab === "community" && (
+              <div style={profileUi.panelStack}>
+                <article style={profileUi.panelCard}>
+                  <h2 style={profileUi.sectionTitle}>
+                    <FaComments /> My Posts
+                  </h2>
+                  <div style={profileUi.communityList}>
+                    {communityPosts.length ? (
+                      communityPosts.map((post) => (
+                        <div key={post.id} style={profileUi.communityItem}>
+                          <strong style={profileUi.communityItemTitle}>{post.category || "general"}</strong>
+                          <p style={profileUi.communityItemText}>{post.content}</p>
+                          <span style={profileUi.communityItemMeta}>{formatCommunityDate(post.createdAt)}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <p style={profileUi.emptyText}>No community posts yet.</p>
+                    )}
+                  </div>
+                  <button
+                    style={{ ...profileUi.primaryButton, marginTop: 14 }}
+                    onClick={() => navigate(routes.community)}
+                    type="button"
+                  >
+                    Open Community
+                  </button>
+                </article>
 
-            <article className="uni-card">
-              <div className="uni-card__body">
-                <h3 className="uni-card__name">
-                  <FaBookmark /> Saved Posts
-                </h3>
-                <div style={profileUi.communityList}>
-                  {savedCommunityPosts.length ? (
-                    savedCommunityPosts.map((post) => (
-                      <button
-                        key={post.id}
-                        style={{ ...profileUi.communityItem, textAlign: "left", cursor: "pointer" }}
-                        onClick={() => navigate(createCommunityPostPath(post.postId || post.id))}
-                        type="button"
-                      >
-                        <strong style={profileUi.communityItemTitle}>{post.authorName || "Student"}</strong>
-                        <p style={profileUi.communityItemText}>{post.contentPreview || "Saved community post"}</p>
-                        <span style={profileUi.communityItemMeta}>Saved {formatCommunityDate(post.savedAt)}</span>
-                      </button>
-                    ))
-                  ) : (
-                    <p className="uni-card__desc" style={{ margin: 0 }}>
-                      Saved community posts will appear here.
-                    </p>
-                  )}
-                </div>
-              </div>
-            </article>
+                <article style={profileUi.panelCard}>
+                  <h2 style={profileUi.sectionTitle}>
+                    <FaBookmark /> Saved Posts
+                  </h2>
+                  <div style={profileUi.communityList}>
+                    {savedCommunityPosts.length ? (
+                      savedCommunityPosts.map((post) => (
+                        <button
+                          key={post.id}
+                          style={{ ...profileUi.communityItem, textAlign: "left", cursor: "pointer" }}
+                          onClick={() => navigate(createCommunityPostPath(post.postId || post.id))}
+                          type="button"
+                        >
+                          <strong style={profileUi.communityItemTitle}>{post.authorName || "Student"}</strong>
+                          <p style={profileUi.communityItemText}>{post.contentPreview || "Saved community post"}</p>
+                          <span style={profileUi.communityItemMeta}>Saved {formatCommunityDate(post.savedAt)}</span>
+                        </button>
+                      ))
+                    ) : (
+                      <p style={profileUi.emptyText}>Saved community posts will appear here.</p>
+                    )}
+                  </div>
+                </article>
 
-            <article className="uni-card">
-              <div className="uni-card__body">
-                <h3 className="uni-card__name">
-                  <FaBell /> Notifications
-                </h3>
-                <div style={profileUi.communityList}>
-                  {communityNotifications.length ? (
-                    communityNotifications.map((notification) => (
-                      <button
-                        key={notification.id}
-                        style={{
-                          ...profileUi.communityNotification,
-                          ...(notification.read ? {} : profileUi.communityNotificationUnread),
-                        }}
-                        onClick={async () => {
-                          await markCommunityNotificationRead(notification.id);
-                          if (notification.postId && !isAdminAnnouncementNotification(notification)) {
-                            navigate(createCommunityPostPath(notification.postId));
-                          }
-                        }}
-                        type="button"
-                      >
-                        <strong style={profileUi.communityItemTitle}>{notification.actorName || "A student"}</strong>
-                        <span style={profileUi.communityItemText}>
-                          {getNotificationActionText(notification)}
-                        </span>
-                        {getNotificationPreview(notification) && (
-                          <span style={{ ...profileUi.communityItemText, fontStyle: "italic", color: "#4b5563" }}>
-                            {getNotificationPreview(notification)}
+                <article style={profileUi.panelCard}>
+                  <h2 style={profileUi.sectionTitle}>
+                    <FaBell /> Notifications
+                  </h2>
+                  <div style={profileUi.communityList}>
+                    {communityNotifications.length ? (
+                      communityNotifications.map((notification) => (
+                        <button
+                          key={notification.id}
+                          style={{
+                            ...profileUi.communityNotification,
+                            ...(notification.read ? {} : profileUi.communityNotificationUnread),
+                          }}
+                          onClick={async () => {
+                            await markCommunityNotificationRead(notification.id);
+                            if (notification.postId && !isAdminAnnouncementNotification(notification)) {
+                              navigate(createCommunityPostPath(notification.postId));
+                            }
+                          }}
+                          type="button"
+                        >
+                          <strong style={profileUi.communityItemTitle}>{notification.actorName || "A student"}</strong>
+                          <span style={profileUi.communityItemText}>{getNotificationActionText(notification)}</span>
+                          {getNotificationPreview(notification) && (
+                            <span style={{ ...profileUi.communityItemText, fontStyle: "italic", color: "#4b5563" }}>
+                              {getNotificationPreview(notification)}
+                            </span>
+                          )}
+                          <span style={profileUi.communityItemMeta}>
+                            {formatCommunityDate(notification.createdAt)}
                           </span>
-                        )}
-                        <span style={profileUi.communityItemMeta}>{formatCommunityDate(notification.createdAt)}</span>
-                      </button>
-                    ))
-                  ) : (
-                    <p className="uni-card__desc" style={{ margin: 0 }}>
-                      No community notifications yet.
-                    </p>
-                  )}
-                </div>
+                        </button>
+                      ))
+                    ) : (
+                      <p style={profileUi.emptyText}>No community notifications yet.</p>
+                    )}
+                  </div>
+                </article>
               </div>
-            </article>
-          </div>
-        )}
+            )}
 
-        {activeTab === "security" && (
-          <div className="uni-grid" style={{ gridTemplateColumns: "1fr" }}>
-            <article className="uni-card">
-              <div className="uni-card__body">
-                <h3 className="uni-card__name">Security Center</h3>
+            {activeTab === "security" && (
+              <article style={profileUi.panelCard}>
+                <div style={profileUi.panelIntro}>
+                  <h2 style={profileUi.panelTitle}>Security Center</h2>
+                  <p style={profileUi.panelText}>Review account activity and manage password access.</p>
+                </div>
 
                 <section style={profileUi.securitySectionCard}>
-                  <h4 style={profileUi.securitySectionTitle}>Account Activity</h4>
-                  <p className="uni-card__desc">Account created: {formatSecurityDate(user?.metadata?.creationTime)}</p>
-                  <p className="uni-card__desc">Last sign-in: {formatSecurityDate(user?.metadata?.lastSignInTime)}</p>
+                  <h3 style={profileUi.securitySectionTitle}>Account Activity</h3>
+                  <p style={profileUi.panelText}>Account created: {formatSecurityDate(user?.metadata?.creationTime)}</p>
+                  <p style={profileUi.panelText}>Last sign-in: {formatSecurityDate(user?.metadata?.lastSignInTime)}</p>
 
                   <div style={profileUi.activityFeed}>
                     {activityLog.length > 0 ? (
@@ -1325,27 +1325,28 @@ const Profile = () => {
                         </div>
                       ))
                     ) : (
-                      <p className="uni-card__desc" style={{ margin: 0 }}>
-                        No recent security actions yet.
-                      </p>
+                      <p style={profileUi.emptyText}>No recent security actions yet.</p>
                     )}
                   </div>
                 </section>
 
                 <section style={profileUi.securitySectionCard}>
-                  <h4 style={profileUi.securitySectionTitle}>Sessions</h4>
-                  <p className="uni-card__desc">
+                  <h3 style={profileUi.securitySectionTitle}>Sessions</h3>
+                  <p style={profileUi.panelText}>
                     Current session: {deviceDescriptor.browser} on {deviceDescriptor.platform}
                   </p>
-                  <div className="uni-card__actions" style={{ marginTop: 4 }}>
-                    <button className="uni-card__btn uni-card__btn--secondary" onClick={handleLogout}>
+                  <div style={profileUi.formActions}>
+                    <button style={profileUi.secondaryButton} onClick={handleLogout} type="button">
                       Sign Out This Device
                     </button>
                     <button
-                      className="uni-card__btn uni-card__btn--secondary"
+                      style={{
+                        ...profileUi.secondaryButton,
+                        ...(securityLoading ? profileUi.disabledButton : {}),
+                      }}
                       onClick={handleSignOutAllSessions}
                       disabled={securityLoading}
-                      style={securityLoading ? profileUi.disabledButton : undefined}
+                      type="button"
                     >
                       Sign Out All Sessions
                     </button>
@@ -1353,30 +1354,30 @@ const Profile = () => {
                 </section>
 
                 <section style={profileUi.securitySectionCard}>
-                  <h4 style={profileUi.securitySectionTitle}>Password and Verification</h4>
-                  <p className="uni-card__desc">
-                    Email status: {" "}
-                    <span style={emailVerified ? profileUi.verifiedText : profileUi.pendingText}>
-                      {emailVerified ? "Verified" : "Not verified"}
-                    </span>
-                  </p>
+                  <h3 style={profileUi.securitySectionTitle}>Password and Verification</h3>
 
-                  <div className="uni-card__actions" style={{ marginBottom: 12 }}>
+                  <div style={{ ...profileUi.formActions, marginBottom: 12 }}>
                     {!emailVerified && (
                       <button
-                        className="uni-card__btn uni-card__btn--secondary"
+                        style={{
+                          ...profileUi.secondaryButton,
+                          ...(securityLoading ? profileUi.disabledButton : {}),
+                        }}
                         onClick={sendVerificationLink}
                         disabled={securityLoading}
-                        style={securityLoading ? profileUi.disabledButton : undefined}
+                        type="button"
                       >
                         Send Verification Email
                       </button>
                     )}
                     <button
-                      className="uni-card__btn uni-card__btn--secondary"
+                      style={{
+                        ...profileUi.secondaryButton,
+                        ...(securityLoading ? profileUi.disabledButton : {}),
+                      }}
                       onClick={refreshVerificationStatus}
                       disabled={securityLoading}
-                      style={securityLoading ? profileUi.disabledButton : undefined}
+                      type="button"
                     >
                       Refresh Status
                     </button>
@@ -1430,18 +1431,22 @@ const Profile = () => {
                   </label>
 
                   <button
-                    className="uni-card__btn uni-card__btn--primary"
+                    style={{
+                      ...profileUi.primaryButton,
+                      marginTop: 12,
+                      ...(securityLoading ? profileUi.disabledButton : {}),
+                    }}
                     onClick={handleChangePassword}
                     disabled={securityLoading}
-                    style={{ marginTop: 12, width: "fit-content", ...(securityLoading ? profileUi.disabledButton : {}) }}
+                    type="button"
                   >
                     {securityLoading ? "Please wait..." : "Update Password"}
                   </button>
                 </section>
 
                 <section style={profileUi.dangerZoneCard}>
-                  <h4 style={profileUi.dangerZoneTitle}>Delete Account</h4>
-                  <p className="uni-card__desc" style={{ marginBottom: 10 }}>
+                  <h3 style={profileUi.dangerZoneTitle}>Delete Account</h3>
+                  <p style={{ ...profileUi.panelText, marginBottom: 10 }}>
                     This permanently deletes your account and profile data. Type DELETE to confirm.
                   </p>
                   <label style={profileUi.fieldWrap}>
@@ -1454,16 +1459,13 @@ const Profile = () => {
                     />
                   </label>
                   <button
-                    className="uni-card__btn"
-                    onClick={handleDeleteAccount}
-                    disabled={deleteLoading}
                     style={{
-                      marginTop: 10,
-                      background: "#b91c1c",
-                      color: "#fff",
-                      border: "1px solid #991b1b",
+                      ...profileUi.dangerButton,
                       ...(deleteLoading ? profileUi.disabledButton : {}),
                     }}
+                    onClick={handleDeleteAccount}
+                    disabled={deleteLoading}
+                    type="button"
                   >
                     {deleteLoading ? "Deleting..." : "Delete Account"}
                   </button>
@@ -1471,72 +1473,289 @@ const Profile = () => {
 
                 {securitySuccess && <p style={profileUi.securitySuccess}>{securitySuccess}</p>}
                 {securityError && <p style={profileUi.securityError}>{securityError}</p>}
-              </div>
-            </article>
-          </div>
-        )}
+              </article>
+            )}
 
-        {success && <div style={profileUi.success}>{success}</div>}
-        {error && <div style={profileUi.error}>{error}</div>}
-      </div>
+            {success && <div style={profileUi.success}>{success}</div>}
+            {error && <div style={profileUi.error}>{error}</div>}
+          </section>
+        </section>
+      </main>
     </>
   );
 };
 
 const profileUi = {
-  heroHeader: {
-    justifyContent: "space-between",
-    minHeight: "unset",
-    padding: "1rem 1.2rem 0.9rem",
+  page: {
+    minHeight: "100vh",
+    padding: "0 0 calc(7.5rem + env(safe-area-inset-bottom))",
+    background: "linear-gradient(180deg, #eef4ff 0%, #f8fbff 54%, #eefdf7 100%)",
   },
-  heroIdentityWrap: {
-    display: "flex",
+  appShell: {
+    width: "min(100%, 460px)",
+    margin: "0 auto",
+    minHeight: "100vh",
+  },
+  blueHeader: {
+    minHeight: 210,
+    padding: "1.1rem 1rem 4.8rem",
+    color: "#fff",
+    background: "linear-gradient(150deg, #2f6df6 0%, #2457e6 52%, #16a3c7 100%)",
+    borderBottomLeftRadius: 34,
+    borderBottomRightRadius: 34,
+    boxShadow: "0 18px 42px rgba(37, 99, 235, 0.24)",
+  },
+  headerBar: {
+    minHeight: 42,
+    display: "grid",
+    gridTemplateColumns: "42px 1fr 42px",
     alignItems: "center",
-    gap: 12,
+    gap: 8,
   },
-  heroAvatar: {
-    width: 72,
-    height: 72,
+  headerTitle: {
+    margin: 0,
+    fontSize: "1.05rem",
+    fontWeight: 800,
+    textAlign: "center",
+    letterSpacing: 0,
+  },
+  headerIconButton: {
+    width: 38,
+    height: 38,
+    border: "1px solid rgba(255, 255, 255, 0.22)",
+    borderRadius: 999,
+    background: "rgba(255, 255, 255, 0.12)",
+    color: "#fff",
+    display: "inline-grid",
+    placeItems: "center",
+    cursor: "pointer",
+  },
+  headerSpacer: {
+    width: 38,
+    height: 38,
+  },
+  sheet: {
+    margin: "-70px 0 0",
+    padding: "0 1rem 1.5rem",
+  },
+  identityCard: {
+    position: "relative",
+    borderRadius: "30px 30px 24px 24px",
+    background: "rgba(255, 255, 255, 0.96)",
+    border: "1px solid rgba(226, 232, 240, 0.9)",
+    boxShadow: "0 20px 50px rgba(15, 23, 42, 0.12)",
+    padding: "3.4rem 1rem 1.1rem",
+    textAlign: "center",
+  },
+  avatarFrame: {
+    position: "absolute",
+    top: -42,
+    left: "50%",
+    transform: "translateX(-50%)",
+    width: 88,
+    height: 88,
     borderRadius: "50%",
-    objectFit: "cover",
-    border: "2px solid #dbeafe",
+    padding: 5,
+    background: "#fff",
+    boxShadow: "0 14px 26px rgba(15, 23, 42, 0.14)",
   },
-  metaLine: {
+  profileName: {
+    margin: "0 0 0.25rem",
+    color: "#172033",
+    fontSize: "1.02rem",
+    fontWeight: 850,
+    letterSpacing: 0,
+  },
+  profileRole: {
     margin: 0,
     color: "#64748b",
     fontSize: "0.78rem",
+    fontWeight: 700,
   },
-  progressRow: {
-    display: "flex",
-    justifyContent: "space-between",
+  contactStrip: {
+    display: "grid",
+    gridTemplateColumns: "1fr",
+    gap: 8,
+    margin: "1rem 0",
+  },
+  contactChip: {
+    minWidth: 0,
+    display: "inline-flex",
     alignItems: "center",
-    marginBottom: 8,
+    justifyContent: "center",
+    gap: 7,
+    color: "#52637a",
+    fontSize: "0.76rem",
+    fontWeight: 700,
+    overflowWrap: "anywhere",
   },
-  progressLabel: {
-    fontSize: "0.8rem",
-    color: "#475569",
-    fontWeight: 600,
+  actionRow: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: 10,
+    marginTop: 12,
   },
-  progressTrack: {
+  outlineAction: {
+    minHeight: 40,
+    border: "1px solid #cbd5e1",
+    borderRadius: 10,
+    background: "#fff",
+    color: "#334155",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 7,
+    fontWeight: 800,
+    cursor: "pointer",
+  },
+  rowGroup: {
+    marginTop: 14,
+    display: "grid",
+    gap: 10,
+  },
+  profileRow: {
     width: "100%",
-    height: 10,
-    borderRadius: 999,
-    background: "#e2e8f0",
+    minHeight: 66,
+    border: "1px solid rgba(226, 232, 240, 0.92)",
+    borderRadius: 18,
+    background: "rgba(255, 255, 255, 0.94)",
+    boxShadow: "0 10px 28px rgba(15, 23, 42, 0.06)",
+    padding: "0.75rem 0.85rem",
+    display: "grid",
+    gridTemplateColumns: "42px 1fr 18px",
+    alignItems: "center",
+    gap: 10,
+    textAlign: "left",
+    cursor: "pointer",
+  },
+  profileRowIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    display: "inline-grid",
+    placeItems: "center",
+    color: "#2563eb",
+    background: "#eaf2ff",
+  },
+  profileRowText: {
+    minWidth: 0,
+    display: "grid",
+    gap: 3,
+  },
+  profileRowTitle: {
+    color: "#1f2937",
+    fontSize: "0.9rem",
+    fontWeight: 850,
+  },
+  profileRowMeta: {
+    color: "#64748b",
+    fontSize: "0.75rem",
+    lineHeight: 1.35,
     overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
   },
-  progressFill: {
+  profileRowChevron: {
+    color: "#94a3b8",
+    fontSize: "0.8rem",
+  },
+  panelStack: {
+    display: "grid",
+    gap: 12,
+  },
+  panelCard: {
+    border: "1px solid rgba(226, 232, 240, 0.92)",
+    borderRadius: 22,
+    background: "rgba(255, 255, 255, 0.96)",
+    boxShadow: "0 14px 34px rgba(15, 23, 42, 0.08)",
+    padding: "1rem",
+  },
+  panelIntro: {
+    marginBottom: 14,
+  },
+  panelTitle: {
+    margin: 0,
+    color: "#172033",
+    fontSize: "1.05rem",
+    fontWeight: 900,
+  },
+  panelText: {
+    margin: "0.35rem 0 0",
+    color: "#64748b",
+    fontSize: "0.82rem",
+    lineHeight: 1.45,
+  },
+  sectionTitle: {
+    margin: "0 0 0.75rem",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 8,
+    color: "#172033",
+    fontSize: "0.95rem",
+    fontWeight: 900,
+  },
+  emptyText: {
+    margin: 0,
+    color: "#64748b",
+    fontSize: "0.82rem",
+    lineHeight: 1.45,
+  },
+  avatarActionRow: {
+    display: "flex",
+    gap: 8,
+    flexWrap: "wrap",
+    alignItems: "center",
+  },
+  avatarLabel: {
+    margin: "4px 0 0",
+    color: "#64748b",
+    fontSize: "0.7rem",
+    textAlign: "center",
+  },
+  formActions: {
+    marginTop: 14,
+    display: "flex",
+    gap: 10,
+    flexWrap: "wrap",
+    alignItems: "center",
+  },
+  primaryButton: {
+    minHeight: 42,
+    border: 0,
+    borderRadius: 12,
+    padding: "0 1rem",
+    background: "linear-gradient(135deg, #2563eb 0%, #16a3c7 100%)",
+    color: "#fff",
+    fontWeight: 850,
+    cursor: "pointer",
+  },
+  secondaryButton: {
+    minHeight: 42,
+    border: "1px solid #cbd5e1",
+    borderRadius: 12,
+    padding: "0 1rem",
+    background: "#fff",
+    color: "#334155",
+    fontWeight: 800,
+    cursor: "pointer",
+  },
+  dangerButton: {
+    minHeight: 42,
+    marginTop: 10,
+    border: "1px solid #991b1b",
+    borderRadius: 12,
+    padding: "0 1rem",
+    background: "#b91c1c",
+    color: "#fff",
+    fontWeight: 850,
+    cursor: "pointer",
+  },
+  heroAvatar: {
+    width: "100%",
     height: "100%",
-    background: "linear-gradient(90deg, #3b82f6 0%, #2563eb 100%)",
-    borderRadius: 999,
-    transition: "width 220ms ease",
-  },
-  verifiedPill: {
-    background: "#dcfce7",
-    color: "#166534",
-  },
-  pendingPill: {
-    background: "#ffedd5",
-    color: "#9a3412",
+    borderRadius: "50%",
+    objectFit: "cover",
+    background: "#eaf2ff",
   },
   formGrid: {
     display: "grid",
@@ -1547,25 +1766,31 @@ const profileUi = {
     display: "flex",
     flexDirection: "column",
     gap: 6,
-    fontSize: 14,
+    fontSize: 13,
     color: "#334155",
+    fontWeight: 750,
   },
   input: {
     width: "100%",
+    minHeight: 42,
     padding: "10px 12px",
-    border: "1px solid #cbd5e1",
-    borderRadius: 10,
+    border: "1px solid #d5e0ee",
+    borderRadius: 13,
+    background: "#f8fbff",
+    color: "#172033",
     fontSize: 14,
     outline: "none",
   },
   textArea: {
-    minHeight: 96,
+    minHeight: 104,
     width: "100%",
-    padding: 10,
-    borderRadius: 10,
-    border: "1px solid #cbd5e1",
+    padding: 12,
+    borderRadius: 14,
+    border: "1px solid #d5e0ee",
+    background: "#f8fbff",
     fontSize: 14,
     resize: "vertical",
+    outline: "none",
   },
   avatarPickerWrap: {
     marginTop: 14,
@@ -1727,14 +1952,6 @@ const profileUi = {
   disabledButton: {
     opacity: 0.65,
     cursor: "not-allowed",
-  },
-  verifiedText: {
-    color: "#166534",
-    fontWeight: 700,
-  },
-  pendingText: {
-    color: "#9a3412",
-    fontWeight: 700,
   },
   securitySuccess: {
     marginTop: 12,
