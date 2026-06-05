@@ -919,7 +919,7 @@ const Profile = () => {
                   </div>
                   <h2 style={profileUi.profileName}>
                     Hello {firstName}!
-                    {isAdmin && <AdminBadge style={{ marginLeft: 8 }} />}
+                    
                   </h2>
                   <p style={profileUi.profileRole}>{profileSubtitle}</p>
 

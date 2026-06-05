@@ -11,7 +11,7 @@ export default function AdminBadge({ className = '' }) {
       title="Gradiate Admin"
     >
       <FaShieldAlt style={{ fontSize: '0.7em' }} />
-      &nbsp;Admin
+      
     </span>
   );
 }
