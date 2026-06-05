@@ -10,6 +10,7 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { db } from "../lib/firebase/firestore";
+import { trackEvent } from "../lib/analytics";
 import {
   FaTwitter,
   FaInstagram,
@@ -238,6 +239,21 @@ export default function Bursary() {
   const { user,  } = useAuth();
   const isGuest = !user?.uid;
 
+  const getBursaryAnalyticsParams = (bursaryId) => {
+    const bursary = BURSARIES.find((item) => item.id === bursaryId);
+    if (!bursary) {
+      return {};
+    }
+
+    return {
+      bursary_id: bursary.id,
+      bursary_name: bursary.name,
+      provider: bursary.provider,
+      province: bursary.province,
+      category: getCategoryLabel(bursary.tags),
+    };
+  };
+
 
 
   const saveBursaryBookmark = useCallback(
@@ -325,7 +341,16 @@ export default function Bursary() {
       const next = removing ? prev.filter((b) => b !== id) : [...prev, id];
       const persist = removing ? removeBursaryBookmark(id) : saveBursaryBookmark(id);
 
-      persist.catch((e) => console.error("Bookmark sync error", e));
+      persist
+        .then(() => {
+          if (!removing) {
+            trackEvent("save_bursary", {
+              ...getBursaryAnalyticsParams(id),
+              source: activeTab === "saved" ? "saved_tab" : "bursary_card",
+            });
+          }
+        })
+        .catch((e) => console.error("Bookmark sync error", e));
 
       setBookmarkMeta((m) => {
         const nm = { ...m };
@@ -370,6 +395,17 @@ export default function Bursary() {
       if (prev.length >= 4) return prev;
       return [...prev, id];
     });
+  };
+
+  const handleBursaryApplyClick = (bursary) => {
+    trackEvent("bursary_apply_click", {
+      bursary_id: bursary.id,
+      bursary_name: bursary.name,
+      provider: bursary.provider,
+      province: bursary.province,
+      category: getCategoryLabel(bursary.tags),
+    });
+    window.open(bursary.applyUrl, "_blank", "noopener,noreferrer");
   };
 
   const filtered = useMemo(() => {
@@ -702,7 +738,7 @@ export default function Bursary() {
                     <div className="uni-card__actions" style={{ gap: 8, display: "flex", flexWrap: "wrap", marginTop: 10 }}>
                       <button
                         className="uni-card__btn uni-card__btn--primary uni-card__btn--apply"
-                        onClick={() => window.open(b.applyUrl, "_blank", "noopener,noreferrer")}
+                        onClick={() => handleBursaryApplyClick(b)}
                       >
                         Apply Now <FaExternalLinkAlt style={{ fontSize: "0.7rem" }} />
                       </button>

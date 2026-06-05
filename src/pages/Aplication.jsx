@@ -10,6 +10,7 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { db } from "../lib/firebase/firestore";
+import { trackEvent } from "../lib/analytics";
 import {
   FaTwitter,
   FaInstagram,
@@ -455,6 +456,19 @@ export default function Aplication() {
   const { user,  } = useAuth();
   const isGuest = !user?.uid;
 
+  const getUniversityAnalyticsParams = (universityId) => {
+    const university = UNIVERSITIES.find((item) => item.id === universityId);
+    if (!university) {
+      return {};
+    }
+
+    return {
+      university_id: university.id,
+      university_name: university.name,
+      province: university.location.split(", ").pop() || "Unknown",
+    };
+  };
+
   
   const buildBookmarkPayload = useCallback((universityId, overrides = {}) => {
     const uni = UNIVERSITIES.find((item) => item.id === universityId);
@@ -609,9 +623,18 @@ export default function Aplication() {
         const persistPromise = isRemoving
           ? removeBookmarkFromFirestore(id)
           : saveBookmarkToFirestore(id);
-        persistPromise.catch((error) => {
-          console.error("Failed to update bookmark", error);
-        });
+        persistPromise
+          .then(() => {
+            if (!isRemoving) {
+              trackEvent("save_university", {
+                ...getUniversityAnalyticsParams(id),
+                source: activeTab === "saved" ? "saved_tab" : "university_card",
+              });
+            }
+          })
+          .catch((error) => {
+            console.error("Failed to update bookmark", error);
+          });
       }
 
       setBookmarkMeta((prevMeta) => {
@@ -663,6 +686,15 @@ export default function Aplication() {
       }
       return [...prev, id];
     });
+  };
+
+  const handleApplicationClick = (university) => {
+    trackEvent("application_click", {
+      university_id: university.id,
+      university_name: university.name,
+      province: university.location.split(", ").pop() || "Unknown",
+    });
+    window.open(university.applyUrl, "_blank", "noopener,noreferrer");
   };
 
   
@@ -995,7 +1027,7 @@ export default function Aplication() {
                     <div className="uni-card__actions" style={{ gap: 8, display: "flex", flexWrap: "wrap" }}>
                       <button
                         className="uni-card__btn uni-card__btn--primary uni-card__btn--apply"
-                        onClick={() => window.open(uni.applyUrl)}
+                        onClick={() => handleApplicationClick(uni)}
                       >
                         Apply Now <FaExternalLinkAlt style={{ fontSize: "0.7rem" }} />
                       </button>

@@ -44,6 +44,7 @@ import CommunityReportModal from "../components/CommunityReportModal";
 import AdminBadge from "../components/AdminBadge";
 import { useAuth } from "../context/useAuth";
 import { db } from "../lib/firebase/firestore";
+import { trackEvent } from "../lib/analytics";
 import { routes } from "../lib/routes";
 import {
   COMMUNITY_SORT_OPTIONS,
@@ -488,7 +489,7 @@ export default function Community() {
     try {
       const authorSnapshot = getAuthorSnapshot(user, userProfile || {}, isAdmin);
 
-      await addDoc(collection(db, "communityPosts"), {
+      const postRef = await addDoc(collection(db, "communityPosts"), {
         ...authorSnapshot,
         category: selectedCategory,
         content: trimmedPostDraft,
@@ -499,6 +500,12 @@ export default function Community() {
         lastActivityAt: serverTimestamp(),
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
+      });
+      trackEvent("community_post_created", {
+        post_id: postRef.id,
+        category: selectedCategory,
+        has_module_code: Boolean(normalizeModuleCode(moduleDraft)),
+        content_length: trimmedPostDraft.length,
       });
       setPostDraft("");
       setModuleDraft("");

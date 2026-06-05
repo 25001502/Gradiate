@@ -11,6 +11,7 @@ import { getAvatarUrl, DEFAULT_AVATAR_STYLE } from "./utils/avatarUtils";
 import SmartImage from "./components/SmartImage";
 import { auth } from "./lib/firebase/auth";
 import { db } from "./lib/firebase/firestore";
+import { trackEvent } from "./lib/analytics";
 import { routes } from "./lib/routes";
 
 import {
@@ -256,6 +257,9 @@ export default function AuthForm() {
           return;
         }
         setPendingVerificationEmail("");
+        trackEvent("login", {
+          method: "email",
+        });
       } else {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         await updateProfile(userCredential.user, { displayName: username });
@@ -274,6 +278,9 @@ export default function AuthForm() {
           },
           { merge: true }
         );
+        trackEvent("sign_up", {
+          method: "email",
+        });
         const createdEmail = userCredential.user.email || email.trim();
         setPendingVerificationEmail(createdEmail);
         try {
@@ -330,6 +337,9 @@ export default function AuthForm() {
     try {
       // Always clear an existing account session before entering guest mode.
       await signOut(auth);
+      trackEvent("guest_access", {
+        method: "auth_screen",
+      });
       navigate(routes.application);
     } catch (error) {
       toast.error(error.message || "Unable to continue as guest right now.");

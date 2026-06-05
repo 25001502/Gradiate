@@ -42,6 +42,7 @@ import {
 } from "react-icons/fa";
 import { auth } from "../lib/firebase/auth";
 import { db } from "../lib/firebase/firestore";
+import { trackEvent } from "../lib/analytics";
 import { routes } from "../lib/routes";
 import {
   createCommunityPostPath,
@@ -485,12 +486,20 @@ const Profile = () => {
     try {
       if (navigator.share) {
         await navigator.share(shareData);
+        trackEvent("share", {
+          method: "native",
+          content_type: "profile",
+        });
         return;
       }
 
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(shareUrl);
         setSuccess("Profile link copied.");
+        trackEvent("share", {
+          method: "clipboard",
+          content_type: "profile",
+        });
         return;
       }
 
@@ -725,6 +734,13 @@ const Profile = () => {
       setShowAvatarPicker(false);
       setError(null);
       setSuccess("Profile saved successfully.");
+      trackEvent("profile_updated", {
+        academic_stage: profileData.academicStage,
+        avatar_style: avatarStyle,
+        has_bio: Boolean(profileData.bio?.trim()),
+        has_location: Boolean(profileData.location?.trim()),
+        has_phone: Boolean(profileData.phone?.trim()),
+      });
       setActiveTab("overview");
     } catch (err) {
       console.error(err);
