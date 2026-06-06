@@ -11,6 +11,13 @@ import {
 } from "firebase/firestore";
 import { db } from "../lib/firebase/firestore";
 import { trackEvent } from "../lib/analytics";
+import ApplicationTrackingPanel from "../components/ApplicationTrackingPanel";
+import {
+  APPLICATION_TRACKING_TYPES,
+  getApplicationTrackingProgress,
+  getDefaultApplicationTracking,
+  normalizeApplicationTracking,
+} from "../lib/applicationTracking";
 import {
   FaTwitter,
   FaInstagram,
@@ -269,6 +276,10 @@ export default function Bursary() {
           name: b.name,
           folder: "General",
           notes: "",
+          applicationTracking: {
+            ...getDefaultApplicationTracking(APPLICATION_TRACKING_TYPES.bursary),
+            updatedAt: serverTimestamp(),
+          },
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
           ...overrides,
@@ -357,7 +368,11 @@ export default function Bursary() {
         if (removing) {
           delete nm[id];
         } else if (!nm[id]) {
-          nm[id] = { folder: "General", notes: "" };
+          nm[id] = {
+            folder: "General",
+            notes: "",
+            applicationTracking: getDefaultApplicationTracking(APPLICATION_TRACKING_TYPES.bursary),
+          };
         }
         return nm;
       });
@@ -387,6 +402,91 @@ export default function Bursary() {
       { ...partial, updatedAt: serverTimestamp() },
       { merge: true }
     ).catch((e) => console.error("Meta update error", e));
+  };
+
+  const persistApplicationTracking = (id, nextTracking, eventName, eventParams = {}) => {
+    if (isGuest) {
+      navigate("/auth");
+      return;
+    }
+
+    const normalizedTracking = normalizeApplicationTracking(
+      nextTracking,
+      APPLICATION_TRACKING_TYPES.bursary
+    );
+    const progress = getApplicationTrackingProgress(
+      normalizedTracking,
+      APPLICATION_TRACKING_TYPES.bursary
+    );
+
+    setBookmarkMeta((prev) => ({
+      ...prev,
+      [id]: {
+        ...(prev[id] || {}),
+        applicationTracking: normalizedTracking,
+      },
+    }));
+
+    setDoc(
+      doc(db, "users", user.uid, "bursaryBookmarks", id),
+      {
+        applicationTracking: {
+          ...normalizedTracking,
+          updatedAt: serverTimestamp(),
+        },
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    )
+      .then(() => {
+        trackEvent(eventName, {
+          application_type: "bursary",
+          status: normalizedTracking.status,
+          progress_percent: progress.percent,
+          ...getBursaryAnalyticsParams(id),
+          ...eventParams,
+        });
+      })
+      .catch((e) => console.error("Tracking update error", e));
+  };
+
+  const updateApplicationStatus = (id, status) => {
+    const currentTracking = normalizeApplicationTracking(
+      bookmarkMeta[id]?.applicationTracking,
+      APPLICATION_TRACKING_TYPES.bursary
+    );
+
+    persistApplicationTracking(
+      id,
+      {
+        ...currentTracking,
+        status,
+      },
+      "application_status_updated"
+    );
+  };
+
+  const updateApplicationChecklist = (id, checklistItem, checked) => {
+    const currentTracking = normalizeApplicationTracking(
+      bookmarkMeta[id]?.applicationTracking,
+      APPLICATION_TRACKING_TYPES.bursary
+    );
+
+    persistApplicationTracking(
+      id,
+      {
+        ...currentTracking,
+        checklist: {
+          ...currentTracking.checklist,
+          [checklistItem]: checked,
+        },
+      },
+      "application_checklist_updated",
+      {
+        checklist_item: checklistItem,
+        checked,
+      }
+    );
   };
 
   const toggleCompare = (id) => {
@@ -756,6 +856,13 @@ export default function Bursary() {
 
                     {!isGuest && saved && activeTab === "saved" && (
                       <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
+                        <ApplicationTrackingPanel
+                          type={APPLICATION_TRACKING_TYPES.bursary}
+                          tracking={bookmarkMeta[b.id]?.applicationTracking}
+                          onStatusChange={(status) => updateApplicationStatus(b.id, status)}
+                          onChecklistChange={(item, checked) => updateApplicationChecklist(b.id, item, checked)}
+                        />
+
                         <label style={{ fontSize: "0.82rem", color: "#334155", fontWeight: 600 }}>
                           Folder
                         </label>

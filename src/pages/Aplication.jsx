@@ -11,6 +11,13 @@ import {
 } from "firebase/firestore";
 import { db } from "../lib/firebase/firestore";
 import { trackEvent } from "../lib/analytics";
+import ApplicationTrackingPanel from "../components/ApplicationTrackingPanel";
+import {
+  APPLICATION_TRACKING_TYPES,
+  getApplicationTrackingProgress,
+  getDefaultApplicationTracking,
+  normalizeApplicationTracking,
+} from "../lib/applicationTracking";
 import {
   FaTwitter,
   FaInstagram,
@@ -483,6 +490,10 @@ export default function Aplication() {
       notes: "",
       reminderEnabled: true,
       deadline: UNIVERSITY_DEADLINES[universityId] || null,
+      applicationTracking: {
+        ...getDefaultApplicationTracking(APPLICATION_TRACKING_TYPES.university),
+        updatedAt: serverTimestamp(),
+      },
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
       ...overrides,
@@ -647,6 +658,7 @@ export default function Aplication() {
             notes: "",
             reminderEnabled: true,
             deadline: UNIVERSITY_DEADLINES[id] || null,
+            applicationTracking: getDefaultApplicationTracking(APPLICATION_TRACKING_TYPES.university),
           };
         }
         return nextMeta;
@@ -674,6 +686,93 @@ export default function Aplication() {
     updateBookmarkMetaInFirestore(id, partialMeta).catch((error) => {
       console.error("Failed to update bookmark details:", error);
     });
+  };
+
+  const persistApplicationTracking = (id, nextTracking, eventName, eventParams = {}) => {
+    if (isGuest) {
+      navigate("/auth");
+      return;
+    }
+
+    const normalizedTracking = normalizeApplicationTracking(
+      nextTracking,
+      APPLICATION_TRACKING_TYPES.university
+    );
+    const progress = getApplicationTrackingProgress(
+      normalizedTracking,
+      APPLICATION_TRACKING_TYPES.university
+    );
+
+    setBookmarkMeta((prevMeta) => ({
+      ...prevMeta,
+      [id]: {
+        ...(prevMeta[id] || {}),
+        applicationTracking: normalizedTracking,
+      },
+    }));
+
+    setDoc(
+      doc(db, "users", user.uid, "bookmarks", id),
+      {
+        applicationTracking: {
+          ...normalizedTracking,
+          updatedAt: serverTimestamp(),
+        },
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    )
+      .then(() => {
+        trackEvent(eventName, {
+          application_type: "university",
+          status: normalizedTracking.status,
+          progress_percent: progress.percent,
+          ...getUniversityAnalyticsParams(id),
+          ...eventParams,
+        });
+      })
+      .catch((error) => {
+        console.error("Failed to update application tracking:", error);
+      });
+  };
+
+  const updateApplicationStatus = (id, status) => {
+    const currentTracking = normalizeApplicationTracking(
+      bookmarkMeta[id]?.applicationTracking,
+      APPLICATION_TRACKING_TYPES.university
+    );
+
+    persistApplicationTracking(
+      id,
+      {
+        ...currentTracking,
+        status,
+      },
+      "application_status_updated"
+    );
+  };
+
+  const updateApplicationChecklist = (id, checklistItem, checked) => {
+    const currentTracking = normalizeApplicationTracking(
+      bookmarkMeta[id]?.applicationTracking,
+      APPLICATION_TRACKING_TYPES.university
+    );
+
+    persistApplicationTracking(
+      id,
+      {
+        ...currentTracking,
+        checklist: {
+          ...currentTracking.checklist,
+          [checklistItem]: checked,
+        },
+      },
+      "application_checklist_updated",
+      {
+        checklist_item: checklistItem,
+        checked,
+      }
+    );
   };
 
   const toggleCompare = (id) => {
@@ -1045,6 +1144,13 @@ export default function Aplication() {
 
                     {!isGuest && bookmarks.includes(uni.id) && activeTab === "saved" && (
                       <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
+                        <ApplicationTrackingPanel
+                          type={APPLICATION_TRACKING_TYPES.university}
+                          tracking={bookmarkMeta[uni.id]?.applicationTracking}
+                          onStatusChange={(status) => updateApplicationStatus(uni.id, status)}
+                          onChecklistChange={(item, checked) => updateApplicationChecklist(uni.id, item, checked)}
+                        />
+
                         <label style={{ fontSize: "0.82rem", color: "#334155", fontWeight: 600 }}>
                           Folder
                         </label>

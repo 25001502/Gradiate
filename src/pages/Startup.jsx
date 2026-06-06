@@ -375,7 +375,7 @@ export default function Startup() {
             </div>
           </div>
           <p style={{ textAlign: "center", marginTop: "2rem" }}>
-            <a onClick={() => navigate("/auth")} className="btn btn-primary" style={{ cursor: "pointer" }}>
+            <a href="https://aps.gradiate.co.za" className="btn btn-primary" style={{ cursor: "pointer" }}>
               Calculate My APS &amp; Find Programmes
             </a>
           </p>
