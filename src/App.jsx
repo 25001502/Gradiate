@@ -18,6 +18,7 @@ const Profile = lazy(() => import('./pages/Profile'));
 const Bursary = lazy(() => import('./pages/Bursary'));
 const Community = lazy(() => import('./pages/Community'));
 const CommunityPostDetail = lazy(() => import('./pages/CommunityPostDetail'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 
 function isVerifiedUser(user) {
@@ -101,6 +102,7 @@ function AppRoutes() {
           <Route path={routes.bursaryDashboard} element={<Bursary />} />
           <Route path={routes.community} element={<Community />} />
           <Route path={routes.communityPost} element={<CommunityPostDetail />} />
+          <Route path={routes.privacyPolicy} element={<PrivacyPolicy />} />
           <Route path={routes.admin} element={<ProtectedAdminRoute />} />
 
           {legacyRoutes.map(([legacyPath, canonicalPath]) => (

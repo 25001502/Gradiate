@@ -629,7 +629,7 @@ const How = () => {
                             </div>
                             <div className="link-group">
                                 <h4>Legal</h4>
-                                <a href="#">Privacy Policy</a>
+                                <a href="/privacy-policy">Privacy Policy</a>
                                 <a href="#">Terms of Service</a>
                             </div>
                         </div>

@@ -11,6 +11,7 @@ export const routes = {
   bursaryDashboard: '/bursary',
   community: '/community',
   communityPost: '/community/post/:postId',
+  privacyPolicy: '/privacy-policy',
   admin: '/admin',
 };
 
