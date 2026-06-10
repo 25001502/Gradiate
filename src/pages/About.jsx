@@ -326,7 +326,7 @@ const About = () => {
               <div className="link-group">
                 <h4>Legal</h4>
                 <a href="/privacy-policy">Privacy Policy</a>
-                <a href="/terms-of-service">Terms of Service</a>
+                <a href="/terms-of-use">Terms of Use</a>
               </div>
             </div>
           </div>

@@ -12,6 +12,7 @@ export const routes = {
   community: '/community',
   communityPost: '/community/post/:postId',
   privacyPolicy: '/privacy-policy',
+  termsOfUse: '/terms-of-use',
   admin: '/admin',
 };
 
@@ -26,4 +27,5 @@ export const legacyRouteRedirects = {
   '/Profile': routes.profile,
   '/Bursary': routes.bursaryDashboard,
   '/Community': routes.community,
+  '/terms-of-service': routes.termsOfUse,
 };
