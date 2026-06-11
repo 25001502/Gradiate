@@ -52,7 +52,7 @@
   padding: 70px max(20px, calc((100% - 900px) / 2)) 64px;
   color: #fff;
   text-align: center;
-  background: linear-gradient(135deg, #2563eb 0%, #2477d4 58%, #12a878 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #2477d4 58%, #2588e5 100%);
 }
 
 .privacy-intro__icon {

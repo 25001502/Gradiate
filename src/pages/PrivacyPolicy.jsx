@@ -49,9 +49,18 @@ export default function PrivacyPolicy() {
             Back to Gradiate
           </Link>
 
-          <div className="privacy-brand" aria-label="Gradiate">
-            Grad<span>iate</span>
-          </div>
+          <a
+            className="logo"
+            href="#"
+            style={{
+              fontWeight: 700,
+              fontSize: "1.5rem",
+              color: "#2c3e50",
+              textDecoration: "none",
+            }}
+          >
+            Grad<span style={{ color: "#3498db" }}>iate</span>
+          </a>
         </div>
       </header>
 
