@@ -16,6 +16,20 @@ export const routes = {
   admin: '/admin',
 };
 
+// Only canonical public pages that should appear in search results.
+export const indexableRoutes = [
+  routes.home,
+  routes.application,
+  routes.bursaries,
+  routes.programs,
+  routes.howItWorks,
+  routes.about,
+  routes.practice,
+  routes.community,
+  routes.privacyPolicy,
+  routes.termsOfUse,
+];
+
 export const legacyRouteRedirects = {
   '/AuthForm': routes.auth,
   '/Aplication': routes.application,

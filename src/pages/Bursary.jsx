@@ -578,6 +578,7 @@ export default function Bursary() {
         title="Bursary Dashboard"
         canonical="/bursary"
         description="Browse and filter the latest bursaries available to South African students on Gradiate's bursary dashboard. Search by field of study and province."
+        noindex
       />
       <nav className="navbar-responsive">
         <div className="navbar-container">

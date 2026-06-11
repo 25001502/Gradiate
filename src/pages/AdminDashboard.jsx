@@ -674,7 +674,7 @@ export default function AdminDashboard() {
       <SEO
         title="Admin Dashboard | Gradiate"
         description="Gradiate global admin dashboard"
-        noIndex
+        noindex
       />
 
       <div className="admin-dashboard-inner">

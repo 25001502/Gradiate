@@ -1,38 +1,38 @@
-# Site Map
+# Sitemap
 
-## Visual Structure
+Gradiate's XML sitemap is generated from `indexableRoutes` in
+`src/lib/routes.js`.
 
-```mermaid
-graph TD
-  A[Home /] --> B[Auth /auth]
-  A --> C[Application /application]
-  A --> D[Bursaries /bursaries]
-  A --> E[Programs /programs]
-  A --> F[How It Works /how-it-works]
-  A --> G[About /about]
-  A --> H[Practice /practice]
-  A --> I[Profile /profile]
+Run:
+
+```sh
+npm run sitemap
 ```
 
-## Canonical Routes
+The production build runs this command automatically before Vite builds.
 
-1. / -> Startup
-2. /auth -> AuthForm
-3. /application -> Application
-4. /bursaries -> Bursaryguest
-5. /programs -> ProgramsGuest
-6. /how-it-works -> How
-7. /about -> About
-8. /practice -> Practise
-9. /profile -> Profile
+## Indexable Canonical Routes
 
-## Backward-Compatible Legacy Routes
+1. `/` - Home
+2. `/application` - University application tracker and finder
+3. `/bursaries` - Public bursary finder
+4. `/programs` - Public programme finder
+5. `/how-it-works` - How Gradiate works
+6. `/about` - About Gradiate
+7. `/practice` - Past papers and practice resources
+8. `/community` - Student Community
+9. `/privacy-policy` - Privacy Policy
+10. `/terms-of-use` - Terms of Use
 
-1. /AuthForm
-2. /Aplication
-3. /Bursaryguest
-4. /Programsguest
-5. /How
-6. /About
-7. /Practise
-8. /Profile
+## Excluded Routes
+
+- `/auth`, `/profile`, and `/admin` are account or private routes and use `noindex`.
+- `/bursary` is excluded and uses `noindex` because `/bursaries` is the preferred
+  public bursary page.
+- Individual Community posts are dynamic and are not currently generated into
+  the static sitemap.
+- Legacy routes redirect to canonical routes and must not be included.
+
+The generated XML intentionally omits `priority` and `changefreq` because Google
+ignores them. It also omits `lastmod` until Gradiate has a reliable per-page
+content-update source.

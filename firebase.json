@@ -4,10 +4,68 @@
   },
   "hosting": {
     "public": "dist",
+    "trailingSlash": false,
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
+    ],
+    "redirects": [
+      {
+        "source": "/AuthForm",
+        "destination": "/auth",
+        "type": 301
+      },
+      {
+        "source": "/Aplication",
+        "destination": "/application",
+        "type": 301
+      },
+      {
+        "source": "/Bursaryguest",
+        "destination": "/bursaries",
+        "type": 301
+      },
+      {
+        "source": "/Programsguest",
+        "destination": "/programs",
+        "type": 301
+      },
+      {
+        "source": "/How",
+        "destination": "/how-it-works",
+        "type": 301
+      },
+      {
+        "source": "/About",
+        "destination": "/about",
+        "type": 301
+      },
+      {
+        "source": "/Practise",
+        "destination": "/practice",
+        "type": 301
+      },
+      {
+        "source": "/Profile",
+        "destination": "/profile",
+        "type": 301
+      },
+      {
+        "source": "/Bursary",
+        "destination": "/bursary",
+        "type": 301
+      },
+      {
+        "source": "/Community",
+        "destination": "/community",
+        "type": 301
+      },
+      {
+        "source": "/terms-of-service",
+        "destination": "/terms-of-use",
+        "type": 301
+      }
     ],
     "headers": [
       {
@@ -38,6 +96,37 @@
         ]
       },
       {
+        "source": "/sitemap.xml",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=3600"
+          }
+        ]
+      },
+      {
+        "source": "/robots.txt",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=3600"
+          }
+        ]
+      },
+      {
+        "source": "404.html",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=300"
+          },
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow"
+          }
+        ]
+      },
+      {
         "source": "/assets/**",
         "headers": [
           {
@@ -53,7 +142,103 @@
         "function": "apiRouter"
       },
       {
-        "source": "**",
+        "source": "/auth",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/application",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/bursaries",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/programs",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/how-it-works",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/about",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/practice",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/profile",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/bursary",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/community",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/community/post/*",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/privacy-policy",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/terms-of-use",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/admin",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/AuthForm",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/Aplication",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/Bursaryguest",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/Programsguest",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/How",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/About",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/Practise",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/Profile",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/Bursary",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/Community",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/terms-of-service",
         "destination": "/index.html"
       }
     ]
