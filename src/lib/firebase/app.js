@@ -1,4 +1,5 @@
 import { initializeApp } from 'firebase/app';
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from 'firebase/app-check';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyDld0y3sKb1e0WkNvWqe2NIsKZSpNUHOW0',
@@ -11,3 +12,41 @@ const firebaseConfig = {
 };
 
 export const firebaseApp = initializeApp(firebaseConfig);
+
+const appCheckStateKey = '__gradiateFirebaseAppCheck';
+const recaptchaEnterpriseSiteKey = import.meta.env.VITE_RECAPTCHA_ENTERPRISE_SITE_KEY;
+const appCheckDebugToken = import.meta.env.DEV
+  ? import.meta.env.VITE_FIREBASE_APPCHECK_DEBUG_TOKEN
+  : '';
+
+function initializeFirebaseAppCheck() {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  if (globalThis[appCheckStateKey]) {
+    return globalThis[appCheckStateKey];
+  }
+
+  if (!recaptchaEnterpriseSiteKey) {
+    console.warn(
+      'Firebase App Check is not initialized because VITE_RECAPTCHA_ENTERPRISE_SITE_KEY is missing.',
+    );
+    return null;
+  }
+
+  if (appCheckDebugToken) {
+    globalThis.FIREBASE_APPCHECK_DEBUG_TOKEN =
+      appCheckDebugToken === 'true' ? true : appCheckDebugToken;
+  }
+
+  // Keep Firebase Console enforcement off until App Check tokens are verified in every client flow.
+  globalThis[appCheckStateKey] = initializeAppCheck(firebaseApp, {
+    provider: new ReCaptchaEnterpriseProvider(recaptchaEnterpriseSiteKey),
+    isTokenAutoRefreshEnabled: true,
+  });
+
+  return globalThis[appCheckStateKey];
+}
+
+export const appCheck = initializeFirebaseAppCheck();

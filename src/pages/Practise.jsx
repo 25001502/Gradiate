@@ -367,7 +367,7 @@ export default function Practise() {
   return (
     <div>
       <SEO
-        title="Practice & Interview Prep"
+        title="Practice Past Papers & Study Resources"
         canonical="/practice"
         description="Access past exam papers, practice questions, and study resources to improve your performance and prepare effectively for your exams."
       />
