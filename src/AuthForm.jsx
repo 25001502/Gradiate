@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
   updateProfile,
@@ -56,6 +57,31 @@ const PASSWORD_RULES = [
 
 const VERIFICATION_CLIENT_ID_KEY = "gradiate_verification_client_id";
 const VERIFICATION_COOLDOWN_KEY = "gradiate_verification_resend_available_at";
+const PASSWORD_RESET_SUCCESS_MESSAGE =
+  "If an account exists for this email, a password reset link has been sent.";
+
+const isValidEmailAddress = (value = "") =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
+const getPasswordResetErrorMessage = (error) => {
+  switch (error?.code) {
+    case "auth/invalid-email":
+      return "Enter a valid email address.";
+    case "auth/too-many-requests":
+      return "Too many password reset attempts. Please wait and try again later.";
+    case "auth/network-request-failed":
+      return "Unable to connect. Check your internet connection and try again.";
+    case "auth/operation-not-allowed":
+      return "Password reset is currently unavailable. Please contact support.";
+    case "auth/app-not-authorized":
+    case "auth/auth-domain-config-required":
+    case "auth/invalid-api-key":
+    case "auth/unauthorized-domain":
+      return "Password reset is not configured for this website. Please contact support.";
+    default:
+      return "Unable to send the password reset email. Please try again.";
+  }
+};
 
 const createFallbackClientId = () =>
   `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
@@ -145,6 +171,8 @@ export default function AuthForm() {
   const [username, setUsername] = useState("");
 
   const [loading, setLoading] = useState(false);
+  const [resettingPassword, setResettingPassword] = useState(false);
+  const [showPasswordReset, setShowPasswordReset] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [pendingVerificationEmail, setPendingVerificationEmail] = useState("");
@@ -249,6 +277,7 @@ export default function AuthForm() {
     try {
       if (isLogin) {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        setShowPasswordReset(false);
         if (!userCredential.user.emailVerified) {
           const unverifiedEmail = userCredential.user.email || email.trim();
           setPendingVerificationEmail(unverifiedEmail);
@@ -293,9 +322,50 @@ export default function AuthForm() {
       }
       navigate(routes.application);
     } catch (error) {
+      if (
+        isLogin &&
+        ["auth/wrong-password", "auth/invalid-credential"].includes(error?.code)
+      ) {
+        setShowPasswordReset(true);
+      }
       toast.error(error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    if (loading || resettingPassword) {
+      return;
+    }
+
+    const targetEmail = email.trim();
+    if (!targetEmail) {
+      toast.error("Enter your email address first.");
+      return;
+    }
+
+    if (!isValidEmailAddress(targetEmail)) {
+      toast.error("Enter a valid email address.");
+      return;
+    }
+
+    setResettingPassword(true);
+    try {
+      await sendPasswordResetEmail(auth, targetEmail);
+      trackEvent("password_reset_requested", {
+        method: "email",
+      });
+      toast.success(PASSWORD_RESET_SUCCESS_MESSAGE);
+    } catch (error) {
+      if (error?.code === "auth/user-not-found") {
+        toast.success(PASSWORD_RESET_SUCCESS_MESSAGE);
+        return;
+      }
+
+      toast.error(getPasswordResetErrorMessage(error));
+    } finally {
+      setResettingPassword(false);
     }
   };
 
@@ -467,7 +537,10 @@ export default function AuthForm() {
                 type="email"
                 placeholder="Enter your email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setShowPasswordReset(false);
+                }}
                 autoComplete="email"
                 required
               />
@@ -480,7 +553,10 @@ export default function AuthForm() {
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setShowPasswordReset(false);
+                  }}
                   autoComplete={isLogin ? "current-password" : "new-password"}
                   required
                   minLength={isLogin ? 6 : 8}
@@ -496,12 +572,25 @@ export default function AuthForm() {
                 </button>
               </div>
             </div>
+            {isLogin && showPasswordReset && (
+              <button
+                type="button"
+                className="auth-link-btn forgot-password-button"
+                onClick={handlePasswordReset}
+                disabled={loading || resettingPassword}
+              >
+                {resettingPassword ? "Sending reset link..." : "Forgot password?"}
+              </button>
+            )}
             <button type="submit" className="btn btn-login auth-3d-pop" disabled={loading}>
               {loading ? "Please wait..." : isLogin ? "Login" : "Sign Up"}
             </button>
             <div className="auth-actions">
               <button
-                onClick={() => setIsLogin(!isLogin)}
+                onClick={() => {
+                  setIsLogin(!isLogin);
+                  setShowPasswordReset(false);
+                }}
                 type="button"
                 className="auth-link-btn"
               >
@@ -906,6 +995,20 @@ export default function AuthForm() {
   .auth-link-btn-secondary {
     font-size: 0.88rem;
     color: #2563eb;
+  }
+
+  .forgot-password-button {
+    align-self: flex-end;
+    margin-top: -0.15rem;
+    padding: 0;
+    font-size: 0.88rem;
+  }
+
+  .forgot-password-button:disabled {
+    color: #94a3b8;
+    cursor: not-allowed;
+    border-color: transparent;
+    transform: none;
   }
 
   .verification-resend-card {
