@@ -70,6 +70,16 @@ const VERIFICATION_RATE_LIMITS = {
   clientWindowMax: 3,
   clientDailyMax: 8,
 };
+const PASSWORD_RESET_COOLDOWN_MS = 10 * 60 * 1000;
+const PASSWORD_RESET_RATE_LIMITS = {
+  emailDailyMax: 3,
+  connectionWindowMs: 15 * 60 * 1000,
+  connectionWindowMax: 10,
+  connectionDailyMax: 50,
+  clientWindowMs: 60 * 60 * 1000,
+  clientWindowMax: 3,
+  clientDailyMax: 8,
+};
 
 class RateLimitError extends Error {
   constructor(message, retryAfterSeconds, code = "rate_limited") {
@@ -141,14 +151,14 @@ function getRateState(snapshot, config, nowMs, dayKey) {
   };
 }
 
-function assertRateLimit(config, state, nowMs) {
+function assertRateLimit(config, state, nowMs, emailKind = "verification") {
   if (
     config.cooldownMs &&
     state.lastSentAtMs &&
     nowMs - state.lastSentAtMs < config.cooldownMs
   ) {
     throw new RateLimitError(
-      "Please wait before requesting another verification email.",
+      `Please wait before requesting another ${emailKind} email.`,
       secondsUntil(state.lastSentAtMs + config.cooldownMs, nowMs),
       "cooldown"
     );
@@ -156,7 +166,7 @@ function assertRateLimit(config, state, nowMs) {
 
   if (config.dailyMax && state.dayCount >= config.dailyMax) {
     throw new RateLimitError(
-      "Too many verification email requests today. Please try again later.",
+      `Too many ${emailKind} email requests today. Please try again later.`,
       secondsUntil(getNextUtcDayMs(nowMs), nowMs)
     );
   }
@@ -167,7 +177,7 @@ function assertRateLimit(config, state, nowMs) {
     state.windowCount >= config.windowMax
   ) {
     throw new RateLimitError(
-      "Too many verification email requests. Please wait before trying again.",
+      `Too many ${emailKind} email requests. Please wait before trying again.`,
       secondsUntil(state.windowStartMs + config.windowMs, nowMs)
     );
   }
@@ -238,6 +248,67 @@ async function enforceVerificationRateLimit({ emailHash, connectionHash, clientH
   });
 }
 
+async function enforcePasswordResetRateLimit({ emailHash, connectionHash, clientHash, reason }) {
+  const nowMs = Date.now();
+  const dayKey = getUtcDayKey(nowMs);
+  const rateLimitCollection = adminDb.collection("passwordResetRateLimits");
+  const configs = [
+    {
+      kind: "email",
+      ref: rateLimitCollection.doc(`email_${emailHash}`),
+      cooldownMs: PASSWORD_RESET_COOLDOWN_MS,
+      dailyMax: PASSWORD_RESET_RATE_LIMITS.emailDailyMax,
+    },
+    {
+      kind: "connection",
+      ref: rateLimitCollection.doc(`connection_${connectionHash}`),
+      windowMs: PASSWORD_RESET_RATE_LIMITS.connectionWindowMs,
+      windowMax: PASSWORD_RESET_RATE_LIMITS.connectionWindowMax,
+      dailyMax: PASSWORD_RESET_RATE_LIMITS.connectionDailyMax,
+    },
+  ];
+
+  if (clientHash) {
+    configs.push({
+      kind: "client",
+      ref: rateLimitCollection.doc(`client_${clientHash}`),
+      windowMs: PASSWORD_RESET_RATE_LIMITS.clientWindowMs,
+      windowMax: PASSWORD_RESET_RATE_LIMITS.clientWindowMax,
+      dailyMax: PASSWORD_RESET_RATE_LIMITS.clientDailyMax,
+    });
+  }
+
+  await adminDb.runTransaction(async (transaction) => {
+    const snapshots = await Promise.all(configs.map((config) => transaction.get(config.ref)));
+    const states = snapshots.map((snapshot, index) =>
+      getRateState(snapshot, configs[index], nowMs, dayKey)
+    );
+
+    configs.forEach((config, index) => {
+      assertRateLimit(config, states[index], nowMs, "password reset");
+    });
+
+    configs.forEach((config, index) => {
+      const state = states[index];
+      const nextData = {
+        kind: config.kind,
+        dayKey,
+        dayCount: state.dayCount + 1,
+        lastSentAtMs: nowMs,
+        updatedAt: FieldValue.serverTimestamp(),
+        lastReason: reason,
+      };
+
+      if (config.windowMs) {
+        nextData.windowStartMs = state.windowStartMs;
+        nextData.windowCount = state.windowCount + 1;
+      }
+
+      transaction.set(config.ref, nextData, { merge: true });
+    });
+  });
+}
+
 function verificationEmailTemplate(verificationLink) {
   return `
   <div style="font-family:Arial,Helvetica,sans-serif;background:#f6f8fb;padding:24px;color:#1f2937;">
@@ -251,6 +322,25 @@ function verificationEmailTemplate(verificationLink) {
         <a href="${verificationLink}" style="display:inline-block;margin:12px 0;padding:12px 20px;background:#2563eb;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:600;">Verify Email</a>
         <p style="margin:12px 0 0;line-height:1.6;font-size:13px;color:#4b5563;">If the button does not work, copy and paste this URL into your browser:</p>
         <p style="word-break:break-all;font-size:12px;color:#1d4ed8;">${verificationLink}</p>
+      </div>
+    </div>
+  </div>`;
+}
+
+function passwordResetEmailTemplate(passwordResetLink) {
+  return `
+  <div style="font-family:Arial,Helvetica,sans-serif;background:#f6f8fb;padding:24px;color:#1f2937;">
+    <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
+      <div style="background:#0f172a;padding:20px 24px;color:#ffffff;">
+        <h1 style="margin:0;font-size:24px;">Gradiate</h1>
+        <p style="margin:8px 0 0;font-size:14px;opacity:.9;">Reset your password securely</p>
+      </div>
+      <div style="padding:24px;">
+        <p style="margin:0 0 12px;line-height:1.6;">We received a request to reset your Gradiate password.</p>
+        <a href="${passwordResetLink}" style="display:inline-block;margin:12px 0;padding:12px 20px;background:#2563eb;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:600;">Reset Password</a>
+        <p style="margin:12px 0;line-height:1.6;font-size:13px;color:#4b5563;">If you did not request this, you can safely ignore this email. Your password will remain unchanged.</p>
+        <p style="margin:12px 0 0;line-height:1.6;font-size:13px;color:#4b5563;">If the button does not work, copy and paste this URL into your browser:</p>
+        <p style="word-break:break-all;font-size:12px;color:#1d4ed8;">${passwordResetLink}</p>
       </div>
     </div>
   </div>`;
@@ -357,6 +447,108 @@ api.post(["/send-verification", "/api/send-verification"], async (req, res) => {
 
     console.error("Error in /api/send-verification:", error);
     return res.status(500).json({ error: error.message || "Failed to send verification email." });
+  }
+});
+
+api.post(["/send-password-reset", "/api/send-password-reset"], async (req, res) => {
+  const neutralResponse = {
+    success: true,
+    message: "If an account exists for this email, a password reset link has been sent.",
+  };
+
+  try {
+    const { email, clientId, reason } = req.body || {};
+    const normalizedEmail = normalizeEmail(email);
+    const safeReason = String(reason || "wrong_password").trim().slice(0, 32) || "wrong_password";
+
+    if (
+      !normalizedEmail ||
+      typeof email !== "string" ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)
+    ) {
+      return res.status(400).json({ error: "A valid email is required." });
+    }
+
+    const resendApiKey = process.env.RESEND_API_KEY;
+    if (!resendApiKey) {
+      return res.status(500).json({ error: "Password reset email service is not configured." });
+    }
+
+    const emailHash = hashValue(normalizedEmail);
+    const connectionHash = hashValue(getRequestIp(req));
+    const normalizedClientId = normalizeClientId(clientId);
+    const clientHash = normalizedClientId ? hashValue(normalizedClientId) : null;
+
+    await enforcePasswordResetRateLimit({
+      emailHash,
+      connectionHash,
+      clientHash,
+      reason: safeReason,
+    });
+
+    const authUser = await adminAuth.getUserByEmail(normalizedEmail).catch((error) => {
+      if (error.code === "auth/user-not-found") {
+        return null;
+      }
+      throw error;
+    });
+
+    if (!authUser) {
+      return res.status(200).json({
+        ...neutralResponse,
+        cooldownSeconds: Math.ceil(PASSWORD_RESET_COOLDOWN_MS / 1000),
+      });
+    }
+
+    const passwordResetLink = await adminAuth.generatePasswordResetLink(normalizedEmail, {
+      url: process.env.PASSWORD_RESET_CONTINUE_URL || "https://gradiate.co.za/auth",
+      handleCodeInApp: false,
+    });
+
+    const resend = new Resend(resendApiKey);
+    const { error: resendError } = await resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL || "Gradiate <noreply@gradiate.co.za>",
+      to: normalizedEmail,
+      subject: "Reset your Gradiate password",
+      html: passwordResetEmailTemplate(passwordResetLink),
+    });
+
+    if (resendError) {
+      throw new Error(resendError.message || "Resend failed to send the password reset email.");
+    }
+
+    try {
+      await adminDb.collection("passwordResetEmailRequests").add({
+        emailHash,
+        connectionHash,
+        clientHash: clientHash || null,
+        uidHash: hashValue(authUser.uid),
+        reason: safeReason,
+        status: "sent",
+        createdAt: FieldValue.serverTimestamp(),
+      });
+    } catch (logError) {
+      console.error("Failed to write password reset email audit log:", logError.message);
+    }
+
+    return res.status(200).json({
+      ...neutralResponse,
+      cooldownSeconds: Math.ceil(PASSWORD_RESET_COOLDOWN_MS / 1000),
+    });
+  } catch (error) {
+    if (error instanceof RateLimitError || error.name === "RateLimitError") {
+      return res
+        .status(429)
+        .set("Retry-After", String(error.retryAfterSeconds))
+        .json({
+          error: error.message,
+          code: error.code,
+          retryAfterSeconds: error.retryAfterSeconds,
+        });
+    }
+
+    console.error("Error in /api/send-password-reset:", error);
+    return res.status(500).json({ error: "Failed to send password reset email." });
   }
 });
 

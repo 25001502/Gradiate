@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   createUserWithEmailAndPassword,
-  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
   updateProfile,
@@ -62,26 +61,6 @@ const PASSWORD_RESET_SUCCESS_MESSAGE =
 
 const isValidEmailAddress = (value = "") =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-
-const getPasswordResetErrorMessage = (error) => {
-  switch (error?.code) {
-    case "auth/invalid-email":
-      return "Enter a valid email address.";
-    case "auth/too-many-requests":
-      return "Too many password reset attempts. Please wait and try again later.";
-    case "auth/network-request-failed":
-      return "Unable to connect. Check your internet connection and try again.";
-    case "auth/operation-not-allowed":
-      return "Password reset is currently unavailable. Please contact support.";
-    case "auth/app-not-authorized":
-    case "auth/auth-domain-config-required":
-    case "auth/invalid-api-key":
-    case "auth/unauthorized-domain":
-      return "Password reset is not configured for this website. Please contact support.";
-    default:
-      return "Unable to send the password reset email. Please try again.";
-  }
-};
 
 const createFallbackClientId = () =>
   `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
@@ -162,6 +141,8 @@ const getPasswordStrength = (password = "") => {
 export default function AuthForm() {
   const verificationEndpoint =
     import.meta.env.VITE_SEND_VERIFICATION_ENDPOINT || "/api/send-verification";
+  const passwordResetEndpoint =
+    import.meta.env.VITE_SEND_PASSWORD_RESET_ENDPOINT || "/api/send-password-reset";
 
   const [isLogin, setIsLogin] = useState(true);
 
@@ -352,18 +333,40 @@ export default function AuthForm() {
 
     setResettingPassword(true);
     try {
-      await sendPasswordResetEmail(auth, targetEmail);
-      trackEvent("password_reset_requested", {
-        method: "email",
+      const response = await fetch(passwordResetEndpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: targetEmail,
+          clientId: getVerificationClientId(),
+          reason: "wrong_password",
+        }),
       });
-      toast.success(PASSWORD_RESET_SUCCESS_MESSAGE);
-    } catch (error) {
-      if (error?.code === "auth/user-not-found") {
-        toast.success(PASSWORD_RESET_SUCCESS_MESSAGE);
-        return;
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error(
+            "Password reset service is unavailable. Start the Firebase Functions emulator or deploy functions."
+          );
+        }
+        if (response.status === 429) {
+          throw new Error(data.error || "Too many password reset attempts. Please try again later.");
+        }
+        throw new Error(data.error || "Unable to send the password reset email. Please try again.");
       }
 
-      toast.error(getPasswordResetErrorMessage(error));
+      trackEvent("password_reset_requested", {
+        method: "resend",
+      });
+      setShowPasswordReset(false);
+      toast.success(data.message || PASSWORD_RESET_SUCCESS_MESSAGE);
+    } catch (error) {
+      toast.error(
+        error.message || "Unable to connect. Check your internet connection and try again."
+      );
     } finally {
       setResettingPassword(false);
     }
