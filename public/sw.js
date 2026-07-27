@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'gradiate-pwa';
-const SHELL_CACHE = `${CACHE_PREFIX}-shell-v3`;
+const SHELL_CACHE = `${CACHE_PREFIX}-shell-v4`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-v1`;
 const IMAGE_CACHE = `${CACHE_PREFIX}-images-v1`;
 const CURRENT_CACHES = [SHELL_CACHE, RUNTIME_CACHE, IMAGE_CACHE];

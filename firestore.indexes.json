@@ -1,0 +1,15 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "savedCommunityPosts",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        {
+          "fieldPath": "postId",
+          "order": "ASCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

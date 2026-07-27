@@ -3,12 +3,14 @@ import * as functions from "firebase-functions";
 import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
+import { onDocumentCreated, onDocumentDeleted } from "firebase-functions/v2/firestore";
 import cors from "cors";
 import express from "express";
 
 import { createHash } from "node:crypto";
 import process from "node:process";
 import { Resend } from "resend";
+import { createCommunitySecurityHandlers } from "./communitySecurity.js";
 
 const firebaseProjectId = process.env.ADMIN_PROJECT_ID;
 const firebaseClientEmail = process.env.ADMIN_CLIENT_EMAIL;
@@ -31,6 +33,7 @@ if (!getApps().length) {
 
 const adminAuth = getAuth();
 const adminDb = getFirestore();
+const communitySecurityHandlers = createCommunitySecurityHandlers(adminDb);
 
 // ---------------------------------------------------------------------------
 // Admin middleware — verifies the caller's ID token and checks admins/{uid}
@@ -42,6 +45,9 @@ async function requireAdmin(req, res, next) {
     if (!token) return res.status(401).json({ error: "Missing auth token." });
 
     const decoded = await adminAuth.verifyIdToken(token);
+    if (decoded.email_verified !== true) {
+      return res.status(403).json({ error: "Verified email required." });
+    }
     const adminDoc = await adminDb.collection("admins").doc(decoded.uid).get();
     if (!adminDoc.exists) return res.status(403).json({ error: "Admin access required." });
 
@@ -553,6 +559,37 @@ api.post(["/send-password-reset", "/api/send-password-reset"], async (req, res) 
 });
 
 export const apiRouter = functions.https.onRequest(api);
+
+const communityTriggerOptions = (document) => ({
+  document,
+  region: "us-central1",
+  retry: true,
+});
+
+export const communityLikeCreated = onDocumentCreated(
+  communityTriggerOptions("communityPosts/{postId}/likes/{userId}"),
+  communitySecurityHandlers.onLikeCreated,
+);
+export const communityLikeDeleted = onDocumentDeleted(
+  communityTriggerOptions("communityPosts/{postId}/likes/{userId}"),
+  communitySecurityHandlers.onLikeDeleted,
+);
+export const communityCommentCreated = onDocumentCreated(
+  communityTriggerOptions("communityPosts/{postId}/comments/{commentId}"),
+  communitySecurityHandlers.onCommentCreated,
+);
+export const communityCommentDeleted = onDocumentDeleted(
+  communityTriggerOptions("communityPosts/{postId}/comments/{commentId}"),
+  communitySecurityHandlers.onCommentDeleted,
+);
+export const communitySavedPostCreated = onDocumentCreated(
+  communityTriggerOptions("users/{userId}/savedCommunityPosts/{postId}"),
+  communitySecurityHandlers.onSavedPostCreated,
+);
+export const communitySavedPostDeleted = onDocumentDeleted(
+  communityTriggerOptions("users/{userId}/savedCommunityPosts/{postId}"),
+  communitySecurityHandlers.onSavedPostDeleted,
+);
 
 // ---------------------------------------------------------------------------
 // Admin endpoints

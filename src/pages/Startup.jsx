@@ -350,7 +350,7 @@ export default function Startup() {
           <h2 style={{ fontWeight: "bold" }}>Understanding Your APS Score</h2>
           <p className="subtitle">
             Your Admission Point Score (APS) determines which university programmes you can apply for.
-            Gradiate calculates it automatically when you sign up.
+            
           </p>
           <div className="aps-grid">
             <div className="aps-card">
@@ -466,7 +466,7 @@ export default function Startup() {
               <a href="#">
                 <FaTwitter />
               </a>
-              <a href="#">
+              <a href="www.linkedin.com/in/nengovhela-thandululo-880080367">
                 <FaLinkedin />
               </a>
               <a href="#">

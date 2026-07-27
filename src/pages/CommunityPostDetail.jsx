@@ -5,7 +5,6 @@ import {
   deleteDoc,
   doc,
   getDocs,
-  increment,
   onSnapshot,
   orderBy,
   query,
@@ -166,27 +165,12 @@ export default function CommunityPostDetail() {
     };
   }, [postId, user?.uid, isAdmin]);
 
-  const addNotificationToBatch = (batch, targetPost, type, extra = {}) => {
-    if (!targetPost.authorId || targetPost.authorId === user?.uid) {
-      return;
-    }
-
-    const notificationRef = doc(collection(db, "users", targetPost.authorId, "notifications"));
-
-    batch.set(notificationRef, {
-      recipientId: targetPost.authorId,
-      actorId: user.uid,
-      actorName: getDisplayName(user),
-      actorPhotoURL: userProfile?.photoURL || user.photoURL || "",
-      type,
-      postId: targetPost.id,
-      postPreview: String(targetPost.content || "").slice(0, 160),
-      commentId: "",
-      commentPreview: "",
-      read: false,
-      createdAt: serverTimestamp(),
-      ...extra,
-    });
+  const adjustPostCount = (field, delta) => {
+    setPost((current) =>
+      current
+        ? { ...current, [field]: Math.max(0, Number(current[field] || 0) + delta) }
+        : current
+    );
   };
 
   const handleToggleLike = async () => {
@@ -200,31 +184,17 @@ export default function CommunityPostDetail() {
     }
 
     const likeRef = doc(db, "communityPosts", post.id, "likes", user.uid);
-    const postRef = doc(db, "communityPosts", post.id);
-    const batch = writeBatch(db);
 
     try {
       if (engagement.likedByMe) {
-        batch.delete(likeRef);
-        if (likeCount > 0) {
-          batch.update(postRef, {
-            likeCount: increment(-1),
-            lastActivityAt: serverTimestamp(),
-          });
-        }
+        await deleteDoc(likeRef);
       } else {
-        batch.set(likeRef, {
+        await setDoc(likeRef, {
           uid: user.uid,
           createdAt: serverTimestamp(),
         });
-        batch.update(postRef, {
-          likeCount: increment(1),
-          lastActivityAt: serverTimestamp(),
-        });
-        addNotificationToBatch(batch, post, "like");
       }
-
-      await batch.commit();
+      adjustPostCount("likeCount", engagement.likedByMe ? -1 : 1);
     } catch (likeError) {
       console.error("Failed to update like", likeError);
       setError("Your reaction could not be saved.");
@@ -242,18 +212,10 @@ export default function CommunityPostDetail() {
     }
 
     const savedRef = doc(db, "users", user.uid, "savedCommunityPosts", post.id);
-    const postRef = doc(db, "communityPosts", post.id);
-    const batch = writeBatch(db);
 
     try {
       if (savedByMe) {
-        batch.delete(savedRef);
-        if ((post.saveCount || 0) > 0) {
-          batch.update(postRef, {
-            saveCount: increment(-1),
-            lastActivityAt: serverTimestamp(),
-          });
-        }
+        await deleteDoc(savedRef);
       } else {
         const savedPayload = {
           postId: post.id,
@@ -273,14 +235,9 @@ export default function CommunityPostDetail() {
           savedPayload.moduleCode = post.moduleCode;
         }
 
-        batch.set(savedRef, savedPayload);
-        batch.update(postRef, {
-          saveCount: increment(1),
-          lastActivityAt: serverTimestamp(),
-        });
+        await setDoc(savedRef, savedPayload);
       }
-
-      await batch.commit();
+      adjustPostCount("saveCount", savedByMe ? -1 : 1);
     } catch (saveError) {
       console.error("Failed to update saved post", saveError);
       setError("That post could not be saved right now.");
@@ -298,7 +255,6 @@ export default function CommunityPostDetail() {
     }
 
     const content = commentDraft.trim().slice(0, MAX_COMMENT_LENGTH);
-    const batch = writeBatch(db);
     const commentRef = doc(collection(db, "communityPosts", post.id, "comments"));
     const authorSnapshot = getAuthorSnapshot(user, userProfile || {}, isAdmin);
 
@@ -306,21 +262,12 @@ export default function CommunityPostDetail() {
     setError("");
 
     try {
-      batch.set(commentRef, {
+      await setDoc(commentRef, {
         ...authorSnapshot,
         content,
         createdAt: serverTimestamp(),
       });
-      batch.update(doc(db, "communityPosts", post.id), {
-        commentCount: increment(1),
-        lastActivityAt: serverTimestamp(),
-      });
-      addNotificationToBatch(batch, post, "comment", {
-        commentId: commentRef.id,
-        commentPreview: content.slice(0, 160),
-      });
-
-      await batch.commit();
+      adjustPostCount("commentCount", 1);
       setCommentDraft("");
     } catch (commentError) {
       console.error("Failed to create comment", commentError);
@@ -335,18 +282,11 @@ export default function CommunityPostDetail() {
       return;
     }
 
-    const batch = writeBatch(db);
     setBusyPostId(targetPost.id);
 
     try {
-      batch.delete(doc(db, "communityPosts", targetPost.id, "comments", commentId));
-      if (commentCount > 0) {
-        batch.update(doc(db, "communityPosts", targetPost.id), {
-          commentCount: increment(-1),
-          lastActivityAt: serverTimestamp(),
-        });
-      }
-      await batch.commit();
+      await deleteDoc(doc(db, "communityPosts", targetPost.id, "comments", commentId));
+      adjustPostCount("commentCount", -1);
     } catch (deleteError) {
       console.error("Failed to delete comment", deleteError);
       setError("That comment could not be removed.");
